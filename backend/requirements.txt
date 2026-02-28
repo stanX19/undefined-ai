@@ -14,3 +14,4 @@ python-multipart
 PyMuPDF
 exa-py
 elevenlabs
+requests

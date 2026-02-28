@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     ELEVENLABS_MODEL: str = "eleven_multilingual_v2"
     ELEVENLABS_DEFAULT_VOICE_ID: str = "PoHUWWWMHFrA8z7Q88pu"
 
+    # MiniMax Configuration
+    MINIMAX_API_KEY: str = ""
+    MINIMAX_TEXT_MODEL: str = "MiniMax-M2.5"
+    MINIMAX_TTS_MODEL: str = "speech-2.8-hd"
+
     # Exa (Web Search) Configuration
     EXA_API_KEY: str = ""
 
