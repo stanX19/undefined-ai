@@ -33,7 +33,7 @@ export function A2UIBadge({
             variantClass = "bg-in-progress text-in-progress-text border-[rgba(216,180,254,0.3)] shadow-[0_0_8px_rgba(216,180,254,0.4)]";
             break;
         case "primary":
-            variantClass = "bg-subtle-blue text-primary border-[rgba(79,70,229,0.2)]";
+            variantClass = "bg-subtle-blue text-primary border-[rgba(17,24,39,0.2)]";
             break;
     }
 

@@ -35,7 +35,7 @@ export function WorkspacePage() {
       </main>
 
       {/* Right — Chat Panel */}
-      <div className="w-[400px] shrink-0 border-l border-border bg-surface shadow-(--shadow-level1)">
+      <div className="w-[400px] shrink-0 border-l border-border bg-surface">
         <ChatPanel inline={true} />
       </div>
     </div>

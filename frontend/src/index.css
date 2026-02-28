@@ -10,10 +10,14 @@
 
 :root {
   /* Brand */
-  --ds-primary: #4F46E5;
-  --ds-primary-hover: #4338CA;
-  --ds-sidebar: #0A0E1A;
-  --ds-subtle-blue: #EFF6FF;
+  --ds-primary: #111827;
+  /* Near Black */
+  --ds-primary-hover: #374151;
+  /* Gray 700 */
+  --ds-sidebar: #FFFFFF;
+  /* White */
+  --ds-subtle-blue: #F3F4F6;
+  /* Light gray instead of subtle blue */
 
   /* Status */
   --ds-success-bg: #DCFCE7;
@@ -37,7 +41,7 @@
   --ds-text-body: #374151;
   --ds-text-secondary: #6B7280;
   --ds-text-inverse: #FFFFFF;
-  --ds-text-link: #4F46E5;
+  --ds-text-link: #111827;
 
   /* Shadows */
   --ds-shadow-level1: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
@@ -53,6 +57,7 @@
   --color-primary-hover: var(--ds-primary-hover);
   --color-sidebar: var(--ds-sidebar);
   --color-surface: var(--ds-surface);
+  --color-surface-alt: var(--ds-hover);
   --color-border: var(--ds-border);
   --color-hover: var(--ds-hover);
   --color-text-primary: var(--ds-text-primary);
@@ -72,39 +77,7 @@
   --shadow-level3: var(--ds-shadow-level3);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ds-primary: #818CF8;
-    --ds-primary-hover: #6366F1;
-    --ds-sidebar: #0A0E1A;
-    --ds-subtle-blue: #1E293B;
 
-    --ds-success-bg: #064E3B;
-    --ds-success-text: #6EE7B7;
-    --ds-in-progress-bg: #2E1065;
-    --ds-in-progress-text: #D8B4FE;
-    --ds-warning-bg: #78350F;
-    --ds-warning-text: #FCD34D;
-    --ds-error-bg: #7F1D1D;
-    --ds-error-text: #FCA5A5;
-
-    --ds-bg: #0F172A;
-    --ds-surface: #1E293B;
-    --ds-border: #334155;
-    --ds-hover: #1E293B;
-    --ds-ghost-hover: #334155;
-
-    --ds-text-primary: #F1F5F9;
-    --ds-text-body: #CBD5E1;
-    --ds-text-secondary: #94A3B8;
-    --ds-text-inverse: #0F172A;
-    --ds-text-link: #818CF8;
-
-    --ds-shadow-level1: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
-    --ds-shadow-level2: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
-    --ds-shadow-level3: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
-  }
-}
 
 * {
   box-sizing: border-box;

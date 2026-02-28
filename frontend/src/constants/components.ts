@@ -14,13 +14,13 @@ export const COMPONENT_STYLES = {
 
   button: {
     primary:
-      "inline-flex items-center justify-center gap-2 rounded-3xl bg-(--ds-sidebar) px-5 py-2.5 text-sm font-medium text-(--ds-text-inverse) transition-colors hover:opacity-90 cursor-pointer",
+      "inline-flex items-center justify-center gap-2 rounded-3xl bg-(--ds-primary) px-5 py-2.5 text-sm font-medium text-(--ds-text-inverse) transition-colors hover:opacity-90 cursor-pointer",
     secondary:
       "inline-flex items-center justify-center gap-2 rounded-xl border border-(--ds-border) bg-(--ds-surface) px-5 py-2.5 text-sm font-medium text-(--ds-text-primary) transition-colors hover:bg-(--ds-hover) cursor-pointer",
     ghost:
       "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-(--ds-text-secondary) transition-colors hover:bg-(--ds-ghost-hover) cursor-pointer",
     icon: "inline-flex items-center justify-center rounded-full p-2 text-(--ds-text-secondary) transition-colors hover:bg-(--ds-ghost-hover) cursor-pointer",
-    send: "inline-flex items-center justify-center rounded-full bg-(--ds-sidebar) p-2.5 text-(--ds-text-inverse) transition-opacity hover:opacity-90 cursor-pointer",
+    send: "inline-flex items-center justify-center rounded-full bg-(--ds-primary) p-2.5 text-(--ds-text-inverse) transition-opacity hover:opacity-90 cursor-pointer",
   },
 
   badge: {
@@ -44,9 +44,9 @@ export const COMPONENT_STYLES = {
   },
 
   sidebar: {
-    base: "flex h-dvh w-[260px] flex-col bg-(--ds-sidebar) text-(--ds-text-inverse)",
-    item: "flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors",
-    itemHover: "hover:bg-white/5",
-    itemActive: "border-l-2 border-(--ds-primary) bg-white/10",
+    base: "flex h-dvh w-[260px] flex-col bg-(--ds-sidebar) text-(--ds-text-primary)",
+    item: "flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors text-(--ds-text-secondary)",
+    itemHover: "hover:bg-(--ds-hover) hover:text-(--ds-text-primary)",
+    itemActive: "border-l-2 border-(--ds-primary) bg-(--ds-hover) text-(--ds-text-primary)",
   },
 } as const;
