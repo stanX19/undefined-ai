@@ -42,13 +42,15 @@ export function UIRoot() {
     const activeModalId = uiJson.global_state?.active_modal_id;
 
     return (
-        <div className="relative h-full w-full flex flex-1 flex-col animate-in fade-in duration-500">
+        <div className="relative w-full flex flex-col animate-in fade-in duration-500">
             <ElementRenderer elementId={rootId} />
 
             {/* Render Modal Overlay */}
             {activeModalId && uiJson.elements[activeModalId] && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-in fade-in">
-                    <ElementRenderer elementId={activeModalId} />
+                <div className="fixed inset-0 z-50 flex justify-center items-start overflow-y-auto bg-black/50 p-4 md:p-10 backdrop-blur-sm animate-in fade-in hide-scrollbar">
+                    <div className="w-full flex justify-center py-8">
+                        <ElementRenderer elementId={activeModalId} />
+                    </div>
                 </div>
             )}
         </div>

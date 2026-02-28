@@ -1,0 +1,21 @@
+{
+  "text": "```json\n[\n  \"The paper proposes measuring two components of Chain-of-Thought monitorability: legibility and coverage.\",\n  \"Legibility measures whether the reasoning in a CoT can be understood by a human following along.\",\n  \"Coverage measures whether the CoT contains all the reasoning steps needed for a human to produce the model's final output.\",\n  \"The metrics are implemented using a prompted autorater that enables any capable LLM to score legibility and coverage on a 0-4 scale.\",\n  \"The authors apply these metrics to frontier models (Gemini 2.5 Pro, Gemini 2.5 Flash, GPT-OSS 120B, DeepSeek-R1, Qwen3 235B) on difficult benchmarks.\",\n  \"The benchmarks used include Humanity's Last Exam, GPQA Diamond, ARC AGI, and AIME.\",\n  \"Gemini 2.5 Pro achieves near-perfect scores of 99.81% legibility and 99.38% coverage.\",\n  \"All tested frontier models exhibit high monitorability on difficult tasks where CoT is necessary.\",\n  \"This monitorability is fragile and could be lost through shifts in training practices or adoption of latent reasoning architectures.\",\n  \"The evaluation is conducted only on examples where the model correctly solves the task.\",\n  \"Coverage does not penalize CoTs for containing reasoning that contradicts the final answer, only for missing necessary reasoning steps.\",\n  \"For multiple-choice questions where the CoT explicitly states the model randomly guessed, coverage receives a full score of 4.\",\n  \"The metrics serve as a complement to adversarial stress-testing, not a replacement for it.\",\n  \"The paper was authored by researchers from Google DeepMind and posted to arXiv on October 28, 2025.\"\n]\n```",
+  "model": "ChatMinimax (MiniMax-M2.5) {api=...NTUF42ohUc}",
+  "status": "ok",
+  "json_data": [
+    "The paper proposes measuring two components of Chain-of-Thought monitorability: legibility and coverage.",
+    "Legibility measures whether the reasoning in a CoT can be understood by a human following along.",
+    "Coverage measures whether the CoT contains all the reasoning steps needed for a human to produce the model's final output.",
+    "The metrics are implemented using a prompted autorater that enables any capable LLM to score legibility and coverage on a 0-4 scale.",
+    "The authors apply these metrics to frontier models (Gemini 2.5 Pro, Gemini 2.5 Flash, GPT-OSS 120B, DeepSeek-R1, Qwen3 235B) on difficult benchmarks.",
+    "The benchmarks used include Humanity's Last Exam, GPQA Diamond, ARC AGI, and AIME.",
+    "Gemini 2.5 Pro achieves near-perfect scores of 99.81% legibility and 99.38% coverage.",
+    "All tested frontier models exhibit high monitorability on difficult tasks where CoT is necessary.",
+    "This monitorability is fragile and could be lost through shifts in training practices or adoption of latent reasoning architectures.",
+    "The evaluation is conducted only on examples where the model correctly solves the task.",
+    "Coverage does not penalize CoTs for containing reasoning that contradicts the final answer, only for missing necessary reasoning steps.",
+    "For multiple-choice questions where the CoT explicitly states the model randomly guessed, coverage receives a full score of 4.",
+    "The metrics serve as a complement to adversarial stress-testing, not a replacement for it.",
+    "The paper was authored by researchers from Google DeepMind and posted to arXiv on October 28, 2025."
+  ]
+}

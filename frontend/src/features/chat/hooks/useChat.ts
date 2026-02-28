@@ -26,30 +26,49 @@ interface ChatState {
   isStreaming: boolean;
   streamingLogs: StreamingLog[];
   topicId: string | null;
+  currentAudio: HTMLAudioElement | null;
   addMessage: (message: Omit<ChatMessage, "id" | "timestamp">) => void;
   updateMessageAudio: (messageId: string, audioUrl: string) => void;
   setStreaming: (streaming: boolean) => void;
   addStreamingLog: (log: Omit<StreamingLog, "id">) => void;
   setTopicId: (topicId: string | null) => void;
+  stopAudio: () => void;
   clear: () => void;
 }
 
-// Module-level variable to hold the active EventSource
+// Module-level variables to hold active handles
 let activeEventSource: EventSource | null = null;
+let activeAudio: HTMLAudioElement | null = null;
 
-export const useChatStore = create<ChatState>((set) => ({
+export const useChatStore = create<ChatState>((set, get) => ({
   messages: [],
   isStreaming: false,
   streamingLogs: [],
   topicId: null,
+  currentAudio: null,
 
-  addMessage: (msg) =>
+  stopAudio: () => {
+    if (activeAudio) {
+      activeAudio.pause();
+      activeAudio.currentTime = 0;
+      activeAudio = null;
+      set({ currentAudio: null });
+    }
+  },
+
+  addMessage: (msg) => {
+    // If user sends a new message, stop any playing audio immediately
+    if (msg.role === 'user') {
+      get().stopAudio();
+    }
+
     set((state) => ({
       messages: [
         ...state.messages,
         { ...msg, id: crypto.randomUUID(), timestamp: Date.now() },
       ],
-    })),
+    }));
+  },
 
   updateMessageAudio: (messageId, audioUrl) =>
     set((state) => ({
@@ -66,7 +85,10 @@ export const useChatStore = create<ChatState>((set) => ({
     streamingLogs: [...state.streamingLogs, { ...log, id: crypto.randomUUID() }]
   })),
   setTopicId: (topicId) => set({ topicId }),
-  clear: () => set({ messages: [], isStreaming: false, streamingLogs: [], topicId: null }),
+  clear: () => {
+    get().stopAudio();
+    set({ messages: [], isStreaming: false, streamingLogs: [], topicId: null });
+  },
 }));
 
 /**
@@ -165,9 +187,14 @@ function openSseStream(sessionId: string): Promise<void> {
         const audioUrl = rawUrl.replace(/^\/media\//, "/uploads/");
 
         // Auto-play (allowed because user initiated the interaction)
-        const audio = new Audio(audioUrl);
-        audio.playbackRate = 1.1;
-        audio.play().catch((err) => console.warn("TTS autoplay blocked:", err));
+        activeAudio = new Audio(audioUrl);
+        activeAudio.playbackRate = 1.1;
+
+        activeAudio.play().catch((err) => console.warn("TTS autoplay blocked:", err));
+
+        activeAudio.onended = () => {
+          activeAudio = null;
+        };
       } catch {
         console.warn("Failed to parse SSE TTSResult event", e.data);
       }
