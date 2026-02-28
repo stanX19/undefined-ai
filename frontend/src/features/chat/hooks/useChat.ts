@@ -10,6 +10,7 @@ export interface ChatMessage {
   content: string;
   timestamp: number;
   attachments?: Array<{ name: string; type: string; url: string }>;
+  audioUrl?: string;
 }
 
 interface ChatState {
@@ -17,6 +18,7 @@ interface ChatState {
   isStreaming: boolean;
   topicId: string | null;
   addMessage: (message: Omit<ChatMessage, "id" | "timestamp">) => void;
+  updateMessageAudio: (messageId: string, audioUrl: string) => void;
   setStreaming: (streaming: boolean) => void;
   setTopicId: (topicId: string | null) => void;
   clear: () => void;
@@ -33,6 +35,13 @@ export const useChatStore = create<ChatState>((set) => ({
         ...state.messages,
         { ...msg, id: crypto.randomUUID(), timestamp: Date.now() },
       ],
+    })),
+
+  updateMessageAudio: (messageId, audioUrl) =>
+    set((state) => ({
+      messages: state.messages.map((m) =>
+        m.id === messageId ? { ...m, audioUrl } : m,
+      ),
     })),
 
   setStreaming: (isStreaming) => set({ isStreaming }),
@@ -92,6 +101,24 @@ function openSseStream(sessionId: string): void {
       }
     } catch {
       console.warn("Failed to parse SSE Replies event", e.data);
+    }
+  });
+
+  // ── TTS audio: auto-play when the backend finishes generating speech ──
+  eventSource.addEventListener("TTSResult", (e: MessageEvent) => {
+    try {
+      const data = JSON.parse(e.data);
+      const rawUrl: string = data.audio_url ?? "";
+      if (!rawUrl) return;
+
+      // Backend returns /media/tts/... but serves files at /uploads/tts/...
+      const audioUrl = rawUrl.replace(/^\/media\//, "/uploads/");
+
+      // Auto-play (allowed because user initiated the interaction)
+      const audio = new Audio(audioUrl);
+      audio.play().catch((err) => console.warn("TTS autoplay blocked:", err));
+    } catch {
+      console.warn("Failed to parse SSE TTSResult event", e.data);
     }
   });
 
