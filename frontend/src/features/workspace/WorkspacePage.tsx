@@ -52,7 +52,7 @@ export function WorkspacePage() {
             </p>
           </div>
         ) : (
-          <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 pb-20">
+          <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 pb-20">
             <UIRoot />
           </div>
         )}

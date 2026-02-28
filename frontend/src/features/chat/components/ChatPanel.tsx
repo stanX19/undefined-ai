@@ -1,14 +1,54 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Sparkles, Trash2 } from "lucide-react";
-import { useChatStore, sendChatMessage, deleteChatHistory } from "../hooks/useChat.ts";
+import { X, Sparkles, Trash2, ChevronDown, Search, Loader2 } from "lucide-react";
+import { useChatStore, sendChatMessage, deleteChatHistory, type StreamingLog } from "../hooks/useChat.ts";
 import { MessageBubble } from "./MessageBubble.tsx";
 import { ChatInput } from "./ChatInput.tsx";
 import { ShiningText } from "../../../components/ui/ShiningText.tsx";
+
+function ThoughtBlock({ log }: { log: StreamingLog }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const getIcon = () => {
+    switch (log.role) {
+      case 'search': return <Search size={14} className="text-slate-400" />;
+      case 'tool': return <Sparkles size={14} className="text-slate-400" />;
+      default: return <ChevronDown size={14} className={`text-slate-400 transition-transform ${isExpanded ? '' : '-rotate-90'}`} />;
+    }
+  };
+
+  const getTitle = () => {
+    if (log.role === 'thought') return "Thought";
+    if (log.role === 'search') return "Searched";
+    return "Action";
+  };
+
+  return (
+    <div className="flex flex-col gap-1.5 px-2">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="flex items-center gap-2 text-[13px] font-medium text-slate-500 hover:text-slate-800 transition-colors cursor-pointer group"
+      >
+        <div className="flex items-center justify-center w-5 h-5">
+          {getIcon()}
+        </div>
+        <span>{getTitle()}</span>
+        {!isExpanded && <span className="text-slate-400 font-normal truncate max-w-[200px] opacity-0 group-hover:opacity-100 transition-opacity ml-1">{log.message}</span>}
+      </button>
+
+      {isExpanded && (
+        <div className="ml-7 border-l-2 border-slate-100 pl-4 py-1 animate-in slide-in-from-left-1 duration-200">
+          <p className="text-[13px] leading-relaxed text-slate-600 font-medium whitespace-pre-wrap">{log.message}</p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function ChatPanel({ inline = false }: { inline?: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
   const messages = useChatStore((s) => s.messages);
   const isStreaming = useChatStore((s) => s.isStreaming);
+  const streamingLogs = useChatStore((s) => s.streamingLogs);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom via MutationObserver
@@ -94,9 +134,20 @@ export function ChatPanel({ inline = false }: { inline?: boolean }) {
         {messages.map((msg) => <MessageBubble key={msg.id} message={msg} />)}
 
         {isStreaming && (
-          <div className="flex justify-start">
-            <div className="rounded-2xl px-4 py-3">
-              <ShiningText text="Generating..." className="font-medium" />
+          <div className="flex flex-col gap-4">
+            {streamingLogs.map((log) => (
+              <ThoughtBlock
+                key={log.id}
+                log={log}
+              />
+            ))}
+            <div className="flex justify-start px-2">
+              <div className="flex items-center gap-2 text-slate-400">
+                <div className="flex items-center justify-center w-5 h-5">
+                  <Loader2 size={14} className="animate-spin" />
+                </div>
+                <ShiningText text="Generating response..." className="text-[13px] font-medium" />
+              </div>
             </div>
           </div>
         )}
