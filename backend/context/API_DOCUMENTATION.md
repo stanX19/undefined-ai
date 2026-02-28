@@ -335,9 +335,35 @@ Delete all chat messages for a topic.
 
 ---
 
+### Speech
+
+#### `POST /api/v1/speech/stt`
+
+Transcribe an uploaded audio file to text using ElevenLabs Scribe.
+
+**Request** — `multipart/form-data`
+
+| Field  | Type         | Required | Notes             |
+|--------|--------------|----------|--------------------|
+| `file` | `UploadFile` | ✅       | Must be an audio file |
+
+**Response** `200 OK`
+```json
+{
+  "text": "Transcribed text from the audio..."
+}
+```
+
+**Errors**
+- `400` — No file provided
+- `500` — Speech-to-text processing failed or returned no text
+
+---
+
 ### Ingestion
 
 #### `GET /api/v1/ingestion/{topic_id}/status`
+
 
 Return the current ingestion pipeline status for a topic.
 
