@@ -1,0 +1,31 @@
+{
+  "text": "[\"Foundations of Computer Vision is a book authored by Antonio Torralba, Phillip Isola, and William Freeman.\", \"The book was published by MIT Press in Cambridge, Massachusetts and London, England in 2024.\", \"The book's ISBN is 9780262378666.\", \"The intended audience includes undergraduate and graduate students entering the field of computer vision, as well as experienced practitioners.\", \"Each chapter in the book is limited to no more than five pages.\", \"The book was conceptualized in November 2010 and took over 10 years to complete.\", \"The deep learning revolution occurred in 2012, which made the foundations of computer vision more solid.\", \"The book is organized into 15 parts covering various topics in computer vision.\", \"Part I introduces motivational topics, the problem of vision, societal context, and a simple vision system along with basic mathematical tools.\", \"Part II covers the image formation process.\", \"Part III covers the foundations of learning using vision examples.\", \"Part IV provides an introduction to signal and image processing.\", \"Part V describes linear filters including Gaussian kernels, binomial filters, image derivatives, Laplacian filter, and temporal filters.\", \"Part VI describes multiscale image representations.\", \"Part VII describes neural networks for vision including convolutional neural networks, recurrent neural networks, and transformers.\", \"Part VIII introduces statistical models of images and graphical models.\", \"Part IX focuses on generative modeling and representation learning.\", \"Part X discusses challenges of building learning-based vision systems.\", \"Part XI introduces geometry tools for reconstructing 3D world structure from 2D images.\", \"Part XII focuses on processing sequences and measuring motion.\", \"Part XIII deals with scene understanding and object detection.\", \"Part XIV provides advice for junior researchers on presentations, writing papers, and researcher mentality.\", \"Part XV applies techniques from the book to solve the toy problem introduced in Part I.\", \"The book focuses on foundational concepts rather than the current state of the art or applications such as shape analysis, object tracking, person pose analysis, or face recognition.\"]",
+  "model": "ChatMinimax (MiniMax-M2.5) {api=...NTUF42ohUc}",
+  "status": "ok",
+  "json_data": [
+    "Foundations of Computer Vision is a book authored by Antonio Torralba, Phillip Isola, and William Freeman.",
+    "The book was published by MIT Press in Cambridge, Massachusetts and London, England in 2024.",
+    "The book's ISBN is 9780262378666.",
+    "The intended audience includes undergraduate and graduate students entering the field of computer vision, as well as experienced practitioners.",
+    "Each chapter in the book is limited to no more than five pages.",
+    "The book was conceptualized in November 2010 and took over 10 years to complete.",
+    "The deep learning revolution occurred in 2012, which made the foundations of computer vision more solid.",
+    "The book is organized into 15 parts covering various topics in computer vision.",
+    "Part I introduces motivational topics, the problem of vision, societal context, and a simple vision system along with basic mathematical tools.",
+    "Part II covers the image formation process.",
+    "Part III covers the foundations of learning using vision examples.",
+    "Part IV provides an introduction to signal and image processing.",
+    "Part V describes linear filters including Gaussian kernels, binomial filters, image derivatives, Laplacian filter, and temporal filters.",
+    "Part VI describes multiscale image representations.",
+    "Part VII describes neural networks for vision including convolutional neural networks, recurrent neural networks, and transformers.",
+    "Part VIII introduces statistical models of images and graphical models.",
+    "Part IX focuses on generative modeling and representation learning.",
+    "Part X discusses challenges of building learning-based vision systems.",
+    "Part XI introduces geometry tools for reconstructing 3D world structure from 2D images.",
+    "Part XII focuses on processing sequences and measuring motion.",
+    "Part XIII deals with scene understanding and object detection.",
+    "Part XIV provides advice for junior researchers on presentations, writing papers, and researcher mentality.",
+    "Part XV applies techniques from the book to solve the toy problem introduced in Part I.",
+    "The book focuses on foundational concepts rather than the current state of the art or applications such as shape analysis, object tracking, person pose analysis, or face recognition."
+  ]
+}

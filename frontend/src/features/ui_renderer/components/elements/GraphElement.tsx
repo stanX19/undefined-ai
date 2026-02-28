@@ -124,16 +124,18 @@ const FloatingEdge = memo(function FloatingEdge({ id, source, target, markerEnd,
 
 // --- Custom Node Component ---
 const CustomNode = memo(({ data }: { data: any }) => {
-    // Strip emojis for a cleaner professional look
     const cleanTitle = data.title ? data.title.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}]/gu, '').trim() : '';
 
     return (
-        <div className="group relative flex min-w-[200px] max-w-[320px] cursor-pointer items-center justify-center rounded-[24px] border border-slate-200/70 bg-white px-8 py-5 shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-slate-300">
-            {/* Invisible handles */}
+        <div className="group relative flex min-w-[200px] max-w-[320px] cursor-pointer items-center justify-center rounded-[24px] border border-slate-300/50 bg-slate-200/40 backdrop-blur-md px-8 py-5 shadow-[0_4px_12px_rgba(0,0,0,0.03)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.06)] hover:border-slate-400/50 hover:bg-slate-200/60">
+            {/* Invisible handles for floating edge intersection */}
             <Handle type="target" position={Position.Top} className="!absolute !left-1/2 !top-1/2 !opacity-0 -z-10" isConnectable={false} />
             <Handle type="source" position={Position.Bottom} className="!absolute !left-1/2 !top-1/2 !opacity-0 -z-10" isConnectable={false} />
 
-            <h3 className="text-[16px] font-semibold tracking-tight text-slate-800 leading-snug px-2 text-center select-none">{cleanTitle}</h3>
+            <h3 className="text-[15px] font-bold tracking-tight text-slate-800 leading-snug px-2 text-center select-none uppercase">{cleanTitle}</h3>
+
+            {/* Subtle glow effect on hover */}
+            <div className="absolute inset-0 rounded-[24px] ring-1 ring-white/10 group-hover:ring-white/30 transition-all" />
         </div>
     );
 });

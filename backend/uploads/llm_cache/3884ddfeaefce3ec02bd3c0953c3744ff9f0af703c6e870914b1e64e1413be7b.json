@@ -1,0 +1,10 @@
+{
+  "text": "[\"The paper proposes measuring Chain-of-Thought monitorability using legibility (human understandability) and coverage (presence of reasoning steps) via a prompted autorater on a 0-4 scale, evaluating frontier models including Gemini 2.5 Pro/Flash, GPT-OSS 120B, DeepSeek-R1, and Qwen3 235B on difficult benchmarks like Humanity's Last Exam, GPQA Diamond, ARC AGI, and AIME, with Gemini 2.5 Pro achieving near-perfect scores (99.81% legibility, 99.38% coverage).\", \"Evaluation is limited to correctly solved tasks, awarding full coverage for multiple-choice questions where CoT explicitly states a random guess and not penalizing contradictory reasoning, only missing steps.\", \"This monitorability is fragile and could be lost through training practice shifts or latent reasoning architectures, serving as a complement to adversarial stress-testing rather than a replacement, and the paper was authored by Google DeepMind researchers and posted to arXiv on October 28, 2025.\"]",
+  "model": "ChatMinimax (MiniMax-M2.5) {api=...NTUF42ohUc}",
+  "status": "ok",
+  "json_data": [
+    "The paper proposes measuring Chain-of-Thought monitorability using legibility (human understandability) and coverage (presence of reasoning steps) via a prompted autorater on a 0-4 scale, evaluating frontier models including Gemini 2.5 Pro/Flash, GPT-OSS 120B, DeepSeek-R1, and Qwen3 235B on difficult benchmarks like Humanity's Last Exam, GPQA Diamond, ARC AGI, and AIME, with Gemini 2.5 Pro achieving near-perfect scores (99.81% legibility, 99.38% coverage).",
+    "Evaluation is limited to correctly solved tasks, awarding full coverage for multiple-choice questions where CoT explicitly states a random guess and not penalizing contradictory reasoning, only missing steps.",
+    "This monitorability is fragile and could be lost through training practice shifts or latent reasoning architectures, serving as a complement to adversarial stress-testing rather than a replacement, and the paper was authored by Google DeepMind researchers and posted to arXiv on October 28, 2025."
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "text": "```json\n[\n  \"The paper proposes measuring Chain-of-Thought monitorability using two components: legibility (whether reasoning can be understood by humans) and coverage (whether all necessary reasoning steps are present), implemented via a prompted autorater scoring on a 0-4 scale.\",\n  \"The authors evaluate frontier models (Gemini 2.5 Pro/Flash, GPT-OSS 120B, DeepSeek-R1, Qwen3 235B) on difficult benchmarks including Humanity's Last Exam, GPQA Diamond, ARC AGI, and AIME.\",\n  \"Gemini 2.5 Pro achieves near-perfect scores of 99.81% legibility and 99.38% coverage, with all tested models showing high monitorability on difficult tasks where CoT is necessary.\",\n  \"Evaluation is limited to correctly solved tasks; coverage awards full scores for multiple-choice questions where the CoT explicitly states a random guess, and does not penalize contradictory reasoning, only missing steps.\",\n  \"This monitorability is fragile and could be lost through training practice shifts or adoption of latent reasoning architectures, serving as a complement to adversarial stress-testing rather than a replacement.\",\n  \"The paper was authored by Google DeepMind researchers and posted to arXiv on October 28, 2025.\"\n]\n```",
+  "model": "ChatMinimax (MiniMax-M2.5) {api=...NTUF42ohUc}",
+  "status": "ok",
+  "json_data": [
+    "The paper proposes measuring Chain-of-Thought monitorability using two components: legibility (whether reasoning can be understood by humans) and coverage (whether all necessary reasoning steps are present), implemented via a prompted autorater scoring on a 0-4 scale.",
+    "The authors evaluate frontier models (Gemini 2.5 Pro/Flash, GPT-OSS 120B, DeepSeek-R1, Qwen3 235B) on difficult benchmarks including Humanity's Last Exam, GPQA Diamond, ARC AGI, and AIME.",
+    "Gemini 2.5 Pro achieves near-perfect scores of 99.81% legibility and 99.38% coverage, with all tested models showing high monitorability on difficult tasks where CoT is necessary.",
+    "Evaluation is limited to correctly solved tasks; coverage awards full scores for multiple-choice questions where the CoT explicitly states a random guess, and does not penalize contradictory reasoning, only missing steps.",
+    "This monitorability is fragile and could be lost through training practice shifts or adoption of latent reasoning architectures, serving as a complement to adversarial stress-testing rather than a replacement.",
+    "The paper was authored by Google DeepMind researchers and posted to arXiv on October 28, 2025."
+  ]
+}

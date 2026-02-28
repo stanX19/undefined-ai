@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles } from "lucide-react";
+
 import { useAuthStore } from "../hooks/useAuthStore";
 
 export function LoginPage() {
@@ -43,13 +43,15 @@ export function LoginPage() {
   return (
     <div className="flex h-dvh w-full flex-col items-center justify-center bg-bg p-6 text-center">
       <div className="flex w-full max-w-sm flex-col items-center gap-6 rounded-3xl border border-border bg-surface p-8 shadow-level2">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
-          <Sparkles className="h-8 w-8" />
+        <div className="flex items-center justify-center">
+          <img src="/logo.png" alt="Logo" className="h-35 w-auto object-contain" />
         </div>
 
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold leading-[1.2] text-text-primary">
-            Welcome to undefined ai
+          <h1 className="text-2xl leading-[1.2] text-text-primary">
+            Welcome to{" "}
+            <span className="font-bold tracking-tight text-[#212529]">undefined</span>
+            <span className="ml-1 font-medium tracking-normal text-[#868e96]">ai</span>
           </h1>
           <p className="text-[14px] leading-relaxed text-text-muted">
             Please enter your user ID to sign in.
@@ -70,7 +72,7 @@ export function LoginPage() {
           <button
             type="submit"
             disabled={!inputValue.trim() || isLoading}
-            className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-8 py-3.5 text-[14px] font-medium text-white transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-8 py-3.5 text-[14px] font-medium text-white transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? "Signing in..." : "Sign In"}
           </button>

@@ -1,5 +1,6 @@
-import { useState, useRef, useCallback } from "react";
-import { X, Paperclip, FileText } from "lucide-react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { X, Paperclip, FileText, Mic, Loader2, Square } from "lucide-react";
+
 
 interface Props {
   onSend: (message: string, files?: File[]) => void;
@@ -10,6 +11,76 @@ export function ChatInput({ onSend, isStreaming }: Props) {
   const [text, setText] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [isRecording, setIsRecording] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
+        await handleSTT(audioBlob);
+        stream.getTracks().forEach((track) => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      console.error("Failed to start recording:", err);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      mediaRecorderRef.current.stop();
+    }
+    setIsRecording(false);
+  };
+
+  const handleSTT = async (blob: Blob) => {
+    setIsProcessing(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", blob, "recording.wav");
+
+      const response = await fetch("/api/v1/speech/stt", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("STT Request failed");
+
+      const data = await response.json();
+      if (data.text) {
+        onSend(data.text);
+      }
+    } catch (err) {
+      console.error("STT Error:", err);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+        mediaRecorderRef.current.stop();
+      }
+    };
+  }, []);
 
   const handleSubmit = useCallback(() => {
     const trimmed = text.trim();
@@ -84,10 +155,10 @@ export function ChatInput({ onSend, isStreaming }: Props) {
           onKeyDown={handleKeyDown}
           placeholder="Ask a question..."
           rows={1}
-          className="max-h-32 flex-1 resize-none bg-transparent px-3 py-2 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none"
+          className="max-h-32 flex-1 resize-none bg-transparent px-3 py-2 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none hide-scrollbar"
         />
 
-        <div className="flex items-center gap-1 px-1">
+        <div className="flex items-center gap-2 pr-1.5 ml-1">
           <button
             onClick={() => fileInputRef.current?.click()}
             className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text-primary)]"
@@ -95,6 +166,25 @@ export function ChatInput({ onSend, isStreaming }: Props) {
           >
             <Paperclip size={18} />
           </button>
+
+          <button
+            onClick={isRecording ? stopRecording : startRecording}
+            disabled={isStreaming || isProcessing}
+            className={`flex h-8 w-8 cursor-pointer items-center justify-center rounded-full transition-all duration-300 ${isRecording
+              ? "bg-red-500 text-white animate-pulse"
+              : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text-primary)]"
+              }`}
+            title={isRecording ? "Stop recording" : "Voice mode"}
+          >
+            {isProcessing ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : isRecording ? (
+              <Square size={14} fill="currentColor" />
+            ) : (
+              <Mic size={18} />
+            )}
+          </button>
+
           <button
             onClick={handleSubmit}
             disabled={isStreaming || (!text.trim() && files.length === 0)}
