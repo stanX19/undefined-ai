@@ -3,6 +3,7 @@ import { useAuthStore } from "../../auth/hooks/useAuthStore.ts";
 import { useSurfaceStore } from "../../a2ui/store.ts";
 import { fallbackParse } from "../../a2ui/fallbackParser.ts";
 import { useTopicListStore, fetchTopics } from "../../workspace/hooks/useTopicList.ts";
+import { useUIStore } from "../../ui_renderer/store.ts";
 
 export interface ChatMessage {
   id: string;
@@ -80,6 +81,20 @@ function openSseStream(sessionId: string): Promise<void> {
       resolve();
     };
 
+    eventSource.onerror = (error) => {
+      console.error("[SSE Error] Stream disconnected or failed", error);
+      // EventSource tries to reconnect automatically by default, but if it dies or the 
+      // backend closes it unexpectedly during a long generation, we can force a manual retry
+      // after a short delay to keep the UI connected.
+      eventSource.close();
+      activeEventSource = null;
+
+      setTimeout(() => {
+        console.info("[SSE Retry] Attempting to reconnect to", url);
+        openSseStream(sessionId).catch(console.error);
+      }, 3000);
+    };
+
     eventSource.addEventListener("Replies", (e: MessageEvent) => {
       try {
         const data = JSON.parse(e.data);
@@ -140,6 +155,38 @@ function openSseStream(sessionId: string): Promise<void> {
         audio.play().catch((err) => console.warn("TTS autoplay blocked:", err));
       } catch {
         console.warn("Failed to parse SSE TTSResult event", e.data);
+      }
+    });
+
+    // ── V3 UI Updates ──
+    eventSource.addEventListener("UIUpdate", (e: MessageEvent) => {
+      try {
+        const data = JSON.parse(e.data);
+        console.log("[USE-CHAT] Received SSE UIUpdate Event:", data);
+        const { topic_id, scene_id, ui_json } = data;
+        useUIStore.getState().setUI(topic_id, scene_id, ui_json);
+      } catch (err) {
+        console.warn("Failed to parse SSE UIUpdate event", e.data);
+      }
+    });
+
+    // ── Tool Calls (Web Search & UI Generation) ──
+    eventSource.addEventListener("ToolCall", (e: MessageEvent) => {
+      try {
+        const data = JSON.parse(e.data);
+        if (data.tool_name === "web_search") {
+          store.addMessage({
+            role: "system",
+            content: `🔍 Searching the web for: ${data.arguments?.query || data.arguments?.description || 'information'}...`
+          });
+        } else if (data.tool_name === "edit_ui") {
+          store.addMessage({
+            role: "system",
+            content: `🎨 Generating custom UI for: ${data.arguments?.description || 'your request'}...`
+          });
+        }
+      } catch (err) {
+        console.warn("Failed to parse SSE ToolCall event", e.data);
       }
     });
 

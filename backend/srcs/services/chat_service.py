@@ -120,8 +120,10 @@ class ChatService:
                     db, topic_id, exclude_id=exclude_message_id,
                 )
 
-                # If ingested facts exist, use top-level summary instead of raw text
-                context_text: str | None = document_text
+                # Ensure the LLM always knows the current topic ID to pass to tools:
+                base_info = f"CURRENT TOPIC ID: '{topic_alias}'. You MUST use this topic_id for all tool calls (edit_ui, retrieve_facts, etc).\n\n"
+                
+                context_text: str | None = document_text or "No document provided."
                 max_level = await RetrievalService.get_max_level(db, topic_id)
                 if max_level is not None and max_level >= 1:
                     top_facts = await RetrievalService.get_facts_by_level(db, topic_id, level=max_level)
@@ -134,6 +136,8 @@ class ChatService:
                             f"TOP-LEVEL SUMMARY (level {max_level}):\n"
                             + "\n".join(concepts)
                         )
+                
+                context_text = base_info + context_text
 
             async def _on_tool_call(tool_name: str, arguments: dict) -> None:
                 await SseService.emit(

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import type { ChatMessage } from "../hooks/useChat.ts";
 import { ThumbsUp, ThumbsDown, Copy, FileText, Check } from "lucide-react";
+import { MarkdownRenderer } from "./MarkdownRenderer";
 
 interface Props {
   message: ChatMessage;
@@ -76,13 +77,13 @@ export function MessageBubble({ message }: Props) {
       {message.content && (
         <div
           className={`text-[15px] leading-relaxed ${isUser
-            ? "max-w-[85%] bg-[var(--ds-ghost-hover,#F3F4F6)] text-[var(--color-text-primary)] rounded-2xl px-5 py-2.5"
+            ? "max-w-[85%] bg-[var(--ds-ghost-hover,#F3F4F6)] text-[var(--color-text-primary)] rounded-2xl px-5 py-2.5 whitespace-pre-wrap"
             : isSystem
-              ? "max-w-[90%] border border-amber-300 bg-amber-50 text-amber-800 px-4 py-2.5 rounded-2xl"
-              : "w-full bg-transparent text-[var(--color-text-body)] pr-2"
+              ? "max-w-[90%] border border-amber-300 bg-amber-50 text-amber-800 px-4 py-2.5 rounded-2xl whitespace-pre-wrap"
+              : "w-full bg-transparent text-[var(--color-text-body)] pr-2 overflow-x-hidden"
             }`}
         >
-          {isAssistant ? displayedText : message.content}
+          {isAssistant ? <MarkdownRenderer content={displayedText} /> : message.content}
         </div>
       )}
 

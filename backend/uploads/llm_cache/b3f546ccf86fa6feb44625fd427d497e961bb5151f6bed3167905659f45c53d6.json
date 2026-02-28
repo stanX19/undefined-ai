@@ -1,0 +1,16 @@
+{
+  "text": "```json\n[\n  \"Small businesses like Ahmad's face significant challenges with complex legal compliance, risking license revocation and contributing to a global 'Compliance Gap' that costs billions and keeps millions in poverty.\",\n  \"Existing AI tools are inadequate for these users, as they assume high digital literacy and perfect English, unlike individuals such as Aris who speak local dialects and lack legal representation.\",\n  \"RasmiAI is an agentic compliance assistant designed to simplify complex legal directives into step-by-step processes.\",\n  \"Users can upload legal directives or select preset compliance sets, describing their situation in native dialects and using photos of their workplace or permits.\",\n  \"The AI generates visual, step-by-step roadmaps, uses image generation to show compliant setups, and autofills complex legal forms iteratively with user voice inputs and photos.\",\n  \"Powered by the Gemini 3 Flash model, RasmiAI's agentic system introduces Stateful Information Gathering and Complex Scenario Management.\",\n  \"This system remembers progress, manages the entire compliance journey, cross-references data from physical photos and legal PDFs, and actively identifies specific gaps like missing permits.\",\n  \"RasmiAI democratizes access to legal standing as a 'Compliance-as-a-Service' layer for NGOs, government bodies, and Micro-SMEs.\",\n  \"By reducing their reliance on expensive manual consulting, RasmiAI aligns with SDG 16 (Peace, Justice, and Strong Institutions) and SDG 10 (Reduced Inequalities).\"\n]\n```",
+  "model": "ChatGoogleGenerativeAI (models/gemini-2.5-flash) {api=...EBRnaNs1P8}",
+  "status": "ok",
+  "json_data": [
+    "Small businesses like Ahmad's face significant challenges with complex legal compliance, risking license revocation and contributing to a global 'Compliance Gap' that costs billions and keeps millions in poverty.",
+    "Existing AI tools are inadequate for these users, as they assume high digital literacy and perfect English, unlike individuals such as Aris who speak local dialects and lack legal representation.",
+    "RasmiAI is an agentic compliance assistant designed to simplify complex legal directives into step-by-step processes.",
+    "Users can upload legal directives or select preset compliance sets, describing their situation in native dialects and using photos of their workplace or permits.",
+    "The AI generates visual, step-by-step roadmaps, uses image generation to show compliant setups, and autofills complex legal forms iteratively with user voice inputs and photos.",
+    "Powered by the Gemini 3 Flash model, RasmiAI's agentic system introduces Stateful Information Gathering and Complex Scenario Management.",
+    "This system remembers progress, manages the entire compliance journey, cross-references data from physical photos and legal PDFs, and actively identifies specific gaps like missing permits.",
+    "RasmiAI democratizes access to legal standing as a 'Compliance-as-a-Service' layer for NGOs, government bodies, and Micro-SMEs.",
+    "By reducing their reliance on expensive manual consulting, RasmiAI aligns with SDG 16 (Peace, Justice, and Strong Institutions) and SDG 10 (Reduced Inequalities)."
+  ]
+}

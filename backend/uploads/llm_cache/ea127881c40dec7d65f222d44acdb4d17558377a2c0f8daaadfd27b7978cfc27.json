@@ -1,0 +1,9 @@
+{
+  "text": "```json\n[\n  \"The document is titled \\\"Sample PDF\\\".\",\n  \"The document is a simple PDF file.\"\n]\n```",
+  "model": "ChatGoogleGenerativeAI (models/gemini-2.5-flash) {api=...-U1uZvzmeU}",
+  "status": "ok",
+  "json_data": [
+    "The document is titled \"Sample PDF\".",
+    "The document is a simple PDF file."
+  ]
+}

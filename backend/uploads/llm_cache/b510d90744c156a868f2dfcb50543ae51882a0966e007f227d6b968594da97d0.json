@@ -1,0 +1,10 @@
+{
+  "text": "[\n  \"RasmiAI is an agentic compliance assistant, powered by Gemini 3 Flash, designed to democratize legal compliance for micro-SMEs and marginalized communities.\",\n  \"Its highly asynchronous, multi-agent backend, built with FastAPI, SQLAlchemy, and LangChain, employs specialized agents that interact with a centralized relational database and a comprehensive toolset.\",\n  \"The system manages core functionalities through loops like Document Ingestion and Checklist Updator, providing an API with endpoints for checklists, document processing, and chat, which supports various tools, uses Server-Sent Events, and requires Firebase ID Token authentication.\"\n]",
+  "model": "ChatGoogleGenerativeAI (models/gemini-2.5-flash) {api=...iy3qGnKTBg}",
+  "status": "ok",
+  "json_data": [
+    "RasmiAI is an agentic compliance assistant, powered by Gemini 3 Flash, designed to democratize legal compliance for micro-SMEs and marginalized communities.",
+    "Its highly asynchronous, multi-agent backend, built with FastAPI, SQLAlchemy, and LangChain, employs specialized agents that interact with a centralized relational database and a comprehensive toolset.",
+    "The system manages core functionalities through loops like Document Ingestion and Checklist Updator, providing an API with endpoints for checklists, document processing, and chat, which supports various tools, uses Server-Sent Events, and requires Firebase ID Token authentication."
+  ]
+}

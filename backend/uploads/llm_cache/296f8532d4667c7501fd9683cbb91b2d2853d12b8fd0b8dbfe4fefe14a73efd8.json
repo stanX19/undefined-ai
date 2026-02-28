@@ -1,0 +1,26 @@
+{
+  "text": "```json\n[\n  \"Ahmad is a small-scale contractor who received a 40-page legal notice regarding new safety and labour compliance regulations.\",\n  \"Ahmad's business license will be revoked if he does not submit five specific forms by Friday.\",\n  \"Aris speaks a local dialect, has a smartphone, but does not have a lawyer.\",\n  \"Globally, the 'Compliance Gap' costs small businesses billions and keeps millions in poverty.\",\n  \"Current AI tools are built for CEOs in Silicon Valley and assume high digital literacy and perfect English.\",\n  \"RasmiAI is an agentic compliance assistant that turns 'Legal Walls' into 'Step-by-Step Walks.'\",\n  \"Users can upload any complex legal directive or select from a library of preset compliance sets into RasmiAI.\",\n  \"RasmiAI allows users to describe their current situation in their native dialect and take photos of their workplace or existing permits.\",\n  \"The AI generates a visual, step-by-step roadmap and uses Image Generation to show what a 'compliant' setup should look like.\",\n  \"RasmiAI autofills complex legal forms iteratively using user voice inputs and photos, ready for export and submission.\",\n  \"The RasmiAI system is powered by the Gemini 3 Flash model.\",\n  \"Unlike standard chatbots, RasmiAI remembers progress using direct access to a checklist.\",\n  \"The agentic system can reason simultaneously across physical photos and 50-page legal PDFs, cross-referencing all data points.\",\n  \"RasmiAI introduces Stateful Information Gathering and Complex Scenario Management.\",\n  \"The system manages the 'state' of the entire compliance journey, remembering progress and not losing track of half-finished forms.\",\n  \"RasmiAI actively identifies specific gaps, such as a missing permit or a blurry ID photo, and prompts the user to fill them.\",\n  \"By targeting Law Compliance, RasmiAI aligns with SDG 16 (Peace, Justice, and Strong Institutions) and SDG 10 (Reduced Inequalities).\",\n  \"RasmiAI democratizes access to legal standing and acts as a 'Compliance-as-a-Service' layer.\",\n  \"RasmiAI serves NGOs, Government bodies, and Micro-SMEs who currently spend thousands on manual consulting they cannot afford.\"\n]\n```",
+  "model": "ChatGoogleGenerativeAI (models/gemini-2.5-flash) {api=...iy3qGnKTBg}",
+  "status": "ok",
+  "json_data": [
+    "Ahmad is a small-scale contractor who received a 40-page legal notice regarding new safety and labour compliance regulations.",
+    "Ahmad's business license will be revoked if he does not submit five specific forms by Friday.",
+    "Aris speaks a local dialect, has a smartphone, but does not have a lawyer.",
+    "Globally, the 'Compliance Gap' costs small businesses billions and keeps millions in poverty.",
+    "Current AI tools are built for CEOs in Silicon Valley and assume high digital literacy and perfect English.",
+    "RasmiAI is an agentic compliance assistant that turns 'Legal Walls' into 'Step-by-Step Walks.'",
+    "Users can upload any complex legal directive or select from a library of preset compliance sets into RasmiAI.",
+    "RasmiAI allows users to describe their current situation in their native dialect and take photos of their workplace or existing permits.",
+    "The AI generates a visual, step-by-step roadmap and uses Image Generation to show what a 'compliant' setup should look like.",
+    "RasmiAI autofills complex legal forms iteratively using user voice inputs and photos, ready for export and submission.",
+    "The RasmiAI system is powered by the Gemini 3 Flash model.",
+    "Unlike standard chatbots, RasmiAI remembers progress using direct access to a checklist.",
+    "The agentic system can reason simultaneously across physical photos and 50-page legal PDFs, cross-referencing all data points.",
+    "RasmiAI introduces Stateful Information Gathering and Complex Scenario Management.",
+    "The system manages the 'state' of the entire compliance journey, remembering progress and not losing track of half-finished forms.",
+    "RasmiAI actively identifies specific gaps, such as a missing permit or a blurry ID photo, and prompts the user to fill them.",
+    "By targeting Law Compliance, RasmiAI aligns with SDG 16 (Peace, Justice, and Strong Institutions) and SDG 10 (Reduced Inequalities).",
+    "RasmiAI democratizes access to legal standing and acts as a 'Compliance-as-a-Service' layer.",
+    "RasmiAI serves NGOs, Government bodies, and Micro-SMEs who currently spend thousands on manual consulting they cannot afford."
+  ]
+}
