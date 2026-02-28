@@ -49,18 +49,32 @@ class Chatbot:
             if not final_messages:
                 return "I'm sorry, I couldn't generate a response."
 
-            content = final_messages[-1].content
-            if isinstance(content, list):
-                return "".join(
-                    block.get("text", "") for block in content if isinstance(block, dict)
-                )
-            return str(content)
+            return self._extract_text(final_messages[-1].content)
 
         except Exception as exc:
             traceback.print_exc()
             return f"An error occurred while processing your request: {exc}"
 
     # ── internals ────────────────────────────────────────────────────────
+
+    @staticmethod
+    def _extract_text(content: str | list) -> str:
+        """Extract plain text from LangChain message content.
+
+        ``content`` may be a plain string or a list of content blocks
+        (e.g. ``[{'type': 'text', 'text': '...', 'extras': {...}}]``).
+        """
+        if isinstance(content, str):
+            return content
+        if isinstance(content, list):
+            parts = [
+                block.get("text", "")
+                for block in content
+                if isinstance(block, dict) and block.get("type") == "text"
+            ]
+            return "\n".join(parts) if parts else str(content)
+        return str(content)
+
 
     def _build_messages(
         self,

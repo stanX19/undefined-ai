@@ -59,7 +59,7 @@ export function A2UITextField({
   };
 
   const className =
-    "w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm text-text-primary shadow-level1 transition-shadow hover:shadow-level2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2";
+    "w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm text-text-primary shadow-sm transition-all duration-200 hover:border-text-muted/50 focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/20 placeholder:text-text-muted/60";
 
   return (
     <div className="flex flex-col gap-1.5">
