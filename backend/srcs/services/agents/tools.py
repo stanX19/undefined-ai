@@ -2,6 +2,7 @@
 from langchain_core.tools import tool
 
 from srcs.services.retrieval_service import RetrievalService
+from srcs.services.web_search_service import WebSearchService
 
 
 @tool
@@ -77,3 +78,81 @@ async def list_topic_facts(topic_id: str, level: int) -> str:
         lines.append(f"[{f.fact_id}] {f.content}")
 
     return "\n".join(lines)
+
+
+@tool
+async def search_web(query: str) -> str:
+    """Search the web and return a brief summary of results with links.
+
+    Use this when the user asks about something NOT covered by the document,
+    or wants current / external information. Returns only titles, URLs, and
+    publication dates — no full-page content.
+
+    Args:
+        query: The search query string.
+
+    Returns:
+        A concise list of search results the user (or you) can act on.
+    """
+    results = await WebSearchService.search(query, num_results=5)
+
+    if not results:
+        return "No web results found for this query."
+
+    lines: list[str] = [f"=== Web Search Results for: '{query}' ==="]
+    for i, r in enumerate(results, 1):
+        lines.append(f"\n{i}. {r.metadata.title}")
+        lines.append(f"   URL: {r.url}")
+        if r.metadata.published_date:
+            lines.append(f"   Published: {r.metadata.published_date}")
+
+    lines.append(
+        "\nUse ingest_url with a URL above to add its content "
+        "to the topic's knowledge base for deeper analysis."
+    )
+    return "\n".join(lines)
+
+
+@tool
+async def ingest_url(topic_id: str, url: str) -> str:
+    """Fetch a web page and ingest its content into the topic's knowledge base.
+
+    This creates a NEW knowledge tree alongside existing document data
+    (nothing is deleted). After ingestion the new content is available at
+    all hierarchy levels via list_topic_facts / retrieve_facts.
+
+    Args:
+        topic_id: The topic to add the web content to.
+        url: The URL to fetch and ingest.
+
+    Returns:
+        Confirmation that ingestion has started.
+    """
+    content = await WebSearchService.get_web_content(url)
+
+    if not content or len(content.strip()) < 50:
+        return f"Could not fetch meaningful content from {url}."
+
+    from srcs.services.ingestion_service import IngestionService
+    IngestionService.trigger_ingestion(topic_id, content)
+
+    return (
+        f"Ingestion started for content from {url} ({len(content)} chars). "
+        f"The knowledge base will be updated shortly with a new knowledge tree."
+    )
+
+
+@tool
+async def design_ui(description: str) -> str:
+    """Design and render a custom UI surface for the user.
+
+    This tool is not yet implemented. It will allow creating interactive
+    UI components based on a natural language description.
+
+    Args:
+        description: A natural language description of the desired UI.
+
+    Returns:
+        Status message.
+    """
+    return "The UI design tool is not yet available. This feature is coming soon."

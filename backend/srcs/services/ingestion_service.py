@@ -10,7 +10,6 @@ The final level N is dynamic -- large documents produce more levels.
 import asyncio
 import traceback
 
-from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from srcs.models.atomic_fact import AtomicFact
@@ -107,12 +106,6 @@ class IngestionService:
 
         try:
             async with AsyncSessionLocal() as db:
-                # Clear any previous facts for re-ingestion
-                await db.execute(
-                    delete(AtomicFact).where(AtomicFact.topic_id == topic_id)
-                )
-                await db.commit()
-
                 # Stage 1: Save raw document as a single level-0 chunk
                 await IngestionService._emit_progress(topic_id, "stage_1", "Saving document...")
                 chunk = AtomicFact(
@@ -152,6 +145,9 @@ class IngestionService:
                         print(f"[INGESTION] Compression stalled at level {current_level}, stopping")
                         break
                     current_facts = compressed
+
+                # Cross-tree: merge across knowledge trees if combined count exceeds threshold
+                await IngestionService._cross_tree_compress(db, topic_id)
 
             _pipeline_status[topic_id] = "completed"
             await IngestionService._emit_progress(topic_id, "completed", "Ingestion complete.")
@@ -235,3 +231,48 @@ class IngestionService:
         await db.commit()
         print(f"[INGESTION] Level {target_level}: compressed {len(source_facts)} -> {len(new_facts)} facts")
         return new_facts
+
+    # -- Cross-tree compression (merges across multiple knowledge trees) ----------
+
+    @staticmethod
+    async def _cross_tree_compress(
+        db: AsyncSession, topic_id: str,
+    ) -> None:
+        """Merge facts across knowledge trees when their combined count exceeds threshold.
+
+        After each individual tree is fully compressed, this method checks the
+        current max level: if the total number of facts there (summed across all
+        trees) exceeds ``_MIN_FACTS_TO_COMPRESS``, it compresses them into a new
+        higher level.  The process repeats until the top level is small enough.
+        """
+        from srcs.services.retrieval_service import RetrievalService
+
+        max_level = await RetrievalService.get_max_level(db, topic_id)
+        if max_level is None or max_level < 1:
+            return
+
+        current_level = max_level
+        while True:
+            facts = await RetrievalService.get_facts_by_level(db, topic_id, current_level)
+            if len(facts) <= _MIN_FACTS_TO_COMPRESS:
+                break
+
+            await IngestionService._emit_progress(
+                topic_id,
+                f"cross_tree_{current_level + 1}",
+                f"Cross-tree compression: {len(facts)} facts at level {current_level} → level {current_level + 1}…",
+            )
+
+            compressed = await IngestionService._compress_facts(
+                db, topic_id, current_level + 1, facts,
+            )
+
+            if len(compressed) >= len(facts):
+                print(f"[INGESTION] Cross-tree compression stalled at level {current_level}, stopping")
+                break
+
+            print(
+                f"[INGESTION] Cross-tree: level {current_level} ({len(facts)}) "
+                f"-> level {current_level + 1} ({len(compressed)})"
+            )
+            current_level += 1

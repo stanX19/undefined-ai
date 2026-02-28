@@ -11,7 +11,13 @@ from langchain.agents import create_agent
 
 from srcs.services.agents.rotating_llm import rotating_llm
 from srcs.services.agents.prompts.main_chatbot import SYSTEM_PROMPT
-from srcs.services.agents.tools import retrieve_facts, list_topic_facts
+from srcs.services.agents.tools import (
+    retrieve_facts,
+    list_topic_facts,
+    search_web,
+    ingest_url,
+    design_ui,
+)
 
 
 class Chatbot:
@@ -26,7 +32,9 @@ class Chatbot:
         tools: list | None = None,
         system_prompt: str = SYSTEM_PROMPT,
     ) -> None:
-        self.tools: list = tools if tools is not None else [retrieve_facts, list_topic_facts]
+        self.tools: list = tools if tools is not None else [
+            retrieve_facts, list_topic_facts, search_web, ingest_url, design_ui,
+        ]
         self.system_prompt: str = system_prompt
 
     # -- public API -------------------------------------------------------
