@@ -1,16 +1,17 @@
-"""Interactive terminal Q&A chat session for Phase 1.
+"""Interactive terminal Q&A chat session for Phase 1 (SSE mode).
 
 Run: ``python -m tests.test_chat`` from the backend root.
 
-Mirrors the pattern from sample_test_chat.py but uses Phase 1's
-synchronous POST /api/v1/chat/ route (no SSE / orchestrator).
+Connects an SSE stream per topic, POSTs messages, and reads
+the agent reply from the SSE ``Replies`` event.
 """
+import json
 import time
 import threading
 
 import uvicorn
 
-from tests.test_client import TestClient, Colors, ThreadFilter
+from tests.test_client import TestClient, TestSocket, Colors, ThreadFilter
 
 ThreadFilter.redirect_all_other()
 from main import app
@@ -41,7 +42,7 @@ def run_interactive_chat():
         )
         topic_id = res["topic_id"]
 
-        print(f"\n{Colors.GREEN}{Colors.BOLD}--- Interactive Agent Chat Started ---{Colors.END}")
+        print(f"\n{Colors.GREEN}{Colors.BOLD}--- Interactive Agent Chat Started (SSE) ---{Colors.END}")
         print(f"Topic ID: {topic_id}")
         print("Type 'exit' or 'quit' to stop.\n")
 
@@ -58,15 +59,38 @@ def run_interactive_chat():
             if not user_msg.strip():
                 continue
 
-            # Send message via synchronous chat endpoint
+            # 1. Open SSE stream before sending the message
+            socket = TestSocket(url=f"{base_url}/api/v1/chat/stream/{topic_id}", actor_name="Agent")
+            socket.connect()
+            socket.listen(until_event="Replies")
+            time.sleep(0.5)
+
+            # 2. Send message — returns immediately with status: success
             res = client.post(
                 "/api/v1/chat/",
                 description=None,
                 json={"topic_id": topic_id, "message": user_msg},
             )
 
-            reply = res.get("assistant_message", {}).get("message", "")
-            print(f"\n{Colors.GREEN}{Colors.BOLD}Agent:{Colors.END} {reply}\n")
+            if res.get("status") != "success":
+                print(f"{Colors.RED}Unexpected response: {res}{Colors.END}")
+                continue
+
+            # 3. Wait for the agent reply via SSE
+            socket.join_listener(timeout=180)
+
+            reply_event = next((e for e in socket.events_received if e["event"] == "Replies"), None)
+            if reply_event:
+                data = reply_event["data"]
+                if isinstance(data, str):
+                    try:
+                        data = json.loads(data)
+                    except (json.JSONDecodeError, ValueError):
+                        pass
+                reply_text = data.get("text", data) if isinstance(data, dict) else data
+                print(f"\n{Colors.GREEN}{Colors.BOLD}Agent:{Colors.END} {reply_text}\n")
+            else:
+                print(f"{Colors.RED}No SSE reply received.{Colors.END}\n")
 
     except Exception as e:
         print(f"\n{Colors.RED}{Colors.BOLD}ERROR EXECUTING CHAT: {e}{Colors.END}")

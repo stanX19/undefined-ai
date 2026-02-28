@@ -1,12 +1,44 @@
-"""Chat service – message persistence and history retrieval."""
+"""Chat service – message persistence, history retrieval, and agent orchestration."""
+import asyncio
+
+from langchain_core.messages import HumanMessage, AIMessage, BaseMessage
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from srcs.models.chat_message import ChatMessage
+from srcs.schemas.chat_dto import SseNotifData, SseRepliesData
+from srcs.services.sse_service import SseService
+from srcs.services.agents.chatbot import chatbot
 
 
 class ChatService:
-    """Reusable chat-history operations."""
+    """Reusable chat-history operations + agent orchestration."""
+
+    # ── Agent orchestration ──────────────────────────────────────────────
+
+    @staticmethod
+    async def send_message(
+        db: AsyncSession, topic_id: str, message: str, document_text: str | None,
+    ) -> ChatMessage:
+        """Persist a user message and kick off the agent reply in the background.
+
+        Returns the persisted user ``ChatMessage`` immediately.
+        The agent reply is emitted via SSE once ready.
+        """
+        user_msg = await ChatService.add_message(db, topic_id, "user", message)
+
+        asyncio.create_task(
+            ChatService._run_agent_and_stream(
+                topic_id=topic_id,
+                user_prompt=message,
+                document_text=document_text,
+                exclude_message_id=user_msg.message_id,
+            )
+        )
+
+        return user_msg
+
+    # ── Persistence helpers ──────────────────────────────────────────────
 
     @staticmethod
     async def add_message(
@@ -15,8 +47,8 @@ class ChatService:
         """Persist a single chat message."""
         msg = ChatMessage(topic_id=topic_id, role=role, message=message)
         db.add(msg)
+        await db.flush()      # populates server-side defaults (message_id, created_at)
         await db.commit()
-        await db.refresh(msg)
         return msg
 
     @staticmethod
@@ -40,3 +72,59 @@ class ChatService:
         )
         await db.commit()
         return result.rowcount  # type: ignore[return-value]
+
+    # ── Private helpers ──────────────────────────────────────────────────
+
+    @staticmethod
+    async def _build_lc_history(
+        db: AsyncSession, topic_id: str, exclude_id: str | None = None,
+    ) -> list[BaseMessage] | None:
+        """Build LangChain-format chat history, optionally skipping one message."""
+        rows = await ChatService.get_history(db, topic_id, limit=50)
+        history: list[BaseMessage] = []
+        for row in rows:
+            if row.message_id == exclude_id:
+                continue
+            if row.role == "user":
+                history.append(HumanMessage(content=row.message))
+            else:
+                history.append(AIMessage(content=row.message))
+        return history or None
+
+    @staticmethod
+    async def _run_agent_and_stream(
+        topic_id: str,
+        user_prompt: str,
+        document_text: str | None,
+        exclude_message_id: str,
+    ) -> None:
+        """Background coroutine: build history, call agent, persist reply, emit SSE."""
+        from srcs.database import AsyncSessionLocal
+
+        session_id = topic_id  # Phase 1: topic_id == SSE session_id
+
+        await SseService.emit(session_id, SseNotifData(message="Processing your message…"))
+
+        try:
+            # Use a fresh session so we see all previously committed data
+            async with AsyncSessionLocal() as db:
+                chat_history = await ChatService._build_lc_history(
+                    db, topic_id, exclude_id=exclude_message_id,
+                )
+
+            answer: str = await chatbot.ask(
+                user_prompt=user_prompt,
+                document_text=document_text,
+                chat_history=chat_history,
+            )
+
+            async with AsyncSessionLocal() as db:
+                assistant_msg = await ChatService.add_message(db, topic_id, "assistant", answer)
+                reply_message_id = assistant_msg.message_id
+
+            await SseService.emit(
+                session_id,
+                SseRepliesData(message_id=reply_message_id, text=answer),
+            )
+        except Exception as exc:
+            await SseService.emit(session_id, SseNotifData(message=f"Error: {exc}"))

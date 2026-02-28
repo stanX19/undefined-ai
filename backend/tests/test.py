@@ -10,18 +10,19 @@ import threading
 import requests
 import uvicorn
 
-from tests.test_client import TestClient, Colors, ThreadFilter
+from tests.test_client import TestClient, Colors, ThreadFilter, TestSocket
 
 ThreadFilter.redirect_all_other()
 
 # ---------------------------------------------------------------------------
-# Monkey-patch Chatbot.ask BEFORE importing main so the agent never fires.
+# Monkey-patch chatbot.ask BEFORE importing main so the agent never fires.
 # ---------------------------------------------------------------------------
 
 _last_ask_kwargs: dict = {}
 
 
 async def _mock_ask(
+    self,
     user_prompt: str,
     document_text: str | None = None,
     chat_history=None,
@@ -34,7 +35,7 @@ async def _mock_ask(
 
 
 import srcs.services.agents.chatbot as _chatbot_mod
-_chatbot_mod.Chatbot.ask = staticmethod(_mock_ask)
+_chatbot_mod.Chatbot.ask = _mock_ask
 
 from main import app
 
@@ -134,18 +135,30 @@ def run_tests():
         #  Chat API Tests
         # ══════════════════════════════════════════════════════════════════
 
-        # ── 9. Send message ──────────────────────────────────────────────
-        print(f"\n{Colors.BOLD}--- 9. Chat: Send message ---{Colors.END}")
+        # ── 9. Send message (SSE) ────────────────────────────────────────
+        print(f"\n{Colors.BOLD}--- 9. Chat: Send message (SSE) ---{Colors.END}")
+
+        socket = TestSocket(url=f"{base_url}/api/v1/chat/stream/{topic_id}", actor_name="SSE")
+        socket.connect()
+        socket.listen(until_event="Replies")
+        time.sleep(0.5)
+
         res = client.post(
             "/api/v1/chat/",
             description="Send first message",
             json={"topic_id": topic_id, "message": "Hello agent"},
         )
+        assert res.get("status") == "success", f"Expected status=success, got {res}"
         assert "user_message" in res, "Response missing user_message"
-        assert "assistant_message" in res, "Response missing assistant_message"
         assert res["user_message"]["role"] == "user"
-        assert res["assistant_message"]["role"] == "assistant"
-        assert res["assistant_message"]["message"] == "Mock reply to: Hello agent"
+
+        socket.join_listener(timeout=30)
+        reply_event = next((e for e in socket.events_received if e["event"] == "Replies"), None)
+        assert reply_event, "Did not receive SSE Replies event"
+        import json as _json
+        reply_data = reply_event["data"] if isinstance(reply_event["data"], dict) else _json.loads(reply_event["data"])
+        assert reply_data["text"] == "Mock reply to: Hello agent"
+        print(f"{Colors.GREEN}SSE reply received: {reply_data['text']}{Colors.END}")
 
         # ── 10. Verify document context is None ──────────────────────────
         print(f"\n{Colors.BOLD}--- 10. Chat: Verify document_text=None ---{Colors.END}")
@@ -153,21 +166,34 @@ def run_tests():
             "document_text should be None for topic without uploaded doc"
         print(f"{Colors.GREEN}Chatbot.ask correctly received document_text=None{Colors.END}")
 
-        # ── 11. Second message — chat_history passed ─────────────────────
-        print(f"\n{Colors.BOLD}--- 11. Chat: Second message passes history ---{Colors.END}")
+        # ── 11. Second message — chat_history passed (SSE) ───────────────
+        print(f"\n{Colors.BOLD}--- 11. Chat: Second message passes history (SSE) ---{Colors.END}")
+
+        socket2 = TestSocket(url=f"{base_url}/api/v1/chat/stream/{topic_id}", actor_name="SSE")
+        socket2.connect()
+        socket2.listen(until_event="Replies")
+        time.sleep(0.5)
+
         res2 = client.post(
             "/api/v1/chat/",
             description="Send second message",
             json={"topic_id": topic_id, "message": "Follow-up question"},
         )
-        assert res2["assistant_message"]["message"] == "Mock reply to: Follow-up question"
+        assert res2.get("status") == "success"
+
+        socket2.join_listener(timeout=30)
+        reply_event2 = next((e for e in socket2.events_received if e["event"] == "Replies"), None)
+        assert reply_event2, "Did not receive SSE Replies event for second message"
+        reply_data2 = reply_event2["data"] if isinstance(reply_event2["data"], dict) else _json.loads(reply_event2["data"])
+        assert reply_data2["text"] == "Mock reply to: Follow-up question"
+
         assert _last_ask_kwargs.get("chat_history") is not None, \
             "chat_history should contain previous exchange"
         assert len(_last_ask_kwargs["chat_history"]) >= 2, \
             f"Expected ≥2 history messages, got {len(_last_ask_kwargs['chat_history'])}"
         print(f"{Colors.GREEN}chat_history passed with {len(_last_ask_kwargs['chat_history'])} messages{Colors.END}")
 
-        # ── 12. Get history ──────────────────────────────────────────────
+        # ── 12. Get history (includes SSE-persisted replies) ─────────────
         print(f"\n{Colors.BOLD}--- 12. Chat: Get history ---{Colors.END}")
         history = client.get(
             f"/api/v1/chat/history?topic_id={topic_id}",
