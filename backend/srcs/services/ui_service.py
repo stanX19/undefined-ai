@@ -124,6 +124,16 @@ class UIService:
         return ui
 
     @staticmethod
+    async def replace_ui_json(
+        db: AsyncSession, topic_id: str, ui_json: dict,
+    ) -> dict:
+        """Replace the entire UI document wholesale. Returns the new ``ui_json``."""
+        scene = await UIService.get_or_create_scene(db, topic_id)
+        scene.ui_json = copy.deepcopy(ui_json)
+        await UIService.save_scene(db, scene)
+        return scene.ui_json
+
+    @staticmethod
     async def apply_patches(
         db: AsyncSession, topic_id: str, patches: list[dict],
     ) -> dict:

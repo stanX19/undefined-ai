@@ -1,8 +1,8 @@
 # UndefinedAI — Phase 1 API Documentation
 
 > **Base URL:** `http://localhost:8000`
-> **Version:** `0.1.0`
-> **Phase:** 1 — POC
+> **Version:** `0.3.0`
+> **Phase:** 3 — Custom UI Generator
 
 ---
 
@@ -16,6 +16,7 @@
   - [Topics](#topics)
   - [Chat](#chat)
   - [Ingestion](#ingestion)
+  - [UI](#ui)
 - [Server-Sent Events (SSE)](#server-sent-events-sse)
 - [Error Handling](#error-handling)
 
@@ -28,9 +29,10 @@ Phase 1 is a **proof-of-concept** backend built with **FastAPI** and **SQLite** 
 **Core capabilities:**
 - Simple ID-based user login (no JWT)
 - Topic creation and management
-- PDF upload with text extraction
+- PDF upload with asynchronous text extraction and fact generation
 - Chat with a LangGraph ReAct agent (Gemini-backed)
 - Real-time responses via Server-Sent Events (SSE)
+- Dynamic UI generation via specialised UIAgent
 
 **Tech stack:** FastAPI · SQLAlchemy (async) · SQLite · LangChain/LangGraph · Google Gemini
 
@@ -476,6 +478,40 @@ Get a single fact with its full parent chain and source chunk.
 
 ---
 
+### UI
+
+#### `GET /api/v1/ui/{topic_id}`
+
+Get the current A2UI scene for a topic. If no scene exists yet, an empty default scene is created and returned.
+
+**Path Parameters**
+
+| Param      | Type   |
+|------------|--------|
+| `topic_id` | string |
+
+**Response** `200 OK` — `UIResponse`
+```json
+{
+  "scene_id": "8818bdd5-0caf-4297-af3a-6e599957b901",
+  "topic_id": "ed62cff73a9f4fe78b45269bb84a7828",
+  "created_at": "2026-03-01T01:30:00Z",
+  "ui_json": {
+    "version": "3.0",
+    "root_id": "root",
+    "elements": {
+      "root": {
+        "type": "linear_layout",
+        "orientation": "vertical",
+        "children": []
+      }
+    }
+  }
+}
+```
+
+---
+
 ## Server-Sent Events (SSE)
 
 Events are pushed over `GET /api/v1/chat/stream/{session_id}`.
@@ -492,6 +528,9 @@ data: <JSON payload>
 |--------------------|---------------------------|------------------------------------|
 | `Notif`            | `SseNotifData`            | Status notification (e.g. "Processing…") |
 | `Replies`          | `SseRepliesData`          | Agent reply text (+ optional audio URL)  |
+| `ToolCall`         | `SseToolCallData`         | Agent calling a tool (name + args) |
+| `IngestionProgress`| `SseIngestionProgressData`| Real-time ingestion system updates |
+| `UIUpdate`         | `SseUIUpdateData`         | Dynamic UI scene updates from UIAgent |
 | `UpdateChecklist`  | `SseUpdateChecklistData`  | Checklist update _(future use)_    |
 | `EditDocument`     | `SseEditDocumentData`     | Document edit _(future use)_       |
 | `TTSResult`        | `SseTTSResultData`        | TTS audio result _(future use)_    |
@@ -536,6 +575,97 @@ data: <JSON payload>
 }
 ```
 
+**`SseToolCallData`**
+```json
+{
+  "tool_name": "edit_ui",
+  "arguments": {
+    "topic_id": "ed62cff73a9f4fe78b45269bb84a7828",
+    "description": "Create a table displaying..."
+  }
+}
+```
+
+**`SseUIUpdateData`**
+Note: This carries the full A2UI v3.0 JSON which the frontend should render.
+
+```json
+{
+  "topic_id": "ed62cff73a9f4fe78b45269bb84a7828",
+  "scene_id": "8818bdd5-0caf-4297-af3a-6e599957b901",
+  "ui_json": {
+    "version": "3.0",
+    "root_id": "root",
+    "elements": {
+      "root": {
+        "type": "linear_layout",
+        "orientation": "horizontal",
+        "children": [
+          "root.table",
+          "root.graph"
+        ],
+        "style": {
+          "gap": "lg"
+        }
+      },
+      "root.table": {
+        "type": "table",
+        "total_rows": 3,
+        "total_columns": 3,
+        "cells": {
+          "0_0": "root.cell_0_0",
+          "0_1": "root.cell_0_1",
+          "0_2": "root.cell_0_2",
+          "1_0": "root.cell_1_0",
+          "1_1": "root.cell_1_1",
+          "1_2": "root.cell_1_2",
+          "2_0": "root.cell_2_0",
+          "2_1": "root.cell_2_1",
+          "2_2": "root.cell_2_2"
+        }
+      },
+      "root.cell_0_0": { "type": "text", "content": "1" },
+      "root.cell_0_1": { "type": "text", "content": "2" },
+      "root.cell_0_2": { "type": "text", "content": "3" },
+      "root.cell_1_0": { "type": "text", "content": "a" },
+      "root.cell_1_1": { "type": "text", "content": "b" },
+      "root.cell_1_2": { "type": "text", "content": "c" },
+      "root.cell_2_0": { "type": "text", "content": "d" },
+      "root.cell_2_1": { "type": "text", "content": "r" },
+      "root.cell_2_2": { "type": "text", "content": "c" },
+      "root.graph": {
+        "type": "graph",
+        "layout_type": "tree",
+        "interactive": true,
+        "children": [
+          "root.graph.node_A",
+          "root.graph.node_B",
+          "root.graph.edge_AB"
+        ]
+      },
+      "root.graph.node_A": {
+        "type": "node",
+        "title": "A",
+        "description": "Node A - Start",
+        "status": "available"
+      },
+      "root.graph.node_B": {
+        "type": "node",
+        "title": "B",
+        "description": "Node B - End",
+        "status": "available"
+      },
+      "root.graph.edge_AB": {
+        "type": "edge",
+        "left": "root.graph.node_A",
+        "right": "root.graph.node_B",
+        "direction": "left_to_right"
+      }
+    }
+  }
+}
+```
+
 ---
 
 ## Error Handling
@@ -563,4 +693,4 @@ Uploaded PDFs are served at `/uploads/{filename}` via FastAPI `StaticFiles`.
 
 ---
 
-_Last updated: 2026-02-28 · Phase 1 POC_
+_Last updated: 2026-03-01 · Phase 3 Custom UI Generator_

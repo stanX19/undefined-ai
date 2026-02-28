@@ -18,26 +18,6 @@ from srcs.services.agents.prompts.ui_agent import UI_AGENT_PROMPT
 # UIAgent-specific tools — each creates its own DB session to stay stateless
 # ---------------------------------------------------------------------------
 
-@tool
-async def get_ui(topic_id: str) -> str:
-    """Read the current full UI JSON for a topic.
-
-    Returns the entire A2UI v3.0 document as a JSON string.
-    Call this first to understand what already exists before editing.
-
-    Args:
-        topic_id: The topic whose UI to read.
-
-    Returns:
-        The full A2UI JSON document as a formatted string.
-    """
-    from srcs.database import AsyncSessionLocal
-    from srcs.services.ui_service import UIService
-
-    async with AsyncSessionLocal() as db:
-        ui = await UIService.get_ui_json(db, topic_id)
-    return json.dumps(ui, indent=2)
-
 
 @tool
 async def set_element(topic_id: str, element_id: str, element_json: str) -> str:
@@ -135,6 +115,46 @@ async def set_root_id(topic_id: str, root_id: str) -> str:
     return f"Root ID set to '{root_id}'."
 
 
+@tool
+async def replace_ui(topic_id: str, ui_json_str: str) -> str:
+    """Replace the entire UI document with a new A2UI v3.0 JSON.
+
+    Use this when creating a NEW UI from scratch — it is far more efficient
+    than calling set_element many times.  For small edits to an existing UI,
+    prefer set_element / remove_element instead.
+
+    The JSON must be a complete A2UI v3.0 document with "version", "root_id",
+    and "elements" keys.
+
+    Args:
+        topic_id: The topic whose UI to replace.
+        ui_json_str: The full A2UI JSON document as a string.
+
+    Returns:
+        Confirmation with element count.
+    """
+    from srcs.database import AsyncSessionLocal
+    from srcs.services.ui_service import UIService
+
+    try:
+        ui_json = json.loads(ui_json_str)
+    except json.JSONDecodeError as e:
+        return f"Invalid JSON: {e}"
+
+    if "elements" not in ui_json:
+        return "Error: ui_json must include an 'elements' key."
+    if "root_id" not in ui_json:
+        return "Error: ui_json must include a 'root_id' key."
+
+    ui_json.setdefault("version", "3.0")
+
+    async with AsyncSessionLocal() as db:
+        await UIService.replace_ui_json(db, topic_id, ui_json)
+
+    count = len(ui_json.get("elements", {}))
+    return f"UI replaced successfully with {count} element(s)."
+
+
 # ---------------------------------------------------------------------------
 # UIAgent class
 # ---------------------------------------------------------------------------
@@ -151,7 +171,8 @@ class UIAgent:
 
     def __init__(self) -> None:
         self.tools = [
-            get_ui, set_element, remove_element, list_elements, set_root_id,
+            replace_ui,
+            set_element, remove_element, list_elements, set_root_id,
             retrieve_facts, list_topic_facts,
         ]
         self.system_prompt = UI_AGENT_PROMPT
@@ -161,10 +182,20 @@ class UIAgent:
 
         Returns the final ``ui_json`` after all edits.
         """
+        # Fetch current UI so the agent doesn't waste a tool call
+        from srcs.database import AsyncSessionLocal
+        from srcs.services.ui_service import UIService
+
+        async with AsyncSessionLocal() as db:
+            current_ui = await UIService.get_ui_json(db, topic_id)
+
+        current_ui_str = json.dumps(current_ui, indent=2)
+
         messages: list[BaseMessage] = [
             SystemMessage(content=self.system_prompt),
             HumanMessage(content=(
                 f"Topic ID: {topic_id}\n\n"
+                f"--- CURRENT UI STATE ---\n{current_ui_str}\n--- END UI STATE ---\n\n"
                 f"Instruction: {prompt}"
             )),
         ]
@@ -172,12 +203,12 @@ class UIAgent:
         try:
             llm = await rotating_llm.get_runnable(temperature=0.3)
             agent = create_agent(model=llm, tools=self.tools)
-            await agent.ainvoke({"messages": messages})
+            await agent.ainvoke(
+				{"messages": messages},
+				config={"recursion_limit": 50}
+			)
 
             # After the agent has finished calling tools, read back the final state
-            from srcs.database import AsyncSessionLocal
-            from srcs.services.ui_service import UIService
-
             async with AsyncSessionLocal() as db:
                 return await UIService.get_ui_json(db, topic_id)
 

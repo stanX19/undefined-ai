@@ -214,17 +214,15 @@ def run_ui_test():
             else:
                 print(f"{Colors.RED}No SSE reply received (timeout).{Colors.END}")
 
-            # Print UI state (from SSE event or fetch)
+            # Print UI state (from SSE event or fetch) — full JSON for frontend dev
             if ui_update:
-                ui_json = ui_update.get("ui_json", ui_update)
-                print(f"\n{Colors.CYAN}--- UI Updated (via SSE) ---{Colors.END}")
-                print(pretty_ui(ui_json))
+                print(f"\n{Colors.CYAN}--- Frontend SSE Payload (UIUpdate) ---{Colors.END}")
+                print(json.dumps(ui_update, indent=2))
             else:
                 # Fetch current UI even if no SSE event came
                 ui_data = client.get(f"/api/v1/ui/{topic_id}", description="Get UI")
-                ui_json = ui_data.get("ui_json", ui_data)
-                print(f"\n{Colors.CYAN}--- Current UI (fetched) ---{Colors.END}")
-                print(pretty_ui(ui_json))
+                print(f"\n{Colors.CYAN}--- Frontend API Response (GET /api/v1/ui/{topic_id}) ---{Colors.END}")
+                print(json.dumps(ui_data, indent=2))
 
             print()
 
