@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+/*
+ * Design System CSS Custom Properties
+ * Source of truth: docs/design_system.md
+ * JS constants: src/constants/
+ *
+ * Naming: --ds-{token}
+ */
+
+:root {
+  /* Brand */
+  --ds-primary: #4F46E5;
+  --ds-primary-hover: #4338CA;
+  --ds-sidebar: #0A0E1A;
+  --ds-subtle-blue: #EFF6FF;
+
+  /* Status */
+  --ds-success-bg: #DCFCE7;
+  --ds-success-text: #16A34A;
+  --ds-in-progress-bg: #F3E8FF;
+  --ds-in-progress-text: #9333EA;
+  --ds-warning-bg: #FEF3C7;
+  --ds-warning-text: #F97316;
+  --ds-error-bg: #FEE2E2;
+  --ds-error-text: #DC2626;
+
+  /* Neutrals */
+  --ds-bg: #F8F9FA;
+  --ds-surface: #FFFFFF;
+  --ds-border: #E5E7EB;
+  --ds-hover: #F9FAFB;
+  --ds-ghost-hover: #F3F4F6;
+
+  /* Typography */
+  --ds-text-primary: #111827;
+  --ds-text-body: #374151;
+  --ds-text-secondary: #6B7280;
+  --ds-text-inverse: #FFFFFF;
+  --ds-text-link: #4F46E5;
+
+  /* Shadows */
+  --ds-shadow-level1: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --ds-shadow-level2: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --ds-shadow-level3: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* A2UI surface theme override (set per-surface via JS) */
+  --a2ui-primary: var(--ds-primary);
+}
+
+@theme {
+  --color-primary: var(--ds-primary);
+  --color-primary-hover: var(--ds-primary-hover);
+  --color-sidebar: var(--ds-sidebar);
+  --color-surface: var(--ds-surface);
+  --color-border: var(--ds-border);
+  --color-hover: var(--ds-hover);
+  --color-text-primary: var(--ds-text-primary);
+  --color-text-body: var(--ds-text-body);
+  --color-text-muted: var(--ds-text-secondary);
+  --color-success: var(--ds-success-bg);
+  --color-success-text: var(--ds-success-text);
+  --color-warning: var(--ds-warning-bg);
+  --color-warning-text: var(--ds-warning-text);
+  --color-error: var(--ds-error-bg);
+  --color-error-text: var(--ds-error-text);
+  --color-in-progress: var(--ds-in-progress-bg);
+  --color-in-progress-text: var(--ds-in-progress-text);
+
+  --shadow-level1: var(--ds-shadow-level1);
+  --shadow-level2: var(--ds-shadow-level2);
+  --shadow-level3: var(--ds-shadow-level3);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ds-primary: #818CF8;
+    --ds-primary-hover: #6366F1;
+    --ds-sidebar: #0A0E1A;
+    --ds-subtle-blue: #1E293B;
+
+    --ds-success-bg: #064E3B;
+    --ds-success-text: #6EE7B7;
+    --ds-in-progress-bg: #2E1065;
+    --ds-in-progress-text: #D8B4FE;
+    --ds-warning-bg: #78350F;
+    --ds-warning-text: #FCD34D;
+    --ds-error-bg: #7F1D1D;
+    --ds-error-text: #FCA5A5;
+
+    --ds-bg: #0F172A;
+    --ds-surface: #1E293B;
+    --ds-border: #334155;
+    --ds-hover: #1E293B;
+    --ds-ghost-hover: #334155;
+
+    --ds-text-primary: #F1F5F9;
+    --ds-text-body: #CBD5E1;
+    --ds-text-secondary: #94A3B8;
+    --ds-text-inverse: #0F172A;
+    --ds-text-link: #818CF8;
+
+    --ds-shadow-level1: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+    --ds-shadow-level2: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+    --ds-shadow-level3: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  background: var(--ds-bg);
+  color: var(--ds-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
