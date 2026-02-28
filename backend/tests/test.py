@@ -1,11 +1,11 @@
-"""Unit tests for Phase 1 routes: health, auth, topics.
+"""Automated tests for Phase 1 routes: health, auth, topics, chat.
 
 Run: ``python -m tests.test`` from the backend root.
+
+Chatbot.ask is monkey-patched so no LLM keys or network calls are needed.
 """
-import os
 import time
 import threading
-import tempfile
 
 import requests
 import uvicorn
@@ -13,11 +13,34 @@ import uvicorn
 from tests.test_client import TestClient, Colors, ThreadFilter
 
 ThreadFilter.redirect_all_other()
+
+# ---------------------------------------------------------------------------
+# Monkey-patch Chatbot.ask BEFORE importing main so the agent never fires.
+# ---------------------------------------------------------------------------
+
+_last_ask_kwargs: dict = {}
+
+
+async def _mock_ask(
+    user_prompt: str,
+    document_text: str | None = None,
+    chat_history=None,
+) -> str:
+    _last_ask_kwargs.clear()
+    _last_ask_kwargs["user_prompt"] = user_prompt
+    _last_ask_kwargs["document_text"] = document_text
+    _last_ask_kwargs["chat_history"] = chat_history
+    return f"Mock reply to: {user_prompt}"
+
+
+import srcs.services.agents.chatbot as _chatbot_mod
+_chatbot_mod.Chatbot.ask = staticmethod(_mock_ask)
+
 from main import app
 
 
 def start_server():
-    """Start uvicorn in a daemon thread with in-memory DB."""
+    """Start uvicorn in a daemon thread."""
     uvicorn.run(app, host="127.0.0.1", port=8001, log_level="error")
 
 
@@ -106,6 +129,79 @@ def run_tests():
         )
         assert raw.status_code == 400, f"Expected 400 for .txt upload, got {raw.status_code}"
         print(f"{Colors.GREEN}Correctly rejected non-PDF upload{Colors.END}")
+
+        # ══════════════════════════════════════════════════════════════════
+        #  Chat API Tests
+        # ══════════════════════════════════════════════════════════════════
+
+        # ── 9. Send message ──────────────────────────────────────────────
+        print(f"\n{Colors.BOLD}--- 9. Chat: Send message ---{Colors.END}")
+        res = client.post(
+            "/api/v1/chat/",
+            description="Send first message",
+            json={"topic_id": topic_id, "message": "Hello agent"},
+        )
+        assert "user_message" in res, "Response missing user_message"
+        assert "assistant_message" in res, "Response missing assistant_message"
+        assert res["user_message"]["role"] == "user"
+        assert res["assistant_message"]["role"] == "assistant"
+        assert res["assistant_message"]["message"] == "Mock reply to: Hello agent"
+
+        # ── 10. Verify document context is None ──────────────────────────
+        print(f"\n{Colors.BOLD}--- 10. Chat: Verify document_text=None ---{Colors.END}")
+        assert _last_ask_kwargs.get("document_text") is None, \
+            "document_text should be None for topic without uploaded doc"
+        print(f"{Colors.GREEN}Chatbot.ask correctly received document_text=None{Colors.END}")
+
+        # ── 11. Second message — chat_history passed ─────────────────────
+        print(f"\n{Colors.BOLD}--- 11. Chat: Second message passes history ---{Colors.END}")
+        res2 = client.post(
+            "/api/v1/chat/",
+            description="Send second message",
+            json={"topic_id": topic_id, "message": "Follow-up question"},
+        )
+        assert res2["assistant_message"]["message"] == "Mock reply to: Follow-up question"
+        assert _last_ask_kwargs.get("chat_history") is not None, \
+            "chat_history should contain previous exchange"
+        assert len(_last_ask_kwargs["chat_history"]) >= 2, \
+            f"Expected ≥2 history messages, got {len(_last_ask_kwargs['chat_history'])}"
+        print(f"{Colors.GREEN}chat_history passed with {len(_last_ask_kwargs['chat_history'])} messages{Colors.END}")
+
+        # ── 12. Get history ──────────────────────────────────────────────
+        print(f"\n{Colors.BOLD}--- 12. Chat: Get history ---{Colors.END}")
+        history = client.get(
+            f"/api/v1/chat/history?topic_id={topic_id}",
+            description="Get chat history",
+        )
+        assert len(history) >= 4, f"Expected ≥4 messages (2 rounds), got {len(history)}"
+        timestamps = [m["created_at"] for m in history]
+        assert timestamps == sorted(timestamps), "History should be oldest-first"
+        print(f"{Colors.GREEN}{len(history)} messages, correctly ordered{Colors.END}")
+
+        # ── 13. Clear history ────────────────────────────────────────────
+        print(f"\n{Colors.BOLD}--- 13. Chat: Clear history ---{Colors.END}")
+        res = client.request(
+            "DELETE",
+            f"/api/v1/chat/history?topic_id={topic_id}",
+            description="Clear chat history",
+        )
+        assert "message" in res
+
+        history = client.get(
+            f"/api/v1/chat/history?topic_id={topic_id}",
+            description="Verify history empty",
+        )
+        assert len(history) == 0, f"Expected empty history, got {len(history)}"
+        print(f"{Colors.GREEN}History correctly empty after clear{Colors.END}")
+
+        # ── 14. Chat 404 — bad topic_id ──────────────────────────────────
+        print(f"\n{Colors.BOLD}--- 14. Chat: 404 for bad topic_id ---{Colors.END}")
+        raw = requests.post(
+            f"{base_url}/api/v1/chat/",
+            json={"topic_id": "nonexistent_topic_999", "message": "hi"},
+        )
+        assert raw.status_code == 404, f"Expected 404, got {raw.status_code}"
+        print(f"{Colors.GREEN}Correctly returned 404{Colors.END}")
 
         # ── Done ─────────────────────────────────────────────────────────
         print(f"\n{Colors.GREEN}{Colors.BOLD}ALL TESTS PASSED!{Colors.END}")
