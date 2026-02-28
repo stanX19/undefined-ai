@@ -11,6 +11,7 @@ export interface ChatMessage {
   timestamp: number;
   attachments?: Array<{ name: string; type: string; url: string }>;
   audioUrl?: string;
+  isAnimatable?: boolean;
 }
 
 interface ChatState {
@@ -85,7 +86,7 @@ function openSseStream(sessionId: string): Promise<void> {
         const text: string = data.text ?? "";
         if (!text) return;
 
-        store.addMessage({ role: "assistant", content: text });
+        store.addMessage({ role: "assistant", content: text, isAnimatable: true });
         store.setStreaming(false);
 
         // Bridge plain text to A2UI surface
@@ -135,6 +136,7 @@ function openSseStream(sessionId: string): Promise<void> {
 
         // Auto-play (allowed because user initiated the interaction)
         const audio = new Audio(audioUrl);
+        audio.playbackRate = 1.1;
         audio.play().catch((err) => console.warn("TTS autoplay blocked:", err));
       } catch {
         console.warn("Failed to parse SSE TTSResult event", e.data);

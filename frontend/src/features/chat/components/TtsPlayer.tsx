@@ -16,6 +16,7 @@ export function TtsPlayer({ audioUrl }: TtsPlayerProps) {
 
     useEffect(() => {
         const audio = new Audio(audioUrl);
+        audio.playbackRate = 1.1;
         audioRef.current = audio;
 
         const onTimeUpdate = () => {

@@ -1,5 +1,6 @@
+import { useState, useEffect } from "react";
 import type { ChatMessage } from "../hooks/useChat.ts";
-import { ThumbsUp, ThumbsDown, Copy, FileText } from "lucide-react";
+import { ThumbsUp, ThumbsDown, Copy, FileText, Check } from "lucide-react";
 
 interface Props {
   message: ChatMessage;
@@ -8,6 +9,44 @@ interface Props {
 export function MessageBubble({ message }: Props) {
   const isUser = message.role === "user";
   const isSystem = message.role === "system";
+  const isAssistant = !isUser && !isSystem;
+
+  const [displayedText, setDisplayedText] = useState(() => {
+    if (isAssistant && message.isAnimatable) return "";
+    return message.content || "";
+  });
+
+  const [isTyping, setIsTyping] = useState(() => {
+    return isAssistant && message.isAnimatable;
+  });
+
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!isTyping || !message.content) return;
+
+    let i = 0;
+    const intervalId = setInterval(() => {
+      i += 1;
+      if (i >= message.content.length) {
+        setDisplayedText(message.content);
+        clearInterval(intervalId);
+        setIsTyping(false);
+      } else {
+        setDisplayedText(message.content.slice(0, i));
+      }
+    }, 15);
+
+    return () => clearInterval(intervalId);
+  }, [isTyping, message.content]);
+
+  const handleCopy = () => {
+    if (message.content) {
+      navigator.clipboard.writeText(message.content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   return (
     <div className={`flex flex-col gap-2 ${isUser ? "items-end" : "items-start"}`}>
@@ -36,27 +75,27 @@ export function MessageBubble({ message }: Props) {
 
       {message.content && (
         <div
-          className={`max-w-[90%] text-[15px] leading-relaxed ${isUser
-            ? "bg-[var(--ds-ghost-hover,#F3F4F6)] text-[var(--color-text-primary)] rounded-[24px] px-5 py-2.5"
+          className={`text-[15px] leading-relaxed ${isUser
+            ? "max-w-[85%] bg-[var(--ds-ghost-hover,#F3F4F6)] text-[var(--color-text-primary)] rounded-2xl px-5 py-2.5"
             : isSystem
-              ? "border border-amber-300 bg-amber-50 text-amber-800 px-4 py-2.5 rounded-2xl"
-              : "bg-transparent text-[var(--color-text-body)]"
+              ? "max-w-[90%] border border-amber-300 bg-amber-50 text-amber-800 px-4 py-2.5 rounded-2xl"
+              : "w-full bg-transparent text-[var(--color-text-body)] pr-2"
             }`}
         >
-          {message.content}
+          {isAssistant ? displayedText : message.content}
         </div>
       )}
 
-      {!isUser && !isSystem && (
+      {isAssistant && !isTyping && (
         <div className="flex items-center gap-3 text-[var(--color-text-muted)] mt-4">
-          <button className="cursor-pointer hover:text-[var(--color-text-primary)] transition-colors">
+          <button className="cursor-pointer hover:text-[var(--color-text-primary)] transition-colors" title="Helpful">
             <ThumbsUp size={16} />
           </button>
-          <button className="cursor-pointer hover:text-[var(--color-text-primary)] transition-colors">
+          <button className="cursor-pointer hover:text-[var(--color-text-primary)] transition-colors" title="Not helpful">
             <ThumbsDown size={16} />
           </button>
-          <button className="cursor-pointer hover:text-[var(--color-text-primary)] transition-colors">
-            <Copy size={16} />
+          <button onClick={handleCopy} className="cursor-pointer hover:text-[var(--color-text-primary)] transition-colors" title="Copy text">
+            {copied ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
           </button>
         </div>
       )}

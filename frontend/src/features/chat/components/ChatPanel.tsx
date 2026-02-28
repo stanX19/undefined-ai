@@ -3,6 +3,7 @@ import { X, Sparkles, Trash2 } from "lucide-react";
 import { useChatStore, sendChatMessage, deleteChatHistory } from "../hooks/useChat.ts";
 import { MessageBubble } from "./MessageBubble.tsx";
 import { ChatInput } from "./ChatInput.tsx";
+import { ShiningText } from "../../../components/ui/ShiningText.tsx";
 
 export function ChatPanel({ inline = false }: { inline?: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -69,15 +70,13 @@ export function ChatPanel({ inline = false }: { inline?: boolean }) {
         )
       }
 
-      <div ref={scrollRef} className="flex flex-1 flex-col gap-8 overflow-y-auto p-4">
+      <div ref={scrollRef} className="flex flex-1 flex-col gap-8 overflow-y-auto hide-scrollbar p-4">
         {messages.map((msg) => <MessageBubble key={msg.id} message={msg} />)}
 
         {isStreaming && (
           <div className="flex justify-start">
-            <div className="flex gap-1 rounded-2xl bg-[var(--color-surface-alt)] px-4 py-3">
-              <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--color-text-muted)] [animation-delay:0ms]" />
-              <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--color-text-muted)] [animation-delay:150ms]" />
-              <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--color-text-muted)] [animation-delay:300ms]" />
+            <div className="rounded-2xl px-4 py-3">
+              <ShiningText text="Generating..." className="font-medium" />
             </div>
           </div>
         )}
