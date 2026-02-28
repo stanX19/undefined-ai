@@ -15,6 +15,7 @@ from srcs.schemas.chat_dto import (
     SseTTSResultData,
     SseIngestionProgressData,
 )
+from srcs.schemas.ui_dto import SseUIUpdateData
 
 # Type alias for all supported SSE payloads
 SsePayload = Union[
@@ -24,6 +25,7 @@ SsePayload = Union[
     SseEditDocumentData,
     SseTTSResultData,
     SseIngestionProgressData,
+    SseUIUpdateData,
 ]
 
 # Mapping from payload class → event name
@@ -34,6 +36,7 @@ _EVENT_MAP: dict[type, SseEvent] = {
     SseEditDocumentData: SseEvent.EDIT_DOCUMENT,
     SseTTSResultData: SseEvent.TTS_RESULT,
     SseIngestionProgressData: SseEvent.INGESTION_PROGRESS,
+    SseUIUpdateData: SseEvent.UI_UPDATE,
 }
 
 

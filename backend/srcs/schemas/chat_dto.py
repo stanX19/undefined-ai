@@ -19,6 +19,7 @@ class SseEvent(str, Enum):
     EDIT_DOCUMENT = "EditDocument"
     TTS_RESULT = "TTSResult"
     INGESTION_PROGRESS = "IngestionProgress"
+    UI_UPDATE = "UIUpdate"
 
 
 # -- SSE payload models -------------------------------------------------------

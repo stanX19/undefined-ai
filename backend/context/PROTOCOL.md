@@ -211,7 +211,12 @@
           },
           "additionalProperties": false
         },
-        "events": { "$ref": "#/definitions/events" }
+        "events": { "$ref": "#/definitions/events" },
+        "metadata": {
+          "type": "object",
+          "description": "Application-level metadata (e.g. source_fact_id). Not rendered by the frontend.",
+          "additionalProperties": true
+        }
       }
     },
     "linear_layout": {

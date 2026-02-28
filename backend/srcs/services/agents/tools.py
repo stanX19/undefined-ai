@@ -143,16 +143,59 @@ async def ingest_url(topic_id: str, url: str) -> str:
 
 
 @tool
-async def design_ui(description: str) -> str:
-    """Design and render a custom UI surface for the user.
+async def edit_ui(topic_id: str, description: str) -> str:
+    """Design or edit the UI surface for a topic.
 
-    This tool is not yet implemented. It will allow creating interactive
-    UI components based on a natural language description.
+    This delegates to a specialised UIAgent that reads the current UI state,
+    gathers content from the knowledge base, and applies element-level CRUD
+    operations to build or modify the A2UI document.
+
+    After editing, the updated UI is pushed to the frontend via SSE.
 
     Args:
-        description: A natural language description of the desired UI.
+        topic_id: The topic whose UI to edit.
+        description: Natural language description of the desired UI changes.
 
     Returns:
-        Status message.
+        Confirmation with a brief summary of changes.
     """
-    return "The UI design tool is not yet available. This feature is coming soon."
+    from srcs.services.agents.ui_agent import ui_agent
+    from srcs.services.sse_service import SseService
+    from srcs.schemas.ui_dto import SseUIUpdateData
+
+    ui_json = await ui_agent.edit(topic_id, description)
+
+    if "error" in ui_json:
+        return f"UI editing failed: {ui_json['error']}"
+
+    # Read the scene_id so we can include it in the SSE event
+    from srcs.database import AsyncSessionLocal
+    from srcs.services.ui_service import UIService
+
+    async with AsyncSessionLocal() as db:
+        scene = await UIService.get_scene(db, topic_id)
+        scene_id = scene.scene_id if scene else "unknown"
+
+    session_id = topic_id  # Phase 1: topic_id == SSE session_id
+    await SseService.emit(
+        session_id,
+        SseUIUpdateData(
+            topic_id=topic_id,
+            scene_id=scene_id,
+            ui_json=ui_json,
+        ),
+    )
+
+    element_count = len(ui_json.get("elements", {}))
+    return (
+        f"UI updated successfully. "
+        f"The scene now has {element_count} element(s) "
+        f"and has been pushed to the frontend."
+    )
+
+
+if __name__ == "__main__":
+    print("Tools module loaded OK")
+    tools = [retrieve_facts, list_topic_facts, search_web, ingest_url, edit_ui]
+    for t in tools:
+        print(f"  {t.name}: {t.description[:60]}...")

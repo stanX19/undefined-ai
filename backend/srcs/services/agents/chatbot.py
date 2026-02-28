@@ -16,7 +16,7 @@ from srcs.services.agents.tools import (
     list_topic_facts,
     search_web,
     ingest_url,
-    design_ui,
+    edit_ui,
 )
 
 
@@ -33,7 +33,7 @@ class Chatbot:
         system_prompt: str = SYSTEM_PROMPT,
     ) -> None:
         self.tools: list = tools if tools is not None else [
-            retrieve_facts, list_topic_facts, search_web, ingest_url, design_ui,
+            retrieve_facts, list_topic_facts, search_web, ingest_url, edit_ui,
         ]
         self.system_prompt: str = system_prompt
 
