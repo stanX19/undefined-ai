@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Compass } from "lucide-react";
 import { useTopicListStore, fetchTopics } from "../workspace/hooks/useTopicList";
@@ -21,47 +21,51 @@ export function MenuPage() {
 
     const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
     const [isLoadingRecs, setIsLoadingRecs] = useState(false);
+    const hasInitialized = useRef(false);
 
     useEffect(() => {
-        fetchTopics();
-    }, []);
+        if (hasInitialized.current) return;
+        hasInitialized.current = true;
 
-    const educationLevelFromAuth = useAuthStore((s) => s.educationLevel);
+        const init = async () => {
+            // 1) Wait for topics to fully load
+            await fetchTopics();
 
-    useEffect(() => {
-        if (isLoadingTopics) return;
+            // 2) Read fresh state AFTER fetch completes
+            const currentTopics = useTopicListStore.getState().topics;
+            const eduLevel = useAuthStore.getState().educationLevel;
 
-        const fetchRecommendations = async () => {
+            if (currentTopics.length === 0 && !eduLevel) {
+                navigate("/onboarding");
+                return;
+            }
+
+            // 3) Fetch recommendations exactly once
             setIsLoadingRecs(true);
             try {
-                if (topics.length > 0) {
-                    // Fetch recommendations based on the user's latest topic via the new endpoint
+                if (currentTopics.length > 0) {
                     const res = await fetch(`/api/v1/recommendations/latest?user_id=${userId}`);
                     if (res.ok) {
                         const data = await res.json();
                         setRecommendations(data.recommendations || []);
                     }
-                } else if (educationLevelFromAuth) {
-                    // No topics, but user already has an education level set
-                    const res = await fetch(`/api/v1/recommendations/default?education_level=${encodeURIComponent(educationLevelFromAuth)}`);
+                } else {
+                    const res = await fetch(`/api/v1/recommendations/default?education_level=${encodeURIComponent(eduLevel!)}`);
                     if (res.ok) {
                         const data = await res.json();
                         setRecommendations(data.recommendations || []);
                     }
-                } else if (!educationLevelFromAuth) {
-                    navigate("/onboarding");
                 }
             } catch (err) {
                 console.error("Failed to fetch recommendations:", err);
+                hasInitialized.current = false; // allow retry on error
             } finally {
                 setIsLoadingRecs(false);
             }
         };
 
-        if (topics.length > 0 || educationLevelFromAuth) {
-            fetchRecommendations();
-        }
-    }, [topics, isLoadingTopics, userId, educationLevelFromAuth]);
+        init();
+    }, [userId, navigate]);
 
     const handleNewTopic = () => {
         clearChat();
