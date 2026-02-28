@@ -1,3 +1,5 @@
+# DONT TOUCH!! WILL BE DEVELOPED BY ANOTHER DEVELOPER!!
+
 import os
 import uuid
 import asyncio

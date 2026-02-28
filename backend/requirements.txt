@@ -12,4 +12,3 @@ langgraph
 sse-starlette
 python-multipart
 PyMuPDF
-mimetypes
