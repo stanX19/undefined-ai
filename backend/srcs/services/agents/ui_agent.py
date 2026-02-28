@@ -12,6 +12,7 @@ from langchain.agents import create_agent
 
 from srcs.services.agents.rotating_llm import rotating_llm
 from srcs.services.agents.prompts.ui_agent import UI_AGENT_PROMPT
+from srcs.services.agents.id_mapper import current_mapper
 
 
 # ---------------------------------------------------------------------------
@@ -36,6 +37,8 @@ async def set_element(topic_id: str, element_id: str, element_json: str) -> str:
     """
     from srcs.database import AsyncSessionLocal
     from srcs.services.ui_service import UIService
+
+    topic_id = current_mapper().resolve(topic_id)
 
     try:
         data = json.loads(element_json)
@@ -64,36 +67,51 @@ async def remove_element(topic_id: str, element_id: str) -> str:
     from srcs.database import AsyncSessionLocal
     from srcs.services.ui_service import UIService
 
+    topic_id = current_mapper().resolve(topic_id)
+
     async with AsyncSessionLocal() as db:
         await UIService.remove_element(db, topic_id, element_id)
     return f"Element '{element_id}' removed."
 
 
 @tool
-async def list_elements(topic_id: str) -> str:
-    """List all UI elements with their IDs and types.
+async def append_ui(topic_id: str, elements_json: str) -> str:
+    """Appends multiple UI elements directly into the UI document.
 
-    Returns a concise overview of the current UI structure.
+    Use this when you need to add many elements (like table cells or graph nodes)
+    to an existing UI without redefining the entire document. It merges the given
+    elements into the scene's elements dictionary.
 
     Args:
-        topic_id: The topic to inspect.
+        topic_id: The topic whose UI to update.
+        elements_json: A JSON string containing a dictionary of element IDs mapped 
+                       to their element data. Example:
+                       {"root.cell1": {"type": "text", "content": "1"}, "root.cell2": ...}
 
     Returns:
-        A formatted list of element IDs and types.
+        Confirmation with appended element count.
     """
     from srcs.database import AsyncSessionLocal
     from srcs.services.ui_service import UIService
 
+    topic_id = current_mapper().resolve(topic_id)
+
+    try:
+        elements = json.loads(elements_json)
+    except json.JSONDecodeError as e:
+        return f"Invalid JSON: {e}"
+
+    if not isinstance(elements, dict):
+        return "Error: elements_json must be a JSON dictionary of { element_id: data }."
+
+    for eid, data in elements.items():
+        if not isinstance(data, dict) or "type" not in data:
+            return f"Error: Element '{eid}' must be an object with a 'type' field."
+
     async with AsyncSessionLocal() as db:
-        items = await UIService.list_elements(db, topic_id)
+        await UIService.append_elements(db, topic_id, elements)
 
-    if not items:
-        return "No elements exist yet. Start by creating a root layout."
-
-    lines = [f"=== {len(items)} elements ==="]
-    for item in items:
-        lines.append(f"  [{item['id']}] type={item['type']}")
-    return "\n".join(lines)
+    return f"Successfully appended {len(elements)} element(s)."
 
 
 @tool
@@ -109,6 +127,8 @@ async def set_root_id(topic_id: str, root_id: str) -> str:
     """
     from srcs.database import AsyncSessionLocal
     from srcs.services.ui_service import UIService
+
+    topic_id = current_mapper().resolve(topic_id)
 
     async with AsyncSessionLocal() as db:
         await UIService.set_root_id(db, topic_id, root_id)
@@ -135,6 +155,8 @@ async def replace_ui(topic_id: str, ui_json_str: str) -> str:
     """
     from srcs.database import AsyncSessionLocal
     from srcs.services.ui_service import UIService
+
+    topic_id = current_mapper().resolve(topic_id)
 
     try:
         ui_json = json.loads(ui_json_str)
@@ -171,8 +193,8 @@ class UIAgent:
 
     def __init__(self) -> None:
         self.tools = [
-            replace_ui,
-            set_element, remove_element, list_elements, set_root_id,
+            replace_ui, append_ui,
+            set_element, remove_element, set_root_id,
             retrieve_facts, list_topic_facts,
         ]
         self.system_prompt = UI_AGENT_PROMPT
@@ -194,7 +216,7 @@ class UIAgent:
         messages: list[BaseMessage] = [
             SystemMessage(content=self.system_prompt),
             HumanMessage(content=(
-                f"Topic ID: {topic_id}\n\n"
+                f"Topic ID: {current_mapper().shorten(topic_id, prefix='T')}\n\n"
                 f"--- CURRENT UI STATE ---\n{current_ui_str}\n--- END UI STATE ---\n\n"
                 f"Instruction: {prompt}"
             )),

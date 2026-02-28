@@ -10,6 +10,7 @@ from srcs.schemas.chat_dto import SseNotifData, SseRepliesData, SseToolCallData
 from srcs.services.sse_service import SseService
 from srcs.services.speech_service import SpeechService
 from srcs.services.agents.chatbot import chatbot
+from srcs.services.agents.id_mapper import ShortIdMapper, set_mapper
 
 
 class ChatService:
@@ -105,6 +106,11 @@ class ChatService:
 
         session_id = topic_id  # Phase 1: topic_id == SSE session_id
 
+        # Set up short-ID mapper so the LLM never sees raw UUIDs
+        mapper = ShortIdMapper()
+        topic_alias = mapper.register(topic_id, prefix="T")
+        set_mapper(mapper)
+
         await SseService.emit(session_id, SseNotifData(message="Processing your message…"))
 
         try:
@@ -123,7 +129,7 @@ class ChatService:
                         concepts: list[str] = [f"- {f.content}" for f in top_facts]
                         context_text = (
                             f"TOPIC KNOWLEDGE (max_level={max_level}, levels 0-{max_level} available).\n"
-                            f"Use list_topic_facts with topic_id='{topic_id}' and level=0..{max_level} to browse.\n"
+                            f"Use list_topic_facts with topic_id='{topic_alias}' and level=0..{max_level} to browse.\n"
                             f"Use retrieve_facts to drill into a specific fact_id.\n\n"
                             f"TOP-LEVEL SUMMARY (level {max_level}):\n"
                             + "\n".join(concepts)

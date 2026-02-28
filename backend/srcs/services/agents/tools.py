@@ -3,6 +3,7 @@ from langchain_core.tools import tool
 
 from srcs.services.retrieval_service import RetrievalService
 from srcs.services.web_search_service import WebSearchService
+from srcs.services.agents.id_mapper import current_mapper
 
 
 @tool
@@ -21,6 +22,10 @@ async def retrieve_facts(topic_id: str, fact_id: str) -> str:
         A formatted string with the fact, its parent chain, and source text.
     """
     from srcs.database import AsyncSessionLocal
+
+    mapper = current_mapper()
+    topic_id = mapper.resolve(topic_id)
+    fact_id = mapper.resolve(fact_id)
 
     async with AsyncSessionLocal() as db:
         result = await RetrievalService.get_fact_with_parents(db, fact_id)
@@ -67,6 +72,9 @@ async def list_topic_facts(topic_id: str, level: int) -> str:
     """
     from srcs.database import AsyncSessionLocal
 
+    mapper = current_mapper()
+    topic_id = mapper.resolve(topic_id)
+
     async with AsyncSessionLocal() as db:
         facts = await RetrievalService.get_facts_by_level(db, topic_id, level)
 
@@ -75,7 +83,8 @@ async def list_topic_facts(topic_id: str, level: int) -> str:
 
     lines: list[str] = [f"=== {len(facts)} level-{level} facts ==="]
     for f in facts:
-        lines.append(f"[{f.fact_id}] {f.content}")
+        short_fid = mapper.shorten(f.fact_id, prefix="F")
+        lines.append(f"[{short_fid}] {f.content}")
 
     return "\n".join(lines)
 
@@ -128,6 +137,8 @@ async def ingest_url(topic_id: str, url: str) -> str:
     Returns:
         Confirmation that ingestion has started.
     """
+    topic_id = current_mapper().resolve(topic_id)
+
     content = await WebSearchService.get_web_content(url)
 
     if not content or len(content.strip()) < 50:
@@ -162,6 +173,8 @@ async def edit_ui(topic_id: str, description: str) -> str:
     from srcs.services.agents.ui_agent import ui_agent
     from srcs.services.sse_service import SseService
     from srcs.schemas.ui_dto import SseUIUpdateData
+
+    topic_id = current_mapper().resolve(topic_id)
 
     ui_json = await ui_agent.edit(topic_id, description)
 

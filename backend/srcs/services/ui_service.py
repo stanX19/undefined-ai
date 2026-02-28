@@ -100,6 +100,22 @@ class UIService:
         return ui
 
     @staticmethod
+    async def append_elements(
+        db: AsyncSession, topic_id: str, elements: dict,
+    ) -> dict:
+        """Merge a dictionary of elements into the existing UI. Returns updated ``ui_json``."""
+        scene = await UIService.get_or_create_scene(db, topic_id)
+        ui = copy.deepcopy(scene.ui_json)
+        
+        target_elements = ui.setdefault("elements", {})
+        for eid, edata in elements.items():
+            target_elements[eid] = edata
+            
+        scene.ui_json = ui
+        await UIService.save_scene(db, scene)
+        return ui
+
+    @staticmethod
     async def remove_element(
         db: AsyncSession, topic_id: str, element_id: str,
     ) -> dict:
