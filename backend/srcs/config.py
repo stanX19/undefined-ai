@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     GEMINI_MODEL_NAME: str = "gemini-2.5-flash"
     STRONG_GEMINI_MODEL_NAME: str = "gemini-2.5-flash"
 
+    # ElevenLabs (Speech) Configuration
+    ELEVENLABS_API_KEY: str = ""
+    ELEVENLABS_MODEL: str = "eleven_multilingual_v2"
+    ELEVENLABS_DEFAULT_VOICE_ID: str = "PoHUWWWMHFrA8z7Q88pu"
+
     # Exa (Web Search) Configuration
     EXA_API_KEY: str = ""
 
