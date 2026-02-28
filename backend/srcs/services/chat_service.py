@@ -114,16 +114,18 @@ class ChatService:
                     db, topic_id, exclude_id=exclude_message_id,
                 )
 
-                # If ingested facts exist, use core concepts instead of raw text
+                # If ingested facts exist, use top-level summary instead of raw text
                 context_text: str | None = document_text
-                has_facts: bool = await RetrievalService.has_facts(db, topic_id)
-                if has_facts:
-                    core_facts = await RetrievalService.get_facts_by_level(db, topic_id, level=3)
-                    if core_facts:
-                        concepts: list[str] = [f"- {f.content}" for f in core_facts]
+                max_level = await RetrievalService.get_max_level(db, topic_id)
+                if max_level is not None and max_level >= 1:
+                    top_facts = await RetrievalService.get_facts_by_level(db, topic_id, level=max_level)
+                    if top_facts:
+                        concepts: list[str] = [f"- {f.content}" for f in top_facts]
                         context_text = (
-                            "CORE CONCEPTS (use retrieve_facts / list_topic_facts "
-                            f"tools with topic_id='{topic_id}' to drill deeper):\n"
+                            f"TOPIC KNOWLEDGE (max_level={max_level}, levels 0-{max_level} available).\n"
+                            f"Use list_topic_facts with topic_id='{topic_id}' and level=0..{max_level} to browse.\n"
+                            f"Use retrieve_facts to drill into a specific fact_id.\n\n"
+                            f"TOP-LEVEL SUMMARY (level {max_level}):\n"
                             + "\n".join(concepts)
                         )
 

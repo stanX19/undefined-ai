@@ -15,6 +15,7 @@
   - [Auth](#auth)
   - [Topics](#topics)
   - [Chat](#chat)
+  - [Ingestion](#ingestion)
 - [Server-Sent Events (SSE)](#server-sent-events-sse)
 - [Error Handling](#error-handling)
 
@@ -64,6 +65,20 @@ Phase 1 is a **proof-of-concept** backend built with **FastAPI** and **SQLite** 
 | `role`      | `String`          | NOT NULL (`"user"` or `"assistant"`) |
 | `message`   | `Text`            | NOT NULL                  |
 | `created_at`| `DateTime (tz)`   | default: `utcnow`         |
+
+### `atomic_facts`
+
+| Column            | Type              | Constraints               |
+|-------------------|-------------------|---------------------------|
+| `fact_id`         | `String`          | **PK**, auto UUID         |
+| `topic_id`        | `String`          | **FK → topics.topic_id**  |
+| `parent_fact_id`  | `String`          | **FK → atomic_facts.fact_id** (nullable)|
+| `level`           | `Integer`         | NOT NULL                  |
+| `content`         | `Text`            | NOT NULL                  |
+| `source_chunk_id` | `String`          | **FK → atomic_facts.fact_id** (nullable)|
+| `source_start`    | `Integer`         | nullable                  |
+| `source_end`      | `Integer`         | nullable                  |
+| `created_at`      | `DateTime (tz)`   | default: `utcnow`         |
 
 ---
 
@@ -317,6 +332,121 @@ Delete all chat messages for a topic.
 ```json
 { "message": "Cleared 12 messages" }
 ```
+
+---
+
+### Ingestion
+
+#### `GET /api/v1/ingestion/{topic_id}/status`
+
+Return the current ingestion pipeline status for a topic.
+
+**Path Parameters**
+
+| Param      | Type   |
+|------------|--------|
+| `topic_id` | string |
+
+**Response** `200 OK` — `IngestionStatusResponse`
+```json
+{
+  "topic_id": "t1",
+  "status": "completed",
+  "message": null
+}
+```
+
+---
+
+#### `GET /api/v1/ingestion/{topic_id}/facts`
+
+List all facts for a topic at a specific compression level.
+
+**Path Parameters**
+
+| Param      | Type   |
+|------------|--------|
+| `topic_id` | string |
+
+**Query Parameters**
+
+| Param   | Type    | Required | Notes |
+|---------|---------|----------|-------|
+| `level` | integer | ✅       | Fact compression level. 0 = raw document text, 1 = atomic facts, higher = more compressed. |
+
+**Response** `200 OK` — `AtomicFactResponse[]`
+```json
+[
+  {
+    "fact_id": "f1",
+    "topic_id": "t1",
+    "level": 1,
+    "content": "A matrix is a rectangular array of numbers.",
+    "parent_fact_id": "f2",
+    "source_chunk_id": "c1",
+    "source_start": 45,
+    "source_end": 88,
+    "created_at": "2026-02-28T07:05:00Z"
+  }
+]
+```
+
+---
+
+#### `GET /api/v1/ingestion/{topic_id}/facts/{fact_id}`
+
+Get a single fact with its full parent chain and source chunk.
+
+**Path Parameters**
+
+| Param      | Type   |
+|------------|--------|
+| `topic_id` | string |
+| `fact_id`  | string |
+
+**Response** `200 OK` — `FactWithParentsResponse`
+```json
+{
+  "fact": {
+    "fact_id": "f1",
+    "topic_id": "t1",
+    "level": 1,
+    "content": "A matrix is a rectangular array of numbers.",
+    "parent_fact_id": "f2",
+    "source_chunk_id": "c1",
+    "source_start": 45,
+    "source_end": 88,
+    "created_at": "2026-02-28T07:05:00Z"
+  },
+  "parents": [
+    {
+      "fact_id": "f2",
+      "topic_id": "t1",
+      "level": 2,
+      "content": "Matrices are arrays of numbers.",
+      "parent_fact_id": null,
+      "source_chunk_id": null,
+      "source_start": null,
+      "source_end": null,
+      "created_at": "2026-02-28T07:05:05Z"
+    }
+  ],
+  "source_chunk": {
+    "fact_id": "c1",
+    "topic_id": "t1",
+    "level": 0,
+    "content": "In mathematics, a matrix is a rectangular array of numbers or expressions...",
+    "parent_fact_id": null,
+    "source_chunk_id": null,
+    "source_start": null,
+    "source_end": null,
+    "created_at": "2026-02-28T07:04:00Z"
+  }
+}
+```
+
+**Errors**
+- `404` — Fact not found
 
 ---
 

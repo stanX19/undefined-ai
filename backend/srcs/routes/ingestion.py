@@ -24,7 +24,7 @@ async def get_ingestion_status(topic_id: str) -> IngestionStatusResponse:
 @router.get("/{topic_id}/facts", response_model=list[AtomicFactResponse])
 async def list_facts(
     topic_id: str,
-    level: int = Query(..., ge=0, le=3, description="Fact compression level (0-3)"),
+    level: int = Query(..., ge=0, description="Fact compression level (0 = raw, 1 = atomic, 2+ = compressed)"),
     db: AsyncSession = Depends(get_db),
 ) -> list[AtomicFactResponse]:
     """List all facts for a topic at a specific compression level."""

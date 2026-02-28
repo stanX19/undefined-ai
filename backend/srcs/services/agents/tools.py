@@ -5,19 +5,6 @@ from srcs.services.retrieval_service import RetrievalService
 
 
 @tool
-def toggle_ui(enabled: bool) -> str:
-    """Toggle the UI visibility.
-
-    Args:
-        enabled: ``True`` to show the UI, ``False`` to hide it.
-
-    Returns:
-        A confirmation string.
-    """
-    return "Success"
-
-
-@tool
 async def retrieve_facts(topic_id: str, fact_id: str) -> str:
     """Retrieve a fact and its full parent chain from the knowledge hierarchy.
 
@@ -62,14 +49,17 @@ async def list_topic_facts(topic_id: str, level: int) -> str:
     """List all facts for a topic at a specific compression level.
 
     Levels:
-        0 = raw text chunks
-        1 = atomic facts (extracted from chunks)
-        2 = main facts (first compression)
-        3 = core concepts (highest level summary)
+        0 = raw document text
+        1 = atomic facts (extracted from document)
+        2+ = progressively compressed summaries (higher = more condensed)
+        N (max) = highest-level summary (the max level is provided in context)
+
+    Use level 1 for detailed facts, higher levels for broader summaries.
+    The maximum available level is provided in the document context.
 
     Args:
         topic_id: The topic to list facts for.
-        level: The compression level (0-3).
+        level: The compression level (0 to max_level shown in context).
 
     Returns:
         A formatted list of facts at the requested level.

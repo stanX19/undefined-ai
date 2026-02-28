@@ -12,10 +12,9 @@ class AtomicFact(Base):
     """A single knowledge fact at a specific compression level.
 
     Levels:
-        0 = raw text chunk (direct from document)
+        0 = raw document text
         1 = atomic fact (extracted by LLM)
-        2 = main fact (first compression)
-        3 = core concept (second compression)
+        2+ = progressively compressed summaries (higher = more condensed)
     """
 
     __tablename__ = "atomic_facts"

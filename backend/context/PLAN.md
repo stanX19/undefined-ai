@@ -86,91 +86,14 @@ No UI generation yet.
 
 ---
 
-# 2️⃣ PHASE 2 — MAIN FEATURE #1 (UI DEFINITION)
-
-Goal:
-
-* Agent can output structured UI (A2UI protocol)
-* Persist scenes
-* Support history stack
-
----
-
-## 2.1 New Tables
-
-### scenes
-
-* scene_id (PK)
-* topic_id (FK)
-* parent_scene_id (nullable)
-* created_at
-
-### ui_elements
-
-* ui_id (PK)
-* scene_id (FK)
-* on_click_scene_id (nullable FK → scenes)
-* value (JSONB)
-
----
-
-## 2.2 A2UI Protocol Layer
-
-Agent Output Example:
-{
-"scene": {
-"type": "graph",
-"nodes": [...],
-"edges": [...]
-}
-}
-
-Backend Responsibilities:
-
-1. Validate JSON schema
-2. Create new scene
-3. Store each UI element
-4. Link clickable elements to future scene_id
-
----
-
-## 2.3 Orchestrator Design
-
-Main Agent
-├── Knowledge Subagent
-└── UI Subagent
-
-Flow:
-
-1. Knowledge subagent gathers facts
-2. UI subagent converts facts → A2UI JSON
-3. Persist scene
-
----
-
-## 2.4 History Stack Implementation
-
-Option A (recommended):
-
-* Store parent_scene_id
-* Back = load parent_scene
-
-Option B:
-
-* Separate history_stack table
-
-Recommended: parent pointer model (tree navigation).
-
----
-
-# 3️⃣ PHASE 3 — MAIN FEATURE #2 (INGESTION PIPELINE)
+# PHASE 2 — MAIN FEATURE #2 (INGESTION PIPELINE)
 
 Goal:
 Transform document → atomic knowledge hierarchy
 
 ---
 
-## 3.1 New Tables
+## 2.1 New Tables
 
 ### atomic_facts
 
@@ -187,7 +110,7 @@ Transform document → atomic knowledge hierarchy
 
 ---
 
-## 3.2 Pipeline Stages
+## 2.2 Pipeline Stages
 
 Stage 1 — Raw Extraction
 PDF → Clean text
@@ -207,7 +130,7 @@ Store in vector DB
 
 ---
 
-## 3.3 Retrieval Strategy
+## 2.3 Retrieval Strategy
 
 When user clicks node:
 
@@ -222,6 +145,84 @@ When user clicks node:
 
 Goal:
 Adaptive difficulty progression
+
+---
+
+
+# PHASE 3 — MAIN FEATURE #1 (UI DEFINITION)
+
+Goal:
+
+* Agent can output structured UI (A2UI protocol)
+* Persist scenes
+* Support history stack
+
+---
+
+## 3.1 New Tables
+
+### scenes
+
+* scene_id (PK)
+* topic_id (FK)
+* parent_scene_id (nullable)
+* created_at
+
+### ui_elements
+
+* ui_id (PK)
+* scene_id (FK)
+* on_click_scene_id (nullable FK → scenes)
+* value (JSONB)
+
+---
+
+## 3.2 A2UI Protocol Layer
+
+Agent Output Example:
+{
+"scene": {
+"type": "graph",
+"nodes": [...],
+"edges": [...]
+}
+}
+
+Backend Responsibilities:
+
+1. Validate JSON schema
+2. Create new scene
+3. Store each UI element
+4. Link clickable elements to future scene_id
+
+---
+
+## 3.3 Orchestrator Design
+
+Main Agent
+├── Knowledge Subagent
+└── UI Subagent
+
+Flow:
+
+1. Knowledge subagent gathers facts
+2. UI subagent converts facts → A2UI JSON
+3. Persist scene
+
+---
+
+## 3.4 History Stack Implementation
+
+Option A (recommended):
+
+* Store parent_scene_id
+* Back = load parent_scene
+
+Option B:
+
+* Separate history_stack table
+
+Recommended: parent pointer model (tree navigation).
 
 ---
 

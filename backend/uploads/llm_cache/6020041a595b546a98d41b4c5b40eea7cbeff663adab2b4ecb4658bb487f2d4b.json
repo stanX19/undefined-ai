@@ -1,0 +1,15 @@
+{
+  "text": "```json\n[\n  \"The paper, titled \\\"Attention Is All You Need,\\\" was presented at the 31st Conference on Neural Information Processing Systems (NIPS 2017), and its code is publicly available.\",\n  \"Google grants permission to reproduce the paper's tables and figures for journalistic or scholarly works, provided proper attribution.\",\n  \"The Transformer is a novel transduction model that relies entirely on self-attention mechanisms, completely dispensing with recurrence and convolutions.\",\n  \"Its architecture utilizes stacked self-attention, multi-head attention, and point-wise fully connected layers for both encoder and decoder, along with positional encodings.\",\n  \"Unlike recurrent layers, self-attention layers connect all positions with a constant number of sequentially executed operations, offering efficiency benefits.\",\n  \"Transformer models demonstrate superior quality, enhanced parallelizability, and significantly reduced training times compared to previous approaches.\",\n  \"It achieved state-of-the-art BLEU scores on WMT 2014 English-to-German (28.4) and English-to-French (41.8) translation tasks, with the latter requiring only a fraction of the training costs of other top models.\",\n  \"The Transformer also generalizes well, successfully applying to tasks like English constituency parsing.\"\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...PdFR2Equ6U}",
+  "status": "ok",
+  "json_data": [
+    "The paper, titled \"Attention Is All You Need,\" was presented at the 31st Conference on Neural Information Processing Systems (NIPS 2017), and its code is publicly available.",
+    "Google grants permission to reproduce the paper's tables and figures for journalistic or scholarly works, provided proper attribution.",
+    "The Transformer is a novel transduction model that relies entirely on self-attention mechanisms, completely dispensing with recurrence and convolutions.",
+    "Its architecture utilizes stacked self-attention, multi-head attention, and point-wise fully connected layers for both encoder and decoder, along with positional encodings.",
+    "Unlike recurrent layers, self-attention layers connect all positions with a constant number of sequentially executed operations, offering efficiency benefits.",
+    "Transformer models demonstrate superior quality, enhanced parallelizability, and significantly reduced training times compared to previous approaches.",
+    "It achieved state-of-the-art BLEU scores on WMT 2014 English-to-German (28.4) and English-to-French (41.8) translation tasks, with the latter requiring only a fraction of the training costs of other top models.",
+    "The Transformer also generalizes well, successfully applying to tasks like English constituency parsing."
+  ]
+}

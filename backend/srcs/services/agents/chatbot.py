@@ -11,7 +11,7 @@ from langchain.agents import create_agent
 
 from srcs.services.agents.rotating_llm import rotating_llm
 from srcs.services.agents.prompts.main_chatbot import SYSTEM_PROMPT
-from srcs.services.agents.tools import toggle_ui, retrieve_facts, list_topic_facts
+from srcs.services.agents.tools import retrieve_facts, list_topic_facts
 
 
 class Chatbot:
@@ -26,10 +26,10 @@ class Chatbot:
         tools: list | None = None,
         system_prompt: str = SYSTEM_PROMPT,
     ) -> None:
-        self.tools: list = tools if tools is not None else [toggle_ui, retrieve_facts, list_topic_facts]
+        self.tools: list = tools if tools is not None else [retrieve_facts, list_topic_facts]
         self.system_prompt: str = system_prompt
 
-    # ── public API ───────────────────────────────────────────────────────
+    # -- public API -------------------------------------------------------
 
     async def ask(
         self,
@@ -55,7 +55,7 @@ class Chatbot:
             traceback.print_exc()
             return f"An error occurred while processing your request: {exc}"
 
-    # ── internals ────────────────────────────────────────────────────────
+    # -- internals --------------------------------------------------------
 
     @staticmethod
     def _extract_text(content: str | list) -> str:
@@ -98,5 +98,5 @@ class Chatbot:
         return messages
 
 
-# ── Module-level singleton ───────────────────────────────────────────────────
+# -- Module-level singleton ---------------------------------------------------
 chatbot = Chatbot()

@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  \"Google grants permission to reproduce the tables and figures in this paper solely for use in journalistic or scholarly works, provided proper attribution is given.\",\n  \"The paper is titled \\\"Attention Is All You Need\\\".\",\n  \"The Transformer is a new simple network architecture based solely on attention mechanisms, dispensing with recurrence and convolutions entirely.\",\n  \"The Transformer is the first transduction model relying entirely on self-attention to compute representations of its input and output without using sequence-aligned RNNs or convolution.\",\n  \"Experiments show Transformer models to be superior in quality while being more parallelizable and requiring significantly less time to train.\",\n  \"The Transformer achieved 28.4 BLEU on the WMT 2014 English-to-German translation task, improving over existing best results by over 2 BLEU.\",\n  \"The Transformer established a new single-model state-of-the-art BLEU score of 41.8 on the WMT 2014 English-to-French translation task.\",\n  \"This English-to-French result was achieved after training for 3.5 days on eight GPUs, a small fraction of the training costs of the best models from the literature.\",\n  \"The Transformer generalizes well to other tasks by applying it successfully to English constituency parsing.\",\n  \"The Transformer uses stacked self-attention and point-wise, fully connected layers for both its encoder and decoder.\",\n  \"Multi-head attention allows the model to jointly attend to information from different representation subspaces at different positions.\",\n  \"Positional encodings are added to the input embeddings to inject information about the relative or absolute position of the tokens in the sequence.\",\n  \"A self-attention layer connects all positions with a constant number of sequentially executed operations, unlike a recurrent layer which requires O(n) sequential operations.\",\n  \"The paper was presented at the 31st Conference on Neural Information Processing Systems (NIPS 2017).\",\n  \"The code used to train and evaluate the models is available at https://github.com/tensorflow/tensor2tensor.\"\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...eyP5HuFF6s}",
+  "status": "ok",
+  "json_data": [
+    "Google grants permission to reproduce the tables and figures in this paper solely for use in journalistic or scholarly works, provided proper attribution is given.",
+    "The paper is titled \"Attention Is All You Need\".",
+    "The Transformer is a new simple network architecture based solely on attention mechanisms, dispensing with recurrence and convolutions entirely.",
+    "The Transformer is the first transduction model relying entirely on self-attention to compute representations of its input and output without using sequence-aligned RNNs or convolution.",
+    "Experiments show Transformer models to be superior in quality while being more parallelizable and requiring significantly less time to train.",
+    "The Transformer achieved 28.4 BLEU on the WMT 2014 English-to-German translation task, improving over existing best results by over 2 BLEU.",
+    "The Transformer established a new single-model state-of-the-art BLEU score of 41.8 on the WMT 2014 English-to-French translation task.",
+    "This English-to-French result was achieved after training for 3.5 days on eight GPUs, a small fraction of the training costs of the best models from the literature.",
+    "The Transformer generalizes well to other tasks by applying it successfully to English constituency parsing.",
+    "The Transformer uses stacked self-attention and point-wise, fully connected layers for both its encoder and decoder.",
+    "Multi-head attention allows the model to jointly attend to information from different representation subspaces at different positions.",
+    "Positional encodings are added to the input embeddings to inject information about the relative or absolute position of the tokens in the sequence.",
+    "A self-attention layer connects all positions with a constant number of sequentially executed operations, unlike a recurrent layer which requires O(n) sequential operations.",
+    "The paper was presented at the 31st Conference on Neural Information Processing Systems (NIPS 2017).",
+    "The code used to train and evaluate the models is available at https://github.com/tensorflow/tensor2tensor."
+  ]
+}
