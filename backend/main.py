@@ -17,6 +17,7 @@ from srcs.routes.auth import router as auth_router
 from srcs.routes.topics import router as topics_router
 from srcs.routes.chat import router as chat_router
 from srcs.routes.ingestion import router as ingestion_router
+from srcs.routes.speech import router as speech_router
 
 
 @asynccontextmanager
@@ -42,6 +43,7 @@ app.include_router(auth_router)
 app.include_router(topics_router)
 app.include_router(chat_router)
 app.include_router(ingestion_router)
+app.include_router(speech_router)
 
 # -- Static files (uploaded PDFs) ---------------------------------------------
 import os

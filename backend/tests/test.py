@@ -37,6 +37,14 @@ async def _mock_ask(
 import srcs.services.agents.chatbot as _chatbot_mod
 _chatbot_mod.Chatbot.ask = _mock_ask
 
+
+async def _mock_transcribe_audio(audio_data: bytes, language_code: str | None = None) -> str | None:
+    """Mock transcription to avoid ElevenLabs API calls during testing."""
+    return "Mock transcribed text"
+
+import srcs.services.speech_service as _speech_mod
+_speech_mod.SpeechService.transcribe_audio = staticmethod(_mock_transcribe_audio)
+
 from main import app
 
 
@@ -228,6 +236,18 @@ def run_tests():
         )
         assert raw.status_code == 404, f"Expected 404, got {raw.status_code}"
         print(f"{Colors.GREEN}Correctly returned 404{Colors.END}")
+
+        # -- 15. Speech STT -----------------------------------------------
+        print(f"\n{Colors.BOLD}--- 15. Speech: STT ---{Colors.END}")
+        raw = requests.post(
+            f"{base_url}/api/v1/speech/stt",
+            files={"file": ("test.mp3", b"dummy audio data", "audio/mpeg")},
+        )
+        assert raw.status_code == 200, f"Expected 200, got {raw.status_code}"
+        res_json = raw.json()
+        assert "text" in res_json, "Missing text in STT response"
+        assert res_json["text"] == "Mock transcribed text", f"Got: {res_json['text']}"
+        print(f"{Colors.GREEN}Successfully tested STT endpoint{Colors.END}")
 
         # -- Done ---------------------------------------------------------
         print(f"\n{Colors.GREEN}{Colors.BOLD}ALL TESTS PASSED!{Colors.END}")

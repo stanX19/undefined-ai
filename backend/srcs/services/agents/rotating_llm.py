@@ -47,6 +47,12 @@ class ChatMinimax(BaseChatModel):
     def _llm_type(self) -> str:
         return "minimax"
 
+    def bind_tools(self, tools: Any, **kwargs: Any) -> Runnable:
+        """Bind tools to the model."""
+        from langchain_core.utils.function_calling import convert_to_openai_tool
+        formatted_tools = [convert_to_openai_tool(tool) for tool in tools]
+        return self.bind(tools=formatted_tools, **kwargs)
+
     @staticmethod
     def _convert_messages(messages: list[BaseMessage]) -> list[dict]:
         """Convert LangChain message objects to OpenAI-format dicts."""
@@ -94,6 +100,10 @@ class ChatMinimax(BaseChatModel):
 
         message = choices[0].get("message", {})
         content = message.get("content", "") or ""
+        
+        # Remove <think>...</think> tags which MiniMax sometimes includes
+        content = re.sub(r'<think>.*?</think>', '', content, flags=re.DOTALL).strip()
+        
         tool_calls_data = message.get("tool_calls", [])
 
         if tool_calls_data:

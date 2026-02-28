@@ -3,7 +3,6 @@ import uuid
 import asyncio
 import traceback
 
-import requests
 from elevenlabs.client import ElevenLabs
 
 from srcs.config import get_settings
@@ -22,21 +21,9 @@ def _get_elevenlabs_client() -> ElevenLabs:
 
 
 class SpeechService:
-    # cantonese.ai endpoints & credentials
-    CANTONESE_AI_API_KEY = get_settings().CANTONESE_API_KEY
-    print(f"{CANTONESE_AI_API_KEY=}")
-    CANTONESE_AI_TTS_URL = "https://cantonese.ai/api/tts"
-    CANTONESE_AI_STT_URL = "https://cantonese.ai/api/stt"
-
-    LANG_CANTONESE = "yue"
     LANG_ENGLISH = "en"
     LANG_MALAY = "ms"
-    DEFAULT_LANG = LANG_CANTONESE
-
-    @staticmethod
-    def _is_cantonese(language_code: str | None) -> bool:
-        lang = (language_code or SpeechService.DEFAULT_LANG).lower()
-        return lang in ("yue", "cantonese", "zh-hk", "yue-hk")
+    DEFAULT_LANG = LANG_ENGLISH
 
     # -- TTS (public) ------------------------------------------------------
 
@@ -47,12 +34,7 @@ class SpeechService:
         model_id: str | None = None,
         language_code: str | None = None,
     ) -> str | None:
-        """Generate speech from text.
-
-        Routes to cantonese.ai for Cantonese, ElevenLabs for everything else.
-        """
-        if SpeechService._is_cantonese(language_code):
-            return await SpeechService._tts_cantonese(text, voice_id=voice_id)
+        """Generate speech from text using ElevenLabs."""
         return await SpeechService._tts_elevenlabs(text, voice_id=voice_id, model_id=model_id)
 
     # -- STT (public) ------------------------------------------------------
@@ -62,12 +44,7 @@ class SpeechService:
         audio_data: bytes,
         language_code: str | None = None,
     ) -> str | None:
-        """Transcribe audio bytes to text.
-
-        Routes to cantonese.ai for Cantonese, ElevenLabs Scribe for everything else.
-        """
-        if SpeechService._is_cantonese(language_code):
-            return await SpeechService._stt_cantonese(audio_data)
+        """Transcribe audio bytes to text using ElevenLabs Scribe."""
         return await SpeechService._stt_elevenlabs(audio_data)
 
     @staticmethod
@@ -103,71 +80,6 @@ class SpeechService:
                 await SseService.emit(session_id, SseTTSResultData(text=text, audio_url=url))
 
         asyncio.create_task(_generate_and_emit())
-
-    # -- cantonese.ai implementations --------------------------------------
-
-    @staticmethod
-    async def _tts_cantonese(text: str, voice_id: str | None = None) -> str | None:
-        settings = get_settings()
-        try:
-            filename = f"tts_{uuid.uuid4().hex[:8]}.mp3"
-            upload_dir = os.path.join(settings.UPLOAD_DIR, "tts")
-            os.makedirs(upload_dir, exist_ok=True)
-            filepath = os.path.join(upload_dir, filename)
-
-            def _call() -> None:
-                payload: dict = {
-                    "api_key": SpeechService.CANTONESE_AI_API_KEY,
-                    "text": text,
-                    "language": "cantonese",
-                    "output_extension": "mp3",
-                    "speed": "1",
-                    "pitch": "0",
-                    "should_return_timestamp": "false",
-                }
-                if voice_id:
-                    payload["voice_id"] = voice_id
-                resp = requests.post(
-                    SpeechService.CANTONESE_AI_TTS_URL,
-                    data=payload,
-                    timeout=30,
-                )
-                if not resp.ok:
-                    print(f"Cantonese TTS API error {resp.status_code}: {resp.text}")
-                resp.raise_for_status()
-                with open(filepath, "wb") as f:
-                    f.write(resp.content)
-
-            await asyncio.to_thread(_call)
-            return f"/media/tts/{filename}"
-        except Exception as exc:
-            traceback.print_exc()
-            print(f"Cantonese TTS Error: {exc}")
-            return None
-
-    @staticmethod
-    async def _stt_cantonese(audio_data: bytes) -> str | None:
-        """cantonese.ai STT — accepts wav, mp3, m4a, flac, ogg."""
-        try:
-            def _call() -> str:
-                resp = requests.post(
-                    SpeechService.CANTONESE_AI_STT_URL,
-                    data={
-                        "api_key": SpeechService.CANTONESE_AI_API_KEY,
-                        "with_timestamp": "false",
-                        "with_diarization": "false",
-                    },
-                    files={"data": ("audio.wav", audio_data, "audio/wav")},
-                    timeout=60,
-                )
-                resp.raise_for_status()
-                return resp.json()["text"]
-
-            return await asyncio.to_thread(_call)
-        except Exception as exc:
-            traceback.print_exc()
-            print(f"Cantonese STT Error: {exc}")
-            return None
 
     # -- ElevenLabs implementations ----------------------------------------
 
@@ -230,32 +142,11 @@ if __name__ == "__main__":
     async def main():
         service = SpeechService()
 
-        print("=== Cantonese TTS (cantonese.ai) ===")
-        url = await service.generate_tts("你今日食咗飯未？", language_code="yue")
-        print(f"  Audio URL: {url}")
-
-        print("\n=== English TTS (ElevenLabs) ===")
+        print("=== English TTS (ElevenLabs) ===")
         url = await service.generate_tts(
             "Hello! This is a test of the ElevenLabs text to speech integration.",
             language_code="en",
         )
         print(f"  Audio URL: {url}")
-
-        if url:
-            settings = get_settings()
-            src = os.path.join(settings.UPLOAD_DIR, "tts", os.path.basename(url))
-            dst = os.path.join(r"C:\Users\jayde\Downloads", os.path.basename(url))
-            os.makedirs(r"C:\Users\jayde\Downloads", exist_ok=True)
-            import shutil
-            shutil.copy2(src, dst)
-            print(f"  Audio copied to: {dst}")
-
-        print("\n=== Cantonese STT (cantonese.ai) ===")
-        sample_path = r"C:\asd\backend\Five Second TEXT.mp3"
-        if os.path.exists(sample_path):
-            transcript = await service.transcribe_audio_file(sample_path, language_code="yue")
-            print(f"  Transcript: {transcript}")
-        else:
-            print(f"  Sample file not found: {sample_path}")
 
     asyncio.run(main())
