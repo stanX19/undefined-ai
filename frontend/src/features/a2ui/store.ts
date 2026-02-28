@@ -25,6 +25,7 @@ interface SurfaceState {
   ) => void;
 
   deleteSurface: (surfaceId: string) => void;
+  clearAll: () => void;
 }
 
 export const useSurfaceStore = create<SurfaceState>((set) => ({
@@ -81,4 +82,6 @@ export const useSurfaceStore = create<SurfaceState>((set) => ({
       next.delete(surfaceId);
       return { surfaces: next };
     }),
+
+  clearAll: () => set({ surfaces: new Map() }),
 }));

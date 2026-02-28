@@ -4,7 +4,7 @@ import { useChatStore, sendChatMessage } from "../hooks/useChat.ts";
 import { MessageBubble } from "./MessageBubble.tsx";
 import { ChatInput } from "./ChatInput.tsx";
 
-export function ChatPanel() {
+export function ChatPanel({ inline = false }: { inline?: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
   const messages = useChatStore((s) => s.messages);
   const isStreaming = useChatStore((s) => s.isStreaming);
@@ -21,11 +21,11 @@ export function ChatPanel() {
     sendChatMessage(message, files);
   }, []);
 
-  if (!isOpen) {
+  if (!inline && !isOpen) {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed right-6 bottom-6 z-50 flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-[var(--a2ui-primary,var(--color-primary))] text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
+        className="fixed right-6 bottom-6 z-50 flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-(--a2ui-primary,var(--color-primary)) text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
         title="Open chat"
       >
         <MessageSquare size={24} />
@@ -33,35 +33,43 @@ export function ChatPanel() {
     );
   }
 
+  const containerClass = inline 
+    ? "flex h-full w-full flex-col border-l border-[var(--color-border)] bg-[var(--color-surface)]" 
+    : "fixed right-0 top-0 z-50 flex h-dvh w-full max-w-md flex-col border-l border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl sm:right-4 sm:top-4 sm:h-[calc(100dvh-2rem)] sm:rounded-2xl sm:border";
+
   return (
-    <div className="fixed right-0 top-0 z-50 flex h-dvh w-full max-w-md flex-col border-l border-[var(--color-border)] bg-[var(--color-surface)] shadow-xl sm:right-4 sm:top-4 sm:h-[calc(100dvh-2rem)] sm:rounded-2xl sm:border">
-      <div className="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-3">
+    <div className={containerClass}>
+      <div className="flex items-center justify-between border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
-          <MessageSquare size={18} className="text-[var(--a2ui-primary,var(--color-primary))]" />
+          <MessageSquare size={18} className="text-(--a2ui-primary,var(--color-primary))" />
           <h2 className="text-sm font-semibold">undefined ai</h2>
         </div>
         <div className="flex items-center gap-1">
           <button
             onClick={clearChat}
-            className="cursor-pointer rounded-lg p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface-alt)]"
+            className="cursor-pointer rounded-lg p-1.5 text-text-muted transition-colors hover:bg-surface-alt"
             title="New Topic"
           >
             <Plus size={16} />
           </button>
-          <button
-            onClick={() => setIsOpen(false)}
-            className="cursor-pointer rounded-lg p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface-alt)]"
-            title="Minimize"
-          >
-            <Minimize2 size={16} />
-          </button>
-          <button
-            onClick={() => setIsOpen(false)}
-            className="cursor-pointer rounded-lg p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface-alt)]"
-            title="Close"
-          >
-            <X size={16} />
-          </button>
+          {!inline && (
+            <>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="cursor-pointer rounded-lg p-1.5 text-text-muted transition-colors hover:bg-surface-alt"
+                title="Minimize"
+              >
+                <Minimize2 size={16} />
+              </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="cursor-pointer rounded-lg p-1.5 text-text-muted transition-colors hover:bg-surface-alt"
+                title="Close"
+              >
+                <X size={16} />
+              </button>
+            </>
+          )}
         </div>
       </div>
 

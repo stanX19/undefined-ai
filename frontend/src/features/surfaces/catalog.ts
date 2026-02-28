@@ -19,6 +19,10 @@ import { A2UIVideoPlayer } from "./components/VideoPlayer.tsx";
 import { A2UIAudioPlayer } from "./components/AudioPlayer.tsx";
 import { A2UIMarkdownView } from "./components/MarkdownView.tsx";
 import { A2UIDataTable } from "./components/DataTable.tsx";
+import { A2UIBadge } from "./components/Badge.tsx";
+import { A2UIProgress } from "./components/Progress.tsx";
+import { A2UIAvatar } from "./components/Avatar.tsx";
+import { A2UISkeleton } from "./components/Skeleton.tsx";
 
 /**
  * Register all A2UI components (basic catalog + educational extensions).
@@ -47,6 +51,10 @@ export function registerAllComponents(): void {
   registerComponent("MarkdownView", A2UIMarkdownView);
   registerComponent("DataTable", A2UIDataTable);
   registerComponent("Table", A2UIDataTable);
+  registerComponent("Badge", A2UIBadge);
+  registerComponent("Progress", A2UIProgress);
+  registerComponent("Avatar", A2UIAvatar);
+  registerComponent("Skeleton", A2UISkeleton);
 
   // Lowercase aliases for fallback parser compatibility
   registerComponent("mindmap", A2UIMindMap);
@@ -55,4 +63,8 @@ export function registerAllComponents(): void {
   registerComponent("video_player", A2UIVideoPlayer);
   registerComponent("markdown", A2UIMarkdownView);
   registerComponent("table", A2UIDataTable);
+  registerComponent("badge", A2UIBadge);
+  registerComponent("progress", A2UIProgress);
+  registerComponent("avatar", A2UIAvatar);
+  registerComponent("skeleton", A2UISkeleton);
 }
