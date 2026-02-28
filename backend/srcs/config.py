@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     GEMINI_MODEL_NAME: str = "gemini-2.5-flash"
     STRONG_GEMINI_MODEL_NAME: str = "gemini-2.5-flash"
 
+    # Exa (Web Search) Configuration
+    EXA_API_KEY: str = ""
+
     # Firebase Configuration
     FIREBASE_CREDENTIALS_JSON_PATH: str = "firebase_key.json"
 
