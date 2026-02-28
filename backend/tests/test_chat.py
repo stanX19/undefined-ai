@@ -45,7 +45,7 @@ def run_interactive_chat():
 
         print(f"\n{Colors.GREEN}{Colors.BOLD}--- Interactive Agent Chat Started (SSE) ---{Colors.END}")
         print(f"Topic ID: {topic_id}")
-        print("Type 'upload' to upload HTEChallengeStatements.pdf")
+        print("Type 'upload' to upload AttentionIsAllYouNeed.pdf")
         print("Type 'exit' or 'quit' to stop.\n")
 
         # 1. Open a persistent SSE stream (no until_event → listens forever)
