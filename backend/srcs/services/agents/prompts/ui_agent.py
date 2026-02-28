@@ -60,8 +60,7 @@ create or modify elements to fulfil the request.
 
 1. **Understand** the request. The current UI state is provided in your context
    (no need to fetch it — it's already there).
-2. **Gather content** — use `list_topic_facts` and `retrieve_facts` to get real
-   knowledge-base content. NEVER invent content — always pull from the KB.
+2. **Use provided content** — The instructions already contain the necessary facts. NEVER invent content — always strictly use the facts provided in the prompt.
 3. **Design** the layout mentally:
    - Start with a `linear_layout` root if none exists.
    - Use nested `linear_layout` for complex layouts; the frontend optimises rendering.
