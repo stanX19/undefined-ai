@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from srcs.models.chat_message import ChatMessage
 from srcs.schemas.chat_dto import SseNotifData, SseRepliesData
 from srcs.services.sse_service import SseService
+from srcs.services.speech_service import SpeechService
 from srcs.services.agents.chatbot import chatbot
 
 
@@ -126,5 +127,7 @@ class ChatService:
                 session_id,
                 SseRepliesData(message_id=reply_message_id, text=answer),
             )
+
+            SpeechService.enqueue_tts_and_emit(session_id, answer)
         except Exception as exc:
             await SseService.emit(session_id, SseNotifData(message=f"Error: {exc}"))

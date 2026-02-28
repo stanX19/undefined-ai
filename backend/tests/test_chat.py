@@ -19,7 +19,7 @@ from main import app
 
 def start_server():
     """Start uvicorn in a daemon thread."""
-    uvicorn.run(app, host="127.0.0.1", port=8002, log_level="error")
+    uvicorn.run(app, host="127.0.0.1", port=8002, log_level="debug")
 
 
 def run_interactive_chat():
@@ -46,6 +46,14 @@ def run_interactive_chat():
         print(f"Topic ID: {topic_id}")
         print("Type 'exit' or 'quit' to stop.\n")
 
+        # 1. Open a persistent SSE stream (no until_event → listens forever)
+        socket = TestSocket(url=f"{base_url}/api/v1/chat/stream/{topic_id}", actor_name="Agent")
+        socket.connect()
+        socket.listen()  # background thread, never stops
+        time.sleep(0.5)
+
+        seen = 0  # index into socket.events_received we've already handled
+
         while True:
             try:
                 user_msg = input(f"{Colors.BLUE}{Colors.BOLD}You: {Colors.END}")
@@ -59,13 +67,6 @@ def run_interactive_chat():
             if not user_msg.strip():
                 continue
 
-            # 1. Open SSE stream before sending the message
-            socket = TestSocket(url=f"{base_url}/api/v1/chat/stream/{topic_id}", actor_name="Agent")
-            socket.connect()
-            socket.listen(until_event="Replies")
-            time.sleep(0.5)
-
-            # 2. Send message — returns immediately with status: success
             res = client.post(
                 "/api/v1/chat/",
                 description=None,
@@ -76,21 +77,31 @@ def run_interactive_chat():
                 print(f"{Colors.RED}Unexpected response: {res}{Colors.END}")
                 continue
 
-            # 3. Wait for the agent reply via SSE
-            socket.join_listener(timeout=180)
+            # 2. Poll for new Replies event (with timeout)
+            reply_text = None
+            deadline = time.time() + 180
+            while time.time() < deadline:
+                new_events = socket.events_received[seen:]
+                reply_event = next((e for e in new_events if e["event"] == "Replies"), None)
+                tts_event = next((e for e in new_events if e["event"] == "TTSResult"), None)
+                if reply_event:
+                    data = reply_event["data"]
+                    if isinstance(data, str):
+                        try:
+                            data = json.loads(data)
+                        except (json.JSONDecodeError, ValueError):
+                            pass
+                    reply_text = data.get("text", data) if isinstance(data, dict) else data
+                    # Mark all events up to (and including) this one as seen
+                    seen = socket.events_received.index(reply_event) + 1
+                if tts_event:
+                    break
+                time.sleep(0.3)
 
-            reply_event = next((e for e in socket.events_received if e["event"] == "Replies"), None)
-            if reply_event:
-                data = reply_event["data"]
-                if isinstance(data, str):
-                    try:
-                        data = json.loads(data)
-                    except (json.JSONDecodeError, ValueError):
-                        pass
-                reply_text = data.get("text", data) if isinstance(data, dict) else data
+            if reply_text:
                 print(f"\n{Colors.GREEN}{Colors.BOLD}Agent:{Colors.END} {reply_text}\n")
             else:
-                print(f"{Colors.RED}No SSE reply received.{Colors.END}\n")
+                print(f"{Colors.RED}No SSE reply received (timeout).{Colors.END}\n")
 
     except Exception as e:
         print(f"\n{Colors.RED}{Colors.BOLD}ERROR EXECUTING CHAT: {e}{Colors.END}")
