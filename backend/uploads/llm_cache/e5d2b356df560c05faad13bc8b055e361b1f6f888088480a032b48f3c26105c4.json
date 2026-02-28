@@ -1,0 +1,10 @@
+{
+  "text": "[\"This Google course is an Introduction to Machine Learning for Developers that introduces ML concepts but does not cover implementation or data work.\", \"Learning objectives include understanding different types of ML, supervised ML concepts, and how ML problem-solving differs from traditional approaches.\", \"The estimated course length is 20 minutes and it was last updated on 2025-02-25 UTC.\"]",
+  "model": "ChatMinimax (MiniMax-M2.5) {api=...NTUF42ohUc}",
+  "status": "ok",
+  "json_data": [
+    "This Google course is an Introduction to Machine Learning for Developers that introduces ML concepts but does not cover implementation or data work.",
+    "Learning objectives include understanding different types of ML, supervised ML concepts, and how ML problem-solving differs from traditional approaches.",
+    "The estimated course length is 20 minutes and it was last updated on 2025-02-25 UTC."
+  ]
+}

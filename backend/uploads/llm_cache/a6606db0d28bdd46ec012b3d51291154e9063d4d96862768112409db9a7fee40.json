@@ -1,0 +1,30 @@
+{
+  "text": "```json\n[\n  \"Tan Shan Chien's email is tanshanchien@gmail.com\",\n  \"Tan Shan Chien's phone number is +6016-793-6308\",\n  \"Tan Shan Chien studied Computer Science with a focus on Artificial Intelligence at University Malaya, achieving a CGPA of 3.90\",\n  \"Tan Shan Chien completed A levels at Methodist College Kuala Lumpur with a CGPA of 4.00\",\n  \"Tan Shan Chien is proficient in Python, C, C++, Java, JavaScript, and assembly programming\",\n  \"Tan Shan Chien has experience with frameworks and technologies including Django, Flask, OpenCV, Pyautogui, Pygame, Glfw, JavaFX, Java Spring Boot, FastAPI, and langchain/graph\",\n  \"Tan Shan Chien works as a Software Engineer at Mindhive\",\n  \"At Mindhive, Tan Shan Chien developed RAG pipelines using embedding models and Vision-Language Models for automated visual data processing\",\n  \"Tan Shan Chien trained a YOLOv12 object detection model for PDF processing achieving over 90% accuracy\",\n  \"Tan Shan Chien developed ByeDB, an agent-based AI platform for natural language-to-SQL querying using FastAPI, SQLite, and Gemini API\",\n  \"Tan Shan Chien developed AutoDocX, an agentic documentation SaaS backend using Java Spring Boot with code knowledge graphs and multi-dimensional memory\",\n  \"Tan Shan Chien developed a GUI-based automation tool using image recognition that saved three to four hours daily\",\n  \"Tan Shan Chien developed a Python app called Piano to MIDI that converts Piano Synthesia videos to MIDI files using Gaussian Mixture Model\",\n  \"Tan Shan Chien developed a 3D space shooter game in C++ using Raylib and Entity Component System architecture with 6 DOF flight simulation\",\n  \"Tan Shan Chien won Champion at Godamlah Hackathon 2026 for Digital Car Accident Settlement\",\n  \"Tan Shan Chien won Champion at CodeFest 2025 in Competitive programming\",\n  \"Tan Shan Chien won Champion at Codenection 2025 for Documentation using agentic workflow\",\n  \"Tan Shan Chien won Champion at Physics Hackathon 2025 for Quantum State Tomography with Neural Networks\",\n  \"Tan Shan Chien won Champion at Programming League National (PLN) 2025\",\n  \"Tan Shan Chien placed 3rd at FutureHack 2025 for Data analysis using agentic SQL\",\n  \"Tan Shan Chien was a Finalist at Malaysian Computing Olympiad (MCO) 2023\",\n  \"Tan Shan Chien was Head of contest protocol and infrastructure at UM Cybersecurity Summit 2025\",\n  \"Tan Shan Chien was President of MCKL Computer Programming Society\"\n]\n```",
+  "model": "ChatMinimax (MiniMax-M2.5) {api=...NTUF42ohUc}",
+  "status": "ok",
+  "json_data": [
+    "Tan Shan Chien's email is tanshanchien@gmail.com",
+    "Tan Shan Chien's phone number is +6016-793-6308",
+    "Tan Shan Chien studied Computer Science with a focus on Artificial Intelligence at University Malaya, achieving a CGPA of 3.90",
+    "Tan Shan Chien completed A levels at Methodist College Kuala Lumpur with a CGPA of 4.00",
+    "Tan Shan Chien is proficient in Python, C, C++, Java, JavaScript, and assembly programming",
+    "Tan Shan Chien has experience with frameworks and technologies including Django, Flask, OpenCV, Pyautogui, Pygame, Glfw, JavaFX, Java Spring Boot, FastAPI, and langchain/graph",
+    "Tan Shan Chien works as a Software Engineer at Mindhive",
+    "At Mindhive, Tan Shan Chien developed RAG pipelines using embedding models and Vision-Language Models for automated visual data processing",
+    "Tan Shan Chien trained a YOLOv12 object detection model for PDF processing achieving over 90% accuracy",
+    "Tan Shan Chien developed ByeDB, an agent-based AI platform for natural language-to-SQL querying using FastAPI, SQLite, and Gemini API",
+    "Tan Shan Chien developed AutoDocX, an agentic documentation SaaS backend using Java Spring Boot with code knowledge graphs and multi-dimensional memory",
+    "Tan Shan Chien developed a GUI-based automation tool using image recognition that saved three to four hours daily",
+    "Tan Shan Chien developed a Python app called Piano to MIDI that converts Piano Synthesia videos to MIDI files using Gaussian Mixture Model",
+    "Tan Shan Chien developed a 3D space shooter game in C++ using Raylib and Entity Component System architecture with 6 DOF flight simulation",
+    "Tan Shan Chien won Champion at Godamlah Hackathon 2026 for Digital Car Accident Settlement",
+    "Tan Shan Chien won Champion at CodeFest 2025 in Competitive programming",
+    "Tan Shan Chien won Champion at Codenection 2025 for Documentation using agentic workflow",
+    "Tan Shan Chien won Champion at Physics Hackathon 2025 for Quantum State Tomography with Neural Networks",
+    "Tan Shan Chien won Champion at Programming League National (PLN) 2025",
+    "Tan Shan Chien placed 3rd at FutureHack 2025 for Data analysis using agentic SQL",
+    "Tan Shan Chien was a Finalist at Malaysian Computing Olympiad (MCO) 2023",
+    "Tan Shan Chien was Head of contest protocol and infrastructure at UM Cybersecurity Summit 2025",
+    "Tan Shan Chien was President of MCKL Computer Programming Society"
+  ]
+}

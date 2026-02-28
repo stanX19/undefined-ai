@@ -1,0 +1,15 @@
+{
+  "text": "```json\n[\n  \"This course is an Introduction to Machine Learning from Google for Developers.\",\n  \"The course introduces machine learning (ML) concepts.\",\n  \"The course does not cover how to implement ML or work with data.\",\n  \"The estimated course length is 20 minutes.\",\n  \"One learning objective is to understand the different types of machine learning.\",\n  \"One learning objective is to understand the key concepts of supervised machine learning.\",\n  \"One learning objective is to learn how solving problems with ML is different from traditional approaches.\",\n  \"The course was last updated on 2025-02-25 UTC.\"\n]\n```",
+  "model": "ChatMinimax (MiniMax-M2.5) {api=...NTUF42ohUc}",
+  "status": "ok",
+  "json_data": [
+    "This course is an Introduction to Machine Learning from Google for Developers.",
+    "The course introduces machine learning (ML) concepts.",
+    "The course does not cover how to implement ML or work with data.",
+    "The estimated course length is 20 minutes.",
+    "One learning objective is to understand the different types of machine learning.",
+    "One learning objective is to understand the key concepts of supervised machine learning.",
+    "One learning objective is to learn how solving problems with ML is different from traditional approaches.",
+    "The course was last updated on 2025-02-25 UTC."
+  ]
+}

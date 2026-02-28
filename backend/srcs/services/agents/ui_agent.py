@@ -220,21 +220,34 @@ class UIAgent:
             )),
         ]
 
-        try:
-            llm = await rotating_llm.get_runnable(temperature=0.3)
-            agent = create_agent(model=llm, tools=self.tools)
-            await agent.ainvoke(
-				{"messages": messages},
-				config={"recursion_limit": 50}
-			)
+        max_retries = 2
+        for attempt in range(max_retries):
+            try:
+                llm = await rotating_llm.get_runnable(temperature=0.3)
+                agent = create_agent(model=llm, tools=self.tools)
+                await agent.ainvoke(
+                    {"messages": messages},
+                    config={"recursion_limit": 50}
+                )
 
-            # After the agent has finished calling tools, read back the final state
-            async with AsyncSessionLocal() as db:
-                return await UIService.get_ui_json(db, topic_id)
+                # After the agent has finished calling tools, read back the final state
+                async with AsyncSessionLocal() as db:
+                    return await UIService.get_ui_json(db, topic_id)
 
-        except Exception as exc:
-            traceback.print_exc()
-            return {"error": str(exc)}
+            except Exception as exc:
+                error_str = str(exc).lower()
+                is_timeout = "timeout" in error_str or "timed out" in error_str
+                if is_timeout and attempt < max_retries - 1:
+                    print(f"UIAgent timeout on attempt {attempt + 1}. Retrying with feedback.")
+                    messages.append(
+                        HumanMessage(content="The previous attempt timed out (likely due to generating too much JSON at once). Please batch your operations into smaller chunks.")
+                    )
+                    continue
+                else:
+                    traceback.print_exc()
+                    return {"error": str(exc)}
+                    
+        return {"error": "Max retries exceeded"}
 
 
 # -- Module-level singleton ---------------------------------------------------

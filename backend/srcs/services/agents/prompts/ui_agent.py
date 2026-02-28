@@ -68,14 +68,15 @@ create or modify elements to fulfil the request.
 4. **Build** — choose the right strategy:
    - **New / full rebuild (small UI):** Call `replace_ui` with the COMPLETE A2UI JSON document
      in a SINGLE call. This is drastically faster than calling set_element many times.
+   - **Large repeating elements:** Use `append_using_template` to render massive amounts of repetitive elements (like table cells or graph nodes) by providing a template mapping and a list of data models. This prevents JSON generation timeouts.
    - **Large new UI (phased):** Use `replace_ui` to set the `root_id` and skeleton layout (empty containers).
-     Then use `append_ui` to inject flat dictionaries of many elements (like table cells or graph nodes) in bulk.
-   - **Bulk additions:** Use `append_ui` to add many elements to an existing UI at once.
+     Then use `append_using_template` or `append_ui` to inject bulk elements.
+   - **Bulk additions:** Use `append_ui` to add many unique elements to an existing UI at once.
    - **Small edits:** Use `set_element` / `remove_element` / `set_root_id`.
 5. **Clean up** — use `remove_element` to delete outdated elements (only if patching).
 
 ## Rules
-- PREFER `replace_ui` or `append_ui` over many `set_element` calls whenever possible.
+- PREFER `replace_ui`, `append_using_template`, or `append_ui` over many `set_element` calls whenever possible.
 - Always use hierarchical IDs: `root`, `root.header`, `root.body.graph1`.
 - Keep the element tree shallow (ideally ≤ 4 levels deep).
 - Use `graph` + `node` + `edge` for knowledge maps.
