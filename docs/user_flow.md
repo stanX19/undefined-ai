@@ -2,9 +2,14 @@
 
 ---
 
-## Difficulty Level (AI-Detected)
+## Difficulty Level
 
-Difficulty is **not** defaulted to 1. The AI infers it from the uploaded or entered material:
+Difficulty is **not** defaulted to 1. It is set in one of two ways:
+
+| Source | When |
+|--------|------|
+| **From PDF** | User uploads a PDF → AI infers `difficulty_level` from the material. |
+| **From user** | User enters only a prompt (no PDF) → We ask education level and use it as `difficulty_level` so we can teach the right depth (simple vs complicated). |
 
 | Level | Material type / audience |
 |-------|--------------------------|
@@ -24,11 +29,23 @@ Difficulty is **not** defaulted to 1. The AI infers it from the uploaded or ente
 **System shows:**
 - Start button
 
-### Step 2 — User clicks "Start Learning"
+### Step 2 — User clicks "Start"
 
 **System shows:**
 - Enter Prompt
+
+  Options align with the difficulty scale (see table above), e.g.:
+  - Kindergarten / Early years
+  - Primary school
+  - Secondary school
+  - Undergraduate
+  - Graduate / Master’s
+  - PhD / Researcher
+
+- Enter Prompt
 - Upload PDF
+
+(No education level is asked at this step.)
 
 ### Step 3 — User submits prompt or PDF
 
@@ -36,7 +53,8 @@ Difficulty is **not** defaulted to 1. The AI infers it from the uploaded or ente
 - Extract topic
 - Extract key concepts
 - Generate knowledge graph JSON
-- **AI detects and sets `difficulty_level`** from material (e.g. kindergarten → 1, primary → 2, secondary → 3, up to PhD/thesis/researcher)
+- **Set `difficulty_level`** from **user’s chosen education level** (primary source). Optionally, AI can still infer from material and use it to refine or validate.
+- Use `difficulty_level` to decide whether to provide **simple** or **complicated** knowledge for the same topic.
 - Save `topic_id`
 - Save `UI_type = graph`
 - Initialize `history_stack = []`
@@ -82,7 +100,7 @@ User can now click nodes to explore deeper.
 
 - Load last topic
 - Load last graph JSON
-- Load difficulty level
+- Load difficulty level (no need show to user but load from database)
 - Render previous UI
 
 ---
