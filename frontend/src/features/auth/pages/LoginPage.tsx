@@ -29,7 +29,9 @@ export function LoginPage() {
         throw new Error("Failed to login");
       }
 
-      login(id);
+      const data = await response.json();
+      login(id, data.education_level);
+
       navigate("/onboarding");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
