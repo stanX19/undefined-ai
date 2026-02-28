@@ -16,12 +16,12 @@ export function A2UITextField({
 
   const boundPath =
     typeof definition.text === "object" &&
-    definition.text !== null &&
-    "path" in (definition.text as Record<string, unknown>)
+      definition.text !== null &&
+      "path" in (definition.text as Record<string, unknown>)
       ? ((definition.text as { path: string }).path)
       : typeof definition.value === "object" &&
-          definition.value !== null &&
-          "path" in (definition.value as Record<string, unknown>)
+        definition.value !== null &&
+        "path" in (definition.value as Record<string, unknown>)
         ? ((definition.value as { path: string }).path)
         : undefined;
 
@@ -59,12 +59,12 @@ export function A2UITextField({
   };
 
   const className =
-    "w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm focus:border-[var(--a2ui-primary,var(--color-primary))] focus:outline-none focus:ring-1 focus:ring-[var(--a2ui-primary,var(--color-primary))]";
+    "w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm text-text-primary shadow-level1 transition-shadow hover:shadow-level2 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2";
 
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label className="text-sm font-medium text-[var(--color-text)]">
+        <label className="text-sm font-medium text-text-primary leading-[1.5]">
           {label}
         </label>
       )}

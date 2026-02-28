@@ -11,11 +11,14 @@ export function A2UIButton({
   const isPrimary =
     (definition.primary as boolean) ?? definition.variant === "primary";
 
+  // Shared base
   const base =
-    "inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 cursor-pointer";
+    "inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 cursor-pointer disabled:cursor-not-allowed disabled:bg-hover disabled:text-text-muted";
+
+  // Specific variants based on Design System
   const variant = isPrimary
-    ? "bg-[var(--a2ui-primary,var(--color-primary))] text-white hover:opacity-90 focus:ring-[var(--a2ui-primary,var(--color-primary))]"
-    : "border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-alt)]";
+    ? "bg-sidebar text-white rounded-3xl shadow-level1 hover:bg-opacity-90 focus:ring-primary"
+    : "border border-border bg-surface text-text-primary rounded-xl hover:bg-hover";
 
   const handleClick = () => {
     const action = definition.action as Record<string, unknown> | undefined;

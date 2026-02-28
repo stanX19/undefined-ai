@@ -10,7 +10,7 @@ export function A2UICard({
   const childId = definition.child as string | undefined;
 
   return (
-    <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+    <div className="rounded-3xl border border-border bg-surface p-5 shadow-level1">
       {childId && (
         <A2UIRenderer
           componentId={childId}

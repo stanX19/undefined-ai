@@ -2,13 +2,13 @@ import type { A2UIComponentProps } from "../../a2ui/registry.ts";
 import { resolveDynamic } from "../../a2ui/resolver.ts";
 
 const VARIANT_CLASSES: Record<string, string> = {
-  h1: "text-3xl font-bold",
-  h2: "text-2xl font-semibold",
-  h3: "text-xl font-semibold",
-  h4: "text-lg font-medium",
-  h5: "text-base font-medium",
-  caption: "text-xs text-[var(--color-text-muted)]",
-  body: "text-base",
+  h1: "text-[32px] font-semibold leading-[1.2] text-text-primary",
+  h2: "text-base font-semibold leading-[1.4] text-text-primary",
+  h3: "text-base font-medium leading-[1.4] text-text-primary",
+  h4: "text-base font-medium leading-[1.4] text-text-primary",
+  h5: "text-sm font-medium leading-[1.5] text-text-primary",
+  caption: "text-xs font-normal leading-[1.5] text-text-muted",
+  body: "text-sm font-normal leading-[1.5] text-text-body",
 };
 
 export function A2UIText({ definition, dataModel, scopePrefix }: A2UIComponentProps) {

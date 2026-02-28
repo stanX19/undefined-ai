@@ -9,8 +9,13 @@ export function A2UIMarkdownView({
   scopePrefix,
 }: A2UIComponentProps) {
   const content = resolveDynamic<string>(
-    definition.text as string | { literalString: string } | { path: string } | undefined ??
-    definition.content as string | { literalString: string } | { path: string } | undefined,
+    (definition.text ??
+      definition.content ??
+      definition.data) as
+      | string
+      | { literalString: string }
+      | { path: string }
+      | undefined,
     dataModel,
     scopePrefix,
   ) ?? "";

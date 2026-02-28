@@ -5,6 +5,7 @@ import { useSurfaceStore } from "./features/a2ui/store.ts";
 import { useSseStream } from "./features/a2ui/transport/useSseStream.ts";
 import { ChatPanel } from "./features/chat/components/ChatPanel.tsx";
 import { loadDemoSurface } from "./features/a2ui/mockDemo.ts";
+import { LoginModal } from "./features/auth/components/LoginModal.tsx";
 
 const SSE_URL = "/api/stream";
 const LOAD_DEMO = import.meta.env.DEV;
@@ -23,6 +24,7 @@ export function App() {
 
   return (
     <div className="relative flex min-h-dvh flex-col">
+      <LoginModal />
       <main className="flex flex-1 p-6">
         {surfaceIds.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">

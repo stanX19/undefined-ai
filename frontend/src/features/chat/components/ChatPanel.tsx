@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { MessageSquare, X, Minimize2 } from "lucide-react";
+import { MessageSquare, X, Minimize2, Plus } from "lucide-react";
 import { useChatStore, sendChatMessage } from "../hooks/useChat.ts";
 import { MessageBubble } from "./MessageBubble.tsx";
 import { ChatInput } from "./ChatInput.tsx";
@@ -8,6 +8,7 @@ export function ChatPanel() {
   const [isOpen, setIsOpen] = useState(false);
   const messages = useChatStore((s) => s.messages);
   const isStreaming = useChatStore((s) => s.isStreaming);
+  const clearChat = useChatStore((s) => s.clear);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -40,6 +41,13 @@ export function ChatPanel() {
           <h2 className="text-sm font-semibold">undefined ai</h2>
         </div>
         <div className="flex items-center gap-1">
+          <button
+            onClick={clearChat}
+            className="cursor-pointer rounded-lg p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface-alt)]"
+            title="New Topic"
+          >
+            <Plus size={16} />
+          </button>
           <button
             onClick={() => setIsOpen(false)}
             className="cursor-pointer rounded-lg p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface-alt)]"
