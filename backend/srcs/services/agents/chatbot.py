@@ -49,7 +49,12 @@ class Chatbot:
             if not final_messages:
                 return "I'm sorry, I couldn't generate a response."
 
-            return str(final_messages[-1].content)
+            content = final_messages[-1].content
+            if isinstance(content, list):
+                return "".join(
+                    block.get("text", "") for block in content if isinstance(block, dict)
+                )
+            return str(content)
 
         except Exception as exc:
             traceback.print_exc()
