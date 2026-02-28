@@ -6,7 +6,7 @@ from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from srcs.models.chat_message import ChatMessage
-from srcs.schemas.chat_dto import SseNotifData, SseRepliesData
+from srcs.schemas.chat_dto import SseNotifData, SseRepliesData, SseToolCallData
 from srcs.services.sse_service import SseService
 from srcs.services.speech_service import SpeechService
 from srcs.services.agents.chatbot import chatbot
@@ -129,10 +129,17 @@ class ChatService:
                             + "\n".join(concepts)
                         )
 
+            async def _on_tool_call(tool_name: str, arguments: dict) -> None:
+                await SseService.emit(
+                    session_id,
+                    SseToolCallData(tool_name=tool_name, arguments=arguments),
+                )
+
             answer: str = await chatbot.ask(
                 user_prompt=user_prompt,
                 document_text=context_text,
                 chat_history=chat_history,
+                on_tool_call=_on_tool_call,
             )
 
             async with AsyncSessionLocal() as db:

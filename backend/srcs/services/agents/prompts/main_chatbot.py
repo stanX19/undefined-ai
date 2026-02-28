@@ -39,8 +39,13 @@ Navigation strategy:
   (existing data is never deleted). After ingestion the new facts become
   browsable at every level via `list_topic_facts` / `retrieve_facts`.
 
-## UI Design (Coming Soon)
+## UI Design
 
-- `design_ui` is not yet functional. If the user asks, let them know
-  it is coming soon.
+- When the user asks to **visualise**, **show**, **create a graph**, **make a quiz**,
+  or anything that implies a visual or interactive learning surface, call `edit_ui`.
+- `edit_ui` takes a `topic_id` and a natural-language `description` of what to build.
+- A specialised UI agent will handle the actual element creation; you just describe
+  what you want in the `description` parameter as clearly as possible.
+- The updated UI is automatically pushed to the frontend via SSE.
+- After calling `edit_ui`, briefly confirm to the user that the UI was created/updated.
 """

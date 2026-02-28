@@ -19,6 +19,8 @@ class SseEvent(str, Enum):
     EDIT_DOCUMENT = "EditDocument"
     TTS_RESULT = "TTSResult"
     INGESTION_PROGRESS = "IngestionProgress"
+    TOOL_CALL = "ToolCall"
+    UI_UPDATE = "UIUpdate"
 
 
 # -- SSE payload models -------------------------------------------------------
@@ -58,6 +60,12 @@ class SseIngestionProgressData(BaseModel):
     topic_id: str
     stage: str
     message: str
+
+
+class SseToolCallData(BaseModel):
+    """Tool invocation event — emitted when the agent calls a tool."""
+    tool_name: str
+    arguments: dict
 
 
 # -- REST request / response models ------------------------------------------
