@@ -1,0 +1,11 @@
+{
+  "text": "[\n  \"Small businesses and individuals face significant challenges with complex legal compliance, contributing to a global 'Compliance Gap' and poverty, as existing AI tools are inadequate for users with low digital literacy or non-English dialects.\",\n  \"RasmiAI is an agentic compliance assistant designed to simplify complex legal directives into visual, step-by-step roadmaps, allowing users to describe their situation in native dialects and use photos to autofill forms and show compliant setups.\",\n  \"Powered by the Gemini 3 Flash model, RasmiAI's agentic system utilizes Stateful Information Gathering and Complex Scenario Management to remember progress, manage the entire compliance journey, cross-reference data, and identify specific gaps.\",\n  \"RasmiAI democratizes access to legal standing as a 'Compliance-as-a-Service' for NGOs, government bodies, and Micro-SMEs, reducing reliance on expensive manual consulting and aligning with SDG 16 and SDG 10.\"\n]",
+  "model": "ChatGoogleGenerativeAI (models/gemini-2.5-flash) {api=..._IV6TW2o-s}",
+  "status": "ok",
+  "json_data": [
+    "Small businesses and individuals face significant challenges with complex legal compliance, contributing to a global 'Compliance Gap' and poverty, as existing AI tools are inadequate for users with low digital literacy or non-English dialects.",
+    "RasmiAI is an agentic compliance assistant designed to simplify complex legal directives into visual, step-by-step roadmaps, allowing users to describe their situation in native dialects and use photos to autofill forms and show compliant setups.",
+    "Powered by the Gemini 3 Flash model, RasmiAI's agentic system utilizes Stateful Information Gathering and Complex Scenario Management to remember progress, manage the entire compliance journey, cross-reference data, and identify specific gaps.",
+    "RasmiAI democratizes access to legal standing as a 'Compliance-as-a-Service' for NGOs, government bodies, and Micro-SMEs, reducing reliance on expensive manual consulting and aligning with SDG 16 and SDG 10."
+  ]
+}

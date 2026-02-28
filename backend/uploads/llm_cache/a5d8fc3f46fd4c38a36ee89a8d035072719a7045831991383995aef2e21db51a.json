@@ -1,0 +1,10 @@
+{
+  "text": "```json\n[\n  \"The global 'Compliance Gap' is a systemic barrier affecting billions, costing small businesses significantly and leading to collapse due to complex legal jargon, lack of guidance, and inadequate AI tools for users with low digital literacy or non-English dialects.\",\n  \"Rasmi AI is an agentic compliance assistant and workflow engine designed to democratize legal standing as 'Compliance-as-a-Service' for underserved businesses, NGOs, and government bodies, transforming complex legal requirements into simple, actionable roadmaps to save businesses and strengthen nations.\",\n  \"Powered by the Gemini 3 Flash model, its highly asynchronous, multi-agent backend, built with FastAPI, SQLAlchemy, and LangChain, utilizes Stateful Information Gathering and Complex Scenario Management to manage the entire compliance journey, supporting user input via native dialects and photos, and providing an API for core functionalities.\"\n]\n```",
+  "model": "ChatGoogleGenerativeAI (models/gemini-2.5-flash) {api=...EBRnaNs1P8}",
+  "status": "ok",
+  "json_data": [
+    "The global 'Compliance Gap' is a systemic barrier affecting billions, costing small businesses significantly and leading to collapse due to complex legal jargon, lack of guidance, and inadequate AI tools for users with low digital literacy or non-English dialects.",
+    "Rasmi AI is an agentic compliance assistant and workflow engine designed to democratize legal standing as 'Compliance-as-a-Service' for underserved businesses, NGOs, and government bodies, transforming complex legal requirements into simple, actionable roadmaps to save businesses and strengthen nations.",
+    "Powered by the Gemini 3 Flash model, its highly asynchronous, multi-agent backend, built with FastAPI, SQLAlchemy, and LangChain, utilizes Stateful Information Gathering and Complex Scenario Management to manage the entire compliance journey, supporting user input via native dialects and photos, and providing an API for core functionalities."
+  ]
+}
