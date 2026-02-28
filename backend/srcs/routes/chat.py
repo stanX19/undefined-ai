@@ -14,7 +14,7 @@ from srcs.services.sse_service import SseService
 router: APIRouter = APIRouter(prefix="/api/v1/chat", tags=["chat"])
 
 
-# ── SSE stream endpoint ─────────────────────────────────────────────────────
+# -- SSE stream endpoint -----------------------------------------------------
 
 @router.get("/stream/{session_id}")
 async def sse_stream(session_id: str):
@@ -46,7 +46,7 @@ async def sse_stream(session_id: str):
     )
 
 
-# ── Send a chat message (returns immediately, streams reply via SSE) ─────────
+# -- Send a chat message (returns immediately, streams reply via SSE) ---------
 
 @router.post("/", response_model=ChatAcceptedResponse)
 async def send_message(
@@ -69,7 +69,7 @@ async def send_message(
     )
 
 
-# ── History endpoints ────────────────────────────────────────────────────────
+# -- History endpoints --------------------------------------------------------
 
 @router.get("/history", response_model=list[ChatMessageResponse])
 async def get_history(

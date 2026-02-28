@@ -26,9 +26,9 @@ os.environ['GRPC_VERBOSITY'] = 'NONE'
 MessagesType = None | str | dict | BaseMessage | list[str | dict | BaseMessage]
 
 
-# ═════════════════════════════════════════════════════════════════════════════
+# -----------------------------------------------------------------------------
 # ChatMinimax — custom LangChain BaseChatModel wrapping MiniMax's API
-# ═════════════════════════════════════════════════════════════════════════════
+# -----------------------------------------------------------------------------
 
 class ChatMinimax(BaseChatModel):
     """LangChain chat model backed by MiniMax chatcompletion_v2.
@@ -183,9 +183,9 @@ class ChatMinimax(BaseChatModel):
         )
 
 
-# ═════════════════════════════════════════════════════════════════════════════
+# -----------------------------------------------------------------------------
 # LLMResponse / LLMConfig / RotatingLLM — unchanged public API
-# ═════════════════════════════════════════════════════════════════════════════
+# -----------------------------------------------------------------------------
 
 class LLMResponse(BaseModel):
     text: str

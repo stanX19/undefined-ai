@@ -59,12 +59,12 @@ def run_tests():
     print(f"\n{Colors.BOLD}=== RUNNING PHASE 1 UNIT TESTS ==={Colors.END}\n")
 
     try:
-        # ── 1. Health Check ──────────────────────────────────────────────
+        # -- 1. Health Check ----------------------------------------------
         print(f"\n{Colors.BOLD}--- 1. Health Check ---{Colors.END}")
         res = client.get("/health", description="Health probe")
         assert res == {"status": "healthy"}, f"Expected healthy, got {res}"
 
-        # ── 2. Login — new user ──────────────────────────────────────────
+        # -- 2. Login — new user ------------------------------------------
         print(f"\n{Colors.BOLD}--- 2. Auth: Login new user ---{Colors.END}")
         res = client.post(
             "/api/v1/auth/login",
@@ -76,7 +76,7 @@ def run_tests():
         assert "created_at" in res, "Missing created_at"
         user_id = res["user_id"]
 
-        # ── 3. Login — idempotent ────────────────────────────────────────
+        # -- 3. Login — idempotent ----------------------------------------
         print(f"\n{Colors.BOLD}--- 3. Auth: Login same user again ---{Colors.END}")
         res2 = client.post(
             "/api/v1/auth/login",
@@ -86,7 +86,7 @@ def run_tests():
         assert res2["user_id"] == user_id, "Login should return same user_id"
         assert res2["created_at"] == res["created_at"], "created_at should stay the same"
 
-        # ── 4. Create topic ──────────────────────────────────────────────
+        # -- 4. Create topic ----------------------------------------------
         print(f"\n{Colors.BOLD}--- 4. Topics: Create ---{Colors.END}")
         res = client.post(
             "/api/v1/topics/",
@@ -98,7 +98,7 @@ def run_tests():
         assert res["title"] == "Test Topic"
         assert res["user_id"] == user_id
 
-        # ── 5. List topics ───────────────────────────────────────────────
+        # -- 5. List topics -----------------------------------------------
         print(f"\n{Colors.BOLD}--- 5. Topics: List ---{Colors.END}")
         res = client.get(
             f"/api/v1/topics/?user_id={user_id}",
@@ -107,7 +107,7 @@ def run_tests():
         assert isinstance(res, list) and len(res) > 0, "Should return non-empty list"
         assert res[0]["topic_id"] == topic_id
 
-        # ── 6. Get topic ─────────────────────────────────────────────────
+        # -- 6. Get topic -------------------------------------------------
         print(f"\n{Colors.BOLD}--- 6. Topics: Get by ID ---{Colors.END}")
         res = client.get(
             f"/api/v1/topics/{topic_id}",
@@ -116,13 +116,13 @@ def run_tests():
         assert res["title"] == "Test Topic"
         assert res.get("document_text") is None, "No doc uploaded yet"
 
-        # ── 7. Get topic — 404 ───────────────────────────────────────────
+        # -- 7. Get topic — 404 -------------------------------------------
         print(f"\n{Colors.BOLD}--- 7. Topics: 404 for nonexistent ---{Colors.END}")
         raw = requests.get(f"{base_url}/api/v1/topics/nonexistent_id_999")
         assert raw.status_code == 404, f"Expected 404, got {raw.status_code}"
         print(f"{Colors.GREEN}Correctly returned 404{Colors.END}")
 
-        # ── 8. Upload — reject non-PDF ───────────────────────────────────
+        # -- 8. Upload — reject non-PDF -----------------------------------
         print(f"\n{Colors.BOLD}--- 8. Topics: Upload rejects non-PDF ---{Colors.END}")
         raw = requests.post(
             f"{base_url}/api/v1/topics/{topic_id}/upload",
@@ -131,11 +131,11 @@ def run_tests():
         assert raw.status_code == 400, f"Expected 400 for .txt upload, got {raw.status_code}"
         print(f"{Colors.GREEN}Correctly rejected non-PDF upload{Colors.END}")
 
-        # ══════════════════════════════════════════════════════════════════
+        # ------------------------------------------------------------------
         #  Chat API Tests
-        # ══════════════════════════════════════════════════════════════════
+        # ------------------------------------------------------------------
 
-        # ── 9. Send message (SSE) ────────────────────────────────────────
+        # -- 9. Send message (SSE) ----------------------------------------
         print(f"\n{Colors.BOLD}--- 9. Chat: Send message (SSE) ---{Colors.END}")
 
         socket = TestSocket(url=f"{base_url}/api/v1/chat/stream/{topic_id}", actor_name="SSE")
@@ -160,13 +160,13 @@ def run_tests():
         assert reply_data["text"] == "Mock reply to: Hello agent"
         print(f"{Colors.GREEN}SSE reply received: {reply_data['text']}{Colors.END}")
 
-        # ── 10. Verify document context is None ──────────────────────────
+        # -- 10. Verify document context is None --------------------------
         print(f"\n{Colors.BOLD}--- 10. Chat: Verify document_text=None ---{Colors.END}")
         assert _last_ask_kwargs.get("document_text") is None, \
             "document_text should be None for topic without uploaded doc"
         print(f"{Colors.GREEN}Chatbot.ask correctly received document_text=None{Colors.END}")
 
-        # ── 11. Second message — chat_history passed (SSE) ───────────────
+        # -- 11. Second message — chat_history passed (SSE) ---------------
         print(f"\n{Colors.BOLD}--- 11. Chat: Second message passes history (SSE) ---{Colors.END}")
 
         socket2 = TestSocket(url=f"{base_url}/api/v1/chat/stream/{topic_id}", actor_name="SSE")
@@ -193,7 +193,7 @@ def run_tests():
             f"Expected ≥2 history messages, got {len(_last_ask_kwargs['chat_history'])}"
         print(f"{Colors.GREEN}chat_history passed with {len(_last_ask_kwargs['chat_history'])} messages{Colors.END}")
 
-        # ── 12. Get history (includes SSE-persisted replies) ─────────────
+        # -- 12. Get history (includes SSE-persisted replies) -------------
         print(f"\n{Colors.BOLD}--- 12. Chat: Get history ---{Colors.END}")
         history = client.get(
             f"/api/v1/chat/history?topic_id={topic_id}",
@@ -204,7 +204,7 @@ def run_tests():
         assert timestamps == sorted(timestamps), "History should be oldest-first"
         print(f"{Colors.GREEN}{len(history)} messages, correctly ordered{Colors.END}")
 
-        # ── 13. Clear history ────────────────────────────────────────────
+        # -- 13. Clear history --------------------------------------------
         print(f"\n{Colors.BOLD}--- 13. Chat: Clear history ---{Colors.END}")
         res = client.request(
             "DELETE",
@@ -220,7 +220,7 @@ def run_tests():
         assert len(history) == 0, f"Expected empty history, got {len(history)}"
         print(f"{Colors.GREEN}History correctly empty after clear{Colors.END}")
 
-        # ── 14. Chat 404 — bad topic_id ──────────────────────────────────
+        # -- 14. Chat 404 — bad topic_id ----------------------------------
         print(f"\n{Colors.BOLD}--- 14. Chat: 404 for bad topic_id ---{Colors.END}")
         raw = requests.post(
             f"{base_url}/api/v1/chat/",
@@ -229,7 +229,7 @@ def run_tests():
         assert raw.status_code == 404, f"Expected 404, got {raw.status_code}"
         print(f"{Colors.GREEN}Correctly returned 404{Colors.END}")
 
-        # ── Done ─────────────────────────────────────────────────────────
+        # -- Done ---------------------------------------------------------
         print(f"\n{Colors.GREEN}{Colors.BOLD}ALL TESTS PASSED!{Colors.END}")
         print(f"{Colors.GREEN}Started at:  {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}{Colors.END}")
         print(f"{Colors.GREEN}Finished at: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}{Colors.END}")

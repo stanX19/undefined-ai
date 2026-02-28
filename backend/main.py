@@ -36,14 +36,14 @@ app: FastAPI = FastAPI(
     debug=settings.DEBUG,
 )
 
-# ── Routers ──────────────────────────────────────────────────────────────────
+# -- Routers ------------------------------------------------------------------
 app.include_router(health_router)
 app.include_router(auth_router)
 app.include_router(topics_router)
 app.include_router(chat_router)
 app.include_router(ingestion_router)
 
-# ── Static files (uploaded PDFs) ─────────────────────────────────────────────
+# -- Static files (uploaded PDFs) ---------------------------------------------
 import os
 
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)

@@ -43,7 +43,7 @@ class SseService:
     # session_id → asyncio.Queue of SSE messages
     _streams: dict[str, asyncio.Queue] = {}
 
-    # ── Stream lifecycle ─────────────────────────────────────────────────
+    # -- Stream lifecycle -------------------------------------------------
 
     @classmethod
     def open(cls, session_id: str) -> asyncio.Queue:
@@ -61,7 +61,7 @@ class SseService:
     def is_open(cls, session_id: str) -> bool:
         return session_id in cls._streams
 
-    # ── Emit helpers ─────────────────────────────────────────────────────
+    # -- Emit helpers -----------------------------------------------------
 
     @classmethod
     async def _emit(cls, session_id: str, event: SseEvent, payload: SsePayload) -> None:

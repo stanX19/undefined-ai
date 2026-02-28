@@ -15,7 +15,7 @@ from srcs.services.agents.chatbot import chatbot
 class ChatService:
     """Reusable chat-history operations + agent orchestration."""
 
-    # ── Agent orchestration ──────────────────────────────────────────────
+    # -- Agent orchestration ----------------------------------------------
 
     @staticmethod
     async def send_message(
@@ -39,7 +39,7 @@ class ChatService:
 
         return user_msg
 
-    # ── Persistence helpers ──────────────────────────────────────────────
+    # -- Persistence helpers ----------------------------------------------
 
     @staticmethod
     async def add_message(
@@ -74,7 +74,7 @@ class ChatService:
         await db.commit()
         return result.rowcount  # type: ignore[return-value]
 
-    # ── Private helpers ──────────────────────────────────────────────────
+    # -- Private helpers --------------------------------------------------
 
     @staticmethod
     async def _build_lc_history(

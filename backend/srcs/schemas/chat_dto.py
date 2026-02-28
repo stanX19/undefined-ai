@@ -6,7 +6,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-# ── SSE event types ──────────────────────────────────────────────────────────
+# -- SSE event types ----------------------------------------------------------
 
 class SseEvent(str, Enum):
     """Server-Sent Event types.
@@ -21,7 +21,7 @@ class SseEvent(str, Enum):
     INGESTION_PROGRESS = "IngestionProgress"
 
 
-# ── SSE payload models ───────────────────────────────────────────────────────
+# -- SSE payload models -------------------------------------------------------
 
 class SseNotifData(BaseModel):
     """Notification payload (e.g. processing status)."""
@@ -60,7 +60,7 @@ class SseIngestionProgressData(BaseModel):
     message: str
 
 
-# ── REST request / response models ──────────────────────────────────────────
+# -- REST request / response models ------------------------------------------
 
 class ChatRequest(BaseModel):
     """Request body for sending a chat message."""

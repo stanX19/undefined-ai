@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     MINIMAX_TEXT_MODEL: str = "MiniMax-M2.5"
     MINIMAX_TTS_MODEL: str = "speech-2.8-hd"
 
+    # Cantonese AI
+    CANTONESE_API_KEY: str = ""
+
     # Exa (Web Search) Configuration
     EXA_API_KEY: str = ""
 

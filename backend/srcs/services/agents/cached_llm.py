@@ -77,7 +77,7 @@ class CachedLLM:
     def __init__(self, llm: RotatingLLM):
         self._llm = llm
 
-    # ── delegate everything else straight through ──
+    # -- delegate everything else straight through --
     def __getattr__(self, name):
         return getattr(self._llm, name)
 

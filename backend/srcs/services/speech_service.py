@@ -8,7 +8,7 @@ from elevenlabs.client import ElevenLabs
 
 from srcs.config import get_settings
 
-# ── ElevenLabs client (lazy singleton) ────────────────────────────────────────
+# -- ElevenLabs client (lazy singleton) ----------------------------------------
 
 _elevenlabs_client: ElevenLabs | None = None
 
@@ -23,7 +23,8 @@ def _get_elevenlabs_client() -> ElevenLabs:
 
 class SpeechService:
     # cantonese.ai endpoints & credentials
-    CANTONESE_AI_API_KEY: str = os.getenv("CANTONESE_AI_API_KEY", "")
+    CANTONESE_AI_API_KEY = get_settings().CANTONESE_API_KEY
+    print(f"{CANTONESE_AI_API_KEY=}")
     CANTONESE_AI_TTS_URL = "https://cantonese.ai/api/tts"
     CANTONESE_AI_STT_URL = "https://cantonese.ai/api/stt"
 
@@ -37,7 +38,7 @@ class SpeechService:
         lang = (language_code or SpeechService.DEFAULT_LANG).lower()
         return lang in ("yue", "cantonese", "zh-hk", "yue-hk")
 
-    # ── TTS (public) ──────────────────────────────────────────────────────
+    # -- TTS (public) ------------------------------------------------------
 
     @staticmethod
     async def generate_tts(
@@ -54,7 +55,7 @@ class SpeechService:
             return await SpeechService._tts_cantonese(text, voice_id=voice_id)
         return await SpeechService._tts_elevenlabs(text, voice_id=voice_id, model_id=model_id)
 
-    # ── STT (public) ──────────────────────────────────────────────────────
+    # -- STT (public) ------------------------------------------------------
 
     @staticmethod
     async def transcribe_audio(
@@ -84,7 +85,7 @@ class SpeechService:
             print(f"STT File Error: {exc}")
             return None
 
-    # ── Background TTS + SSE emit ─────────────────────────────────────────
+    # -- Background TTS + SSE emit -----------------------------------------
 
     @staticmethod
     def enqueue_tts_and_emit(
@@ -103,7 +104,7 @@ class SpeechService:
 
         asyncio.create_task(_generate_and_emit())
 
-    # ── cantonese.ai implementations ──────────────────────────────────────
+    # -- cantonese.ai implementations --------------------------------------
 
     @staticmethod
     async def _tts_cantonese(text: str, voice_id: str | None = None) -> str | None:
@@ -120,17 +121,19 @@ class SpeechService:
                     "text": text,
                     "language": "cantonese",
                     "output_extension": "mp3",
-                    "speed": 1,
-                    "pitch": 0,
-                    "should_return_timestamp": False,
+                    "speed": "1",
+                    "pitch": "0",
+                    "should_return_timestamp": "false",
                 }
                 if voice_id:
                     payload["voice_id"] = voice_id
                 resp = requests.post(
                     SpeechService.CANTONESE_AI_TTS_URL,
-                    json=payload,
+                    data=payload,
                     timeout=30,
                 )
+                if not resp.ok:
+                    print(f"Cantonese TTS API error {resp.status_code}: {resp.text}")
                 resp.raise_for_status()
                 with open(filepath, "wb") as f:
                     f.write(resp.content)
@@ -166,7 +169,7 @@ class SpeechService:
             print(f"Cantonese STT Error: {exc}")
             return None
 
-    # ── ElevenLabs implementations ────────────────────────────────────────
+    # -- ElevenLabs implementations ----------------------------------------
 
     @staticmethod
     async def _tts_elevenlabs(
