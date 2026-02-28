@@ -23,7 +23,7 @@ export function OnboardingPage() {
 
         <button
           onClick={() => navigate("/workspace")}
-          className="mt-4 flex cursor-pointer items-center justify-center gap-2 rounded-full bg-sidebar px-8 py-3.5 text-[14px] font-medium text-white transition-all hover:opacity-90 active:scale-95"
+          className="mt-4 flex cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-8 py-3.5 text-[14px] font-medium text-white transition-all hover:opacity-90 active:scale-95"
         >
           <Sparkles className="h-4 w-4" />
           Get Started

@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { useAuthStore } from "../../auth/hooks/useAuthStore.ts";
 import { useSurfaceStore } from "../../a2ui/store.ts";
 import { fallbackParse } from "../../a2ui/fallbackParser.ts";
-import { fetchTopics } from "../../workspace/hooks/useTopicList.ts";
+import { useTopicListStore, fetchTopics } from "../../workspace/hooks/useTopicList.ts";
 
 export interface ChatMessage {
   id: string;
@@ -11,6 +11,7 @@ export interface ChatMessage {
   timestamp: number;
   attachments?: Array<{ name: string; type: string; url: string }>;
   audioUrl?: string;
+  isAnimatable?: boolean;
 }
 
 interface ChatState {
@@ -23,6 +24,9 @@ interface ChatState {
   setTopicId: (topicId: string | null) => void;
   clear: () => void;
 }
+
+// Module-level variable to hold the active EventSource
+let activeEventSource: EventSource | null = null;
 
 export const useChatStore = create<ChatState>((set) => ({
   messages: [],
@@ -51,91 +55,113 @@ export const useChatStore = create<ChatState>((set) => ({
 
 /**
  * Open an SSE connection for a given session (topic) and handle incoming events.
- * Fire-and-forget — the connection establishes in the background.
+ * Returns a Promise that resolves when the connection is fully established.
  */
-function openSseStream(sessionId: string): void {
-  const store = useChatStore.getState();
-  const surfaceStore = useSurfaceStore.getState();
+function openSseStream(sessionId: string): Promise<void> {
+  return new Promise((resolve) => {
+    // If we're already connected to this topic, just return
+    if (activeEventSource && activeEventSource.url.includes(`/api/v1/chat/stream/${sessionId}`)) {
+      return resolve();
+    }
 
-  const url = `/api/v1/chat/stream/${sessionId}`;
-  const eventSource = new EventSource(url);
+    // Close any previous connections gracefully
+    if (activeEventSource) {
+      activeEventSource.close();
+    }
 
-  eventSource.addEventListener("Replies", (e: MessageEvent) => {
-    try {
-      const data = JSON.parse(e.data);
-      const text: string = data.text ?? "";
-      if (!text) return;
+    const store = useChatStore.getState();
+    const surfaceStore = useSurfaceStore.getState();
 
-      store.addMessage({ role: "assistant", content: text });
-      store.setStreaming(false);
+    const url = `/api/v1/chat/stream/${sessionId}`;
+    const eventSource = new EventSource(url);
+    activeEventSource = eventSource;
 
-      // Bridge plain text to A2UI surface
-      const fallbackMessages = fallbackParse({
-        type: "MarkdownView",
-        data: text,
-      });
-      if (fallbackMessages) {
-        fallbackMessages.forEach((msg) => {
-          if ("createSurface" in msg) {
-            surfaceStore.createSurface(
-              msg.createSurface.surfaceId,
-              msg.createSurface.catalogId,
-              msg.createSurface.theme,
-              msg.createSurface.sendDataModel,
-            );
-          } else if ("updateComponents" in msg) {
-            surfaceStore.updateComponents(
-              msg.updateComponents.surfaceId,
-              msg.updateComponents.components,
-            );
-          } else if ("updateDataModel" in msg) {
-            surfaceStore.updateDataModel(
-              msg.updateDataModel.surfaceId,
-              msg.updateDataModel.path,
-              msg.updateDataModel.value,
-            );
-          } else if ("deleteSurface" in msg) {
-            surfaceStore.deleteSurface(msg.deleteSurface.surfaceId);
-          }
+    eventSource.onopen = () => {
+      resolve();
+    };
+
+    eventSource.addEventListener("Replies", (e: MessageEvent) => {
+      try {
+        const data = JSON.parse(e.data);
+        const text: string = data.text ?? "";
+        if (!text) return;
+
+        store.addMessage({ role: "assistant", content: text, isAnimatable: true });
+        store.setStreaming(false);
+
+        // Bridge plain text to A2UI surface
+        const fallbackMessages = fallbackParse({
+          type: "MarkdownView",
+          data: text,
         });
+        if (fallbackMessages) {
+          fallbackMessages.forEach((msg) => {
+            if ("createSurface" in msg) {
+              surfaceStore.createSurface(
+                msg.createSurface.surfaceId,
+                msg.createSurface.catalogId,
+                msg.createSurface.theme,
+                msg.createSurface.sendDataModel,
+              );
+            } else if ("updateComponents" in msg) {
+              surfaceStore.updateComponents(
+                msg.updateComponents.surfaceId,
+                msg.updateComponents.components,
+              );
+            } else if ("updateDataModel" in msg) {
+              surfaceStore.updateDataModel(
+                msg.updateDataModel.surfaceId,
+                msg.updateDataModel.path,
+                msg.updateDataModel.value,
+              );
+            } else if ("deleteSurface" in msg) {
+              surfaceStore.deleteSurface(msg.deleteSurface.surfaceId);
+            }
+          });
+        }
+      } catch {
+        console.warn("Failed to parse SSE Replies event", e.data);
       }
-    } catch {
-      console.warn("Failed to parse SSE Replies event", e.data);
-    }
+    });
+
+    // ── TTS audio: auto-play when the backend finishes generating speech ──
+    eventSource.addEventListener("TTSResult", (e: MessageEvent) => {
+      try {
+        const data = JSON.parse(e.data);
+        const rawUrl: string = data.audio_url ?? "";
+        if (!rawUrl) return;
+
+        // Backend returns /media/tts/... but serves files at /uploads/tts/...
+        const audioUrl = rawUrl.replace(/^\/media\//, "/uploads/");
+
+        // Auto-play (allowed because user initiated the interaction)
+        const audio = new Audio(audioUrl);
+        audio.playbackRate = 1.1;
+        audio.play().catch((err) => console.warn("TTS autoplay blocked:", err));
+      } catch {
+        console.warn("Failed to parse SSE TTSResult event", e.data);
+      }
+    });
+
+    eventSource.addEventListener("Notif", (e: MessageEvent) => {
+      try {
+        const data = JSON.parse(e.data);
+        console.info("[SSE Notif]", data.message);
+        const msgStr = data.message || "";
+        if (msgStr.startsWith("Error:")) {
+          store.addMessage({ role: "system", content: msgStr });
+          store.setStreaming(false);
+        }
+      } catch {
+        // ignore
+      }
+    });
+    eventSource.onerror = () => {
+      // Connection lost — clean up
+      eventSource.close();
+      store.setStreaming(false);
+    };
   });
-
-  // ── TTS audio: auto-play when the backend finishes generating speech ──
-  eventSource.addEventListener("TTSResult", (e: MessageEvent) => {
-    try {
-      const data = JSON.parse(e.data);
-      const rawUrl: string = data.audio_url ?? "";
-      if (!rawUrl) return;
-
-      // Backend returns /media/tts/... but serves files at /uploads/tts/...
-      const audioUrl = rawUrl.replace(/^\/media\//, "/uploads/");
-
-      // Auto-play (allowed because user initiated the interaction)
-      const audio = new Audio(audioUrl);
-      audio.play().catch((err) => console.warn("TTS autoplay blocked:", err));
-    } catch {
-      console.warn("Failed to parse SSE TTSResult event", e.data);
-    }
-  });
-
-  eventSource.addEventListener("Notif", (e: MessageEvent) => {
-    try {
-      const data = JSON.parse(e.data);
-      console.info("[SSE Notif]", data.message);
-    } catch {
-      // ignore
-    }
-  });
-
-  eventSource.onerror = () => {
-    // Connection lost — clean up
-    eventSource.close();
-    store.setStreaming(false);
-  };
 }
 
 /**
@@ -165,6 +191,67 @@ export async function loadChatHistory(topicId: string): Promise<void> {
 }
 
 /**
+ * Delete chat history for the current topic from the backend and clear the UI.
+ */
+export async function deleteChatHistory(): Promise<void> {
+  const store = useChatStore.getState();
+  const currentTopicId = store.topicId;
+
+  if (currentTopicId) {
+    try {
+      const res = await fetch(`/api/v1/chat/history?topic_id=${currentTopicId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        // Find next topic to select
+        const topicStore = useTopicListStore.getState();
+        const topics = topicStore.topics;
+        const currentIndex = topics.findIndex(t => t.topic_id === currentTopicId);
+
+        let nextTopicId: string | null = null;
+        if (topics.length > 1 && currentIndex !== -1) {
+          // If the first topic is deleted, select the new first topic. Otherwise select the previous one.
+          const nextIndex = currentIndex === 0 ? 1 : currentIndex - 1;
+          nextTopicId = topics[nextIndex].topic_id;
+        }
+
+        // Locally remove the topic so it disappears from the sidebar without using the backend
+        const newTopics = topics.filter(t => t.topic_id !== currentTopicId);
+        topicStore.setTopics(newTopics);
+
+        // Clear existing states and connections
+        store.clear();
+        useSurfaceStore.getState().clearAll();
+        if (activeEventSource) {
+          activeEventSource.close();
+          activeEventSource = null;
+        }
+
+        // Switch to next topic if available
+        if (nextTopicId) {
+          store.setTopicId(nextTopicId);
+          loadChatHistory(nextTopicId);
+        }
+
+        return;
+      } else {
+        console.error("Failed to delete chat history:", res.status);
+      }
+    } catch (err) {
+      console.error("Error deleting chat history:", err);
+    }
+  }
+
+  // Clear local stores unconditionally so user always gets a clean slate 
+  store.clear();
+  useSurfaceStore.getState().clearAll();
+  if (activeEventSource) {
+    activeEventSource.close();
+    activeEventSource = null;
+  }
+}
+
+/**
  * Send a chat message to the backend and trigger SSE streaming.
  */
 export async function sendChatMessage(
@@ -172,7 +259,15 @@ export async function sendChatMessage(
   attachments?: File[],
 ): Promise<void> {
   const store = useChatStore.getState();
-  store.addMessage({ role: "user", content });
+  store.addMessage({
+    role: "user",
+    content,
+    attachments: attachments?.map(file => ({
+      name: file.name,
+      type: file.name.split('.').pop()?.toUpperCase() || "FILE",
+      url: ""
+    }))
+  });
   store.setStreaming(true);
 
   try {
@@ -214,10 +309,10 @@ export async function sendChatMessage(
       }
     }
 
-    // 3. Open SSE stream (connects in background)
-    openSseStream(currentTopicId!);
+    // 3. Open SSE stream and wait until it's officially connected
+    await openSseStream(currentTopicId!);
 
-    // 4. Send Chat Message to backend
+    // 4. Send Chat Message to backend (only after SSE is open)
     const chatRes = await fetch("/api/v1/chat/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

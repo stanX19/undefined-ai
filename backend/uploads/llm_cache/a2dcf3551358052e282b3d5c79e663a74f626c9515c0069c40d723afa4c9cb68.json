@@ -1,0 +1,11 @@
+{
+  "text": "```json\n[\n  \"The 'Compliance Gap' is a systemic barrier affecting billions globally, exemplified by individuals like Ahmad facing overwhelming legal notices, which costs small businesses billions and can lead to business collapse due to complex jargon and lack of contextual guidance.\",\n  \"The mission is to transform complex legal requirements into simple, actionable steps using Rasmi AI, an Agentic Compliance Assistant and workflow engine.\",\n  \"Rasmi AI is built for the 90% of underserved businesses to democratize access and create systemic efficiency by ingesting legal documents, understanding context, generating visual roadmaps, autofilling forms, and providing reliable, context-aware step-by-step execution.\",\n  \"Rasmi AI benefits citizens by providing clear paths and saving businesses, supports governments and NGOs with scalable compliance for micro-SMEs, and strengthens nations by formalizing the informal economy and institutions.\"\n]\n```",
+  "model": "ChatGoogleGenerativeAI (models/gemini-2.5-flash) {api=...47z42G7BKM}",
+  "status": "ok",
+  "json_data": [
+    "The 'Compliance Gap' is a systemic barrier affecting billions globally, exemplified by individuals like Ahmad facing overwhelming legal notices, which costs small businesses billions and can lead to business collapse due to complex jargon and lack of contextual guidance.",
+    "The mission is to transform complex legal requirements into simple, actionable steps using Rasmi AI, an Agentic Compliance Assistant and workflow engine.",
+    "Rasmi AI is built for the 90% of underserved businesses to democratize access and create systemic efficiency by ingesting legal documents, understanding context, generating visual roadmaps, autofilling forms, and providing reliable, context-aware step-by-step execution.",
+    "Rasmi AI benefits citizens by providing clear paths and saving businesses, supports governments and NGOs with scalable compliance for micro-SMEs, and strengthens nations by formalizing the informal economy and institutions."
+  ]
+}

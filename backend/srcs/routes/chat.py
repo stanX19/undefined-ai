@@ -26,6 +26,7 @@ async def sse_stream(session_id: str):
     queue = SseService.open(session_id)
 
     async def _event_generator():
+        yield ": ping\ndata: \n\n"
         try:
             while True:
                 msg = await queue.get()

@@ -68,7 +68,7 @@ export function LoginPage() {
           <button
             type="submit"
             disabled={!inputValue.trim() || isLoading}
-            className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-sidebar px-8 py-3.5 text-[14px] font-medium text-white transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-8 py-3.5 text-[14px] font-medium text-white transition-all hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? "Signing in..." : "Sign In"}
           </button>
