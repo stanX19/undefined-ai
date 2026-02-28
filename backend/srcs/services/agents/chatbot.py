@@ -5,8 +5,9 @@ Uses the rotating LLM pool and exposes a single ``ask()`` entry-point
 for the rest of the application.
 """
 import traceback
+from typing import Awaitable, Callable
 
-from langchain_core.messages import HumanMessage, SystemMessage, BaseMessage
+from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, BaseMessage
 from langchain.agents import create_agent
 
 from srcs.services.agents.rotating_llm import rotating_llm
@@ -44,20 +45,45 @@ class Chatbot:
         user_prompt: str,
         document_text: str | None = None,
         chat_history: list[BaseMessage] | None = None,
+        on_tool_call: Callable[[str, dict], Awaitable[None]] | None = None,
     ) -> str:
-        """Send a message through the agent and return the final text answer."""
+        """Send a message through the agent and return the final text answer.
+
+        Args:
+            on_tool_call: Optional async callback invoked with ``(tool_name, arguments)``
+                          each time the agent calls a tool.
+        """
         messages = self._build_messages(user_prompt, document_text, chat_history)
 
         try:
             llm = await rotating_llm.get_runnable(temperature=0.4)
             agent = create_agent(model=llm, tools=self.tools)
-            result = await agent.ainvoke({"messages": messages})  # type: ignore[arg-type]
 
-            final_messages: list[BaseMessage] = result.get("messages", [])
-            if not final_messages:
+            # Stream events so we can intercept tool calls in real time
+            last_ai_message: BaseMessage | None = None
+            async for event in agent.astream_events(
+                {"messages": messages}, version="v2",
+            ):
+                kind = event.get("event", "")
+
+                # Capture tool-call events and forward via callback
+                if kind == "on_chat_model_end" and on_tool_call:
+                    output = event.get("data", {}).get("output")
+                    if isinstance(output, AIMessage) and output.tool_calls:
+                        for tc in output.tool_calls:
+                            await on_tool_call(tc["name"], tc.get("args", {}))
+
+                # Track the final AI message from the agent
+                if kind == "on_chain_end" and event.get("name") == "LangGraph":
+                    output = event.get("data", {}).get("output", {})
+                    final_msgs = output.get("messages", [])
+                    if final_msgs:
+                        last_ai_message = final_msgs[-1]
+
+            if last_ai_message is None:
                 return "I'm sorry, I couldn't generate a response."
 
-            return self._extract_text(final_messages[-1].content)
+            return self._extract_text(last_ai_message.content)
 
         except Exception as exc:
             traceback.print_exc()
