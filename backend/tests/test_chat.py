@@ -69,8 +69,12 @@ def run_interactive_chat():
             if not user_msg.strip():
                 continue
 
-            if user_msg.lower() == "upload":
-                pdf_path = os.path.join(os.path.dirname(__file__), "AttentionIsAllYouNeed.pdf")#"HTEChallengeStatements.pdf")
+            if user_msg.lower().startswith("upload"):
+                try:
+                    name = user_msg.split()[1]
+                except Exception as exc:
+                    name = "AttentionIsAllYouNeed"
+                pdf_path = os.path.join(os.path.dirname(__file__), f"{name}.pdf")#"HTEChallengeStatements.pdf")
                 if not os.path.isfile(pdf_path):
                     print(f"{Colors.RED}PDF not found: {pdf_path}{Colors.END}")
                     continue

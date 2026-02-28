@@ -1,5 +1,5 @@
 """Retrieval service — hierarchy-based fact retrieval (no vector DB)."""
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from srcs.models.atomic_fact import AtomicFact
@@ -82,3 +82,12 @@ class RetrievalService:
             .limit(1)
         )
         return result.scalar_one_or_none() is not None
+
+    @staticmethod
+    async def get_max_level(db: AsyncSession, topic_id: str) -> int | None:
+        """Return the highest compression level available for a topic, or None."""
+        result = await db.execute(
+            select(func.max(AtomicFact.level))
+            .where(AtomicFact.topic_id == topic_id)
+        )
+        return result.scalar_one_or_none()
