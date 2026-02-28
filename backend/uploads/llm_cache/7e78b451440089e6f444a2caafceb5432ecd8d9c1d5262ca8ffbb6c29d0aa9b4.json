@@ -1,0 +1,20 @@
+{
+  "text": "```json\n[\n  \"CH4 is methane, a simple hydrocarbon with the chemical formula CH4.\",\n  \"CH4 is a colorless, odorless gas that is highly flammable and is a potent greenhouse gas.\",\n  \"The molecule consists of one carbon atom bonded to four hydrogen atoms.\",\n  \"The carbon atom in CH4 is the central atom.\",\n  \"The molecular shape of CH4 is tetrahedral.\",\n  \"The bond angles in CH4 are 109.5 degrees.\",\n  \"The carbon atom has four valence electrons.\",\n  \"The carbon atom has no lone pairs of electrons.\",\n  \"There are four bonding pairs of electrons around the central carbon atom.\",\n  \"According to VSEPR theory, electron pairs around a central atom arrange themselves to minimize repulsion.\",\n  \"The bond length between carbon and hydrogen atoms is approximately 1.09 angstroms.\",\n  \"The tetrahedral geometry is symmetrical with all bond lengths and bond angles being equal.\",\n  \"Experimental techniques including X-ray diffraction and infrared spectroscopy have confirmed the tetrahedral shape of CH4.\"\n]\n```",
+  "model": "ChatMinimax (MiniMax-M2.5) {api=...NTUF42ohUc}",
+  "status": "ok",
+  "json_data": [
+    "CH4 is methane, a simple hydrocarbon with the chemical formula CH4.",
+    "CH4 is a colorless, odorless gas that is highly flammable and is a potent greenhouse gas.",
+    "The molecule consists of one carbon atom bonded to four hydrogen atoms.",
+    "The carbon atom in CH4 is the central atom.",
+    "The molecular shape of CH4 is tetrahedral.",
+    "The bond angles in CH4 are 109.5 degrees.",
+    "The carbon atom has four valence electrons.",
+    "The carbon atom has no lone pairs of electrons.",
+    "There are four bonding pairs of electrons around the central carbon atom.",
+    "According to VSEPR theory, electron pairs around a central atom arrange themselves to minimize repulsion.",
+    "The bond length between carbon and hydrogen atoms is approximately 1.09 angstroms.",
+    "The tetrahedral geometry is symmetrical with all bond lengths and bond angles being equal.",
+    "Experimental techniques including X-ray diffraction and infrared spectroscopy have confirmed the tetrahedral shape of CH4."
+  ]
+}

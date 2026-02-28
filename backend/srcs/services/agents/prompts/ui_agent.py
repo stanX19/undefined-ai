@@ -78,10 +78,3 @@ create or modify elements to fulfil the request.
 - Set `metadata.source_fact_id` when an element's content comes from a fact.
 - NEVER output raw JSON to the user — always call tools.
 """
-
-
-if __name__ == "__main__":
-    print("UI Agent prompt length:", len(UI_AGENT_PROMPT), "chars")
-    print("Protocol summary length:", len(PROTOCOL_SUMMARY), "chars")
-    print("\n--- First 500 chars ---")
-    print(UI_AGENT_PROMPT[:500])
