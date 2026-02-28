@@ -1,13 +1,20 @@
-import { useShallow } from "zustand/react/shallow";
-import { SurfaceRenderer } from "../a2ui/SurfaceRenderer.tsx";
-import { useSurfaceStore } from "../a2ui/store.ts";
+import { UIRoot } from "../ui_renderer/components/UIRoot.tsx";
+import { useUIStore, fetchUIForTopic } from "../ui_renderer/store.ts";
 import { ChatPanel } from "../chat/components/ChatPanel.tsx";
 import { TopicsSidebar } from "./components/TopicsSidebar.tsx";
+import { useEffect } from "react";
+import { useChatStore } from "../chat/hooks/useChat.ts";
 
 export function WorkspacePage() {
-  const surfaceIds = useSurfaceStore(
-    useShallow((s) => Array.from(s.surfaces.keys())),
-  );
+  const { topicId: chatTopicId } = useChatStore();
+  const { topicId: uiTopicId } = useUIStore();
+
+  // Load UI when topic changes
+  useEffect(() => {
+    if (chatTopicId && chatTopicId !== uiTopicId) {
+      fetchUIForTopic(chatTopicId);
+    }
+  }, [chatTopicId, uiTopicId]);
 
   return (
     <div className="flex h-dvh w-full overflow-hidden bg-(--color-bg)">
@@ -16,7 +23,7 @@ export function WorkspacePage() {
 
       {/* Center — Main UI Panel */}
       <main className="flex flex-1 flex-col overflow-y-auto p-6">
-        {surfaceIds.length === 0 ? (
+        {!chatTopicId ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
             <h2 className="text-2xl font-semibold text-text-primary">
               Workspace
@@ -27,9 +34,7 @@ export function WorkspacePage() {
           </div>
         ) : (
           <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 pb-20">
-            {surfaceIds.map((id) => (
-              <SurfaceRenderer key={id} surfaceId={id} />
-            ))}
+            <UIRoot />
           </div>
         )}
       </main>
