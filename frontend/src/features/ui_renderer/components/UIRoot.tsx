@@ -4,6 +4,8 @@ import { ElementRenderer } from "./ElementRenderer.tsx";
 export function UIRoot() {
     const { uiJson, isLoading, error } = useUIStore();
 
+    console.log("[UIRoot] Render cycle triggered. Store state:\n", { uiJson, isLoading, error });
+
     if (isLoading && !uiJson) {
         return (
             <div className="flex h-full w-full items-center justify-center p-8">

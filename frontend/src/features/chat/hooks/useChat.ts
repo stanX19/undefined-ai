@@ -162,6 +162,7 @@ function openSseStream(sessionId: string): Promise<void> {
     eventSource.addEventListener("UIUpdate", (e: MessageEvent) => {
       try {
         const data = JSON.parse(e.data);
+        console.log("[USE-CHAT] Received SSE UIUpdate Event:", data);
         const { topic_id, scene_id, ui_json } = data;
         useUIStore.getState().setUI(topic_id, scene_id, ui_json);
       } catch (err) {
