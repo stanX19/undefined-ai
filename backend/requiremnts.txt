@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+sqlalchemy
+aiosqlite
+pydantic
+pydantic-settings
+google-genai
+firebase-admin
+langchain
+langchain-google-genai
+langgraph
+sse-starlette
+python-multipart
+PyMuPDF
+mimetypes
