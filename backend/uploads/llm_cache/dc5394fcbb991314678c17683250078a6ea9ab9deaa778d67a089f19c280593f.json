@@ -1,0 +1,11 @@
+{
+  "text": "```json\n[\n  \"RTX 4060 was released May 18, 2023 at $299 MSRP (vs RTX 3060's Jan 12, 2021 at $329), uses Ada Lovelace 5nm (vs Ampere 8nm), has 8GB GDDR6/128-bit/272 GB/s (vs 12GB/192-bit/360 GB/s), 3072 CUDA cores/96 TMUs/48 ROPs (vs 3584/112/48), 2460 MHz/15.11 TFLOPS (vs 1777 MHz/12.74 TFLOPS), and 115W TDP (vs 170W).\",\n  \"At 1080p, RTX 4060 is 17% faster with 29% lower cost per frame and 46% better value, but RTX 3060 is 3% faster at 1440p and 11% faster at 4K.\",\n  \"RTX 4060 uses PCIe 4.0 x8 (vs x16) while both support DirectX 12 Ultimate, OpenGL 4.6, Vulkan 1.3, with RTX 4060 supporting CUDA 8.9 (vs 8.6).\",\n  \"The GeForce RTX 4060 is recommended as it beats the RTX 3060 in performance tests.\"\n]\n```",
+  "model": "ChatMinimax (MiniMax-M2.5) {api=...NTUF42ohUc}",
+  "status": "ok",
+  "json_data": [
+    "RTX 4060 was released May 18, 2023 at $299 MSRP (vs RTX 3060's Jan 12, 2021 at $329), uses Ada Lovelace 5nm (vs Ampere 8nm), has 8GB GDDR6/128-bit/272 GB/s (vs 12GB/192-bit/360 GB/s), 3072 CUDA cores/96 TMUs/48 ROPs (vs 3584/112/48), 2460 MHz/15.11 TFLOPS (vs 1777 MHz/12.74 TFLOPS), and 115W TDP (vs 170W).",
+    "At 1080p, RTX 4060 is 17% faster with 29% lower cost per frame and 46% better value, but RTX 3060 is 3% faster at 1440p and 11% faster at 4K.",
+    "RTX 4060 uses PCIe 4.0 x8 (vs x16) while both support DirectX 12 Ultimate, OpenGL 4.6, Vulkan 1.3, with RTX 4060 supporting CUDA 8.9 (vs 8.6).",
+    "The GeForce RTX 4060 is recommended as it beats the RTX 3060 in performance tests."
+  ]
+}

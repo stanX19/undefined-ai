@@ -53,6 +53,7 @@
 }
 
 @theme {
+  --color-bg: var(--ds-bg);
   --color-primary: var(--ds-primary);
   --color-primary-hover: var(--ds-primary-hover);
   --color-sidebar: var(--ds-sidebar);

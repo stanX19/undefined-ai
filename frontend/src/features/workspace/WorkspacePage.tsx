@@ -36,7 +36,7 @@ export function WorkspacePage() {
   }, [location.state, location.pathname, navigate]);
 
   return (
-    <div className="flex h-dvh w-full overflow-hidden bg-(--color-bg)">
+    <div className="flex h-dvh w-full overflow-hidden bg-bg">
       {/* Left — Topics sidebar */}
       <TopicsSidebar />
 
