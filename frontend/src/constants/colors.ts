@@ -8,10 +8,10 @@
 
 export const COLORS = {
   brand: {
-    primary: "#4F46E5",
-    primaryHover: "#4338CA",
-    sidebarDeep: "#0A0E1A",
-    subtleBlue: "#EFF6FF",
+    primary: "#111827", // Dark Gray / Near Black
+    primaryHover: "#374151", // Gray 700
+    sidebarDeep: "#FFFFFF", // White
+    subtleBlue: "#F3F4F6", // Light Gray
   },
 
   semantic: {
@@ -41,15 +41,15 @@ export const COLORS = {
     body: "#374151",
     secondary: "#6B7280",
     inverse: "#FFFFFF",
-    link: "#4F46E5",
+    link: "#111827",
   },
 
   dark: {
-    sidebar: "#0A0E1A",
-    surface: "#1E293B",
-    border: "#334155",
-    textPrimary: "#F1F5F9",
-    textSecondary: "#94A3B8",
+    sidebar: "#111827", // Dark Gray
+    surface: "#1F2937", // Gray 800
+    border: "#374151",  // Gray 700
+    textPrimary: "#F9FAFB",
+    textSecondary: "#9CA3AF",
   },
 } as const;
 
