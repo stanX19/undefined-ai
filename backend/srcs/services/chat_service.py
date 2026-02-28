@@ -101,6 +101,7 @@ class ChatService:
     ) -> None:
         """Background coroutine: build history, call agent, persist reply, emit SSE."""
         from srcs.database import AsyncSessionLocal
+        from srcs.services.retrieval_service import RetrievalService
 
         session_id = topic_id  # Phase 1: topic_id == SSE session_id
 
@@ -113,9 +114,22 @@ class ChatService:
                     db, topic_id, exclude_id=exclude_message_id,
                 )
 
+                # If ingested facts exist, use core concepts instead of raw text
+                context_text: str | None = document_text
+                has_facts: bool = await RetrievalService.has_facts(db, topic_id)
+                if has_facts:
+                    core_facts = await RetrievalService.get_facts_by_level(db, topic_id, level=3)
+                    if core_facts:
+                        concepts: list[str] = [f"- {f.content}" for f in core_facts]
+                        context_text = (
+                            "CORE CONCEPTS (use retrieve_facts / list_topic_facts "
+                            f"tools with topic_id='{topic_id}' to drill deeper):\n"
+                            + "\n".join(concepts)
+                        )
+
             answer: str = await chatbot.ask(
                 user_prompt=user_prompt,
-                document_text=document_text,
+                document_text=context_text,
                 chat_history=chat_history,
             )
 

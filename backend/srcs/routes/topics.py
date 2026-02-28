@@ -7,6 +7,7 @@ from srcs.database import get_db
 from srcs.schemas.topic_dto import TopicCreateRequest, TopicResponse, TopicDetailResponse
 from srcs.services.topic_service import TopicService
 from srcs.services.document_service import DocumentService
+from srcs.services.ingestion_service import IngestionService
 
 router: APIRouter = APIRouter(prefix="/api/v1/topics", tags=["topics"])
 
@@ -52,6 +53,7 @@ async def upload_document(
     """Upload a PDF, extract its text, and store it on the topic.
 
     Only PDF files are accepted.
+    Automatically triggers the ingestion pipeline in the background.
     """
     if not file.filename or not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are accepted")
@@ -63,4 +65,8 @@ async def upload_document(
     extracted: str = DocumentService.extract_text(file_path)
 
     topic = await TopicService.set_document_text(db, topic_id, extracted)
+
+    # Auto-trigger ingestion pipeline in background (non-blocking)
+    IngestionService.trigger_ingestion(topic_id, extracted)
+
     return TopicDetailResponse.model_validate(topic)

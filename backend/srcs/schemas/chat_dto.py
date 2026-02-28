@@ -18,6 +18,7 @@ class SseEvent(str, Enum):
     UPDATE_CHECKLIST = "UpdateChecklist"
     EDIT_DOCUMENT = "EditDocument"
     TTS_RESULT = "TTSResult"
+    INGESTION_PROGRESS = "IngestionProgress"
 
 
 # ── SSE payload models ───────────────────────────────────────────────────────
@@ -50,6 +51,13 @@ class SseTTSResultData(BaseModel):
     """TTS generation result event payload."""
     text: str
     audio_url: str
+
+
+class SseIngestionProgressData(BaseModel):
+    """Ingestion pipeline progress event payload."""
+    topic_id: str
+    stage: str
+    message: str
 
 
 # ── REST request / response models ──────────────────────────────────────────

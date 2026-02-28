@@ -31,3 +31,6 @@ class Topic(Base):
     messages: Mapped[list["ChatMessage"]] = relationship(  # noqa: F821
         back_populates="topic", cascade="all, delete-orphan"
     )
+    facts: Mapped[list["AtomicFact"]] = relationship(  # noqa: F821
+        back_populates="topic", cascade="all, delete-orphan"
+    )

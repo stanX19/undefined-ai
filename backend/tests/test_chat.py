@@ -6,6 +6,7 @@ Connects an SSE stream per topic, POSTs messages, and reads
 the agent reply from the SSE ``Replies`` event.
 """
 import json
+import os
 import time
 import threading
 
@@ -44,6 +45,7 @@ def run_interactive_chat():
 
         print(f"\n{Colors.GREEN}{Colors.BOLD}--- Interactive Agent Chat Started (SSE) ---{Colors.END}")
         print(f"Topic ID: {topic_id}")
+        print("Type 'upload' to upload HTEChallengeStatements.pdf")
         print("Type 'exit' or 'quit' to stop.\n")
 
         # 1. Open a persistent SSE stream (no until_event → listens forever)
@@ -65,6 +67,20 @@ def run_interactive_chat():
                 break
 
             if not user_msg.strip():
+                continue
+
+            if user_msg.lower() == "upload":
+                pdf_path = os.path.join(os.path.dirname(__file__), "AttentionIsAllYouNeed.pdf")#"HTEChallengeStatements.pdf")
+                if not os.path.isfile(pdf_path):
+                    print(f"{Colors.RED}PDF not found: {pdf_path}{Colors.END}")
+                    continue
+                with open(pdf_path, "rb") as f:
+                    upload_res = client.post(
+                        f"/api/v1/topics/{topic_id}/upload",
+                        description="Upload PDF",
+                        files={"file": ("HTEChallengeStatements.pdf", f, "application/pdf")},
+                    )
+                print(f"{Colors.GREEN}Document uploaded. Extracted {len(upload_res.get('document_text', ''))} chars.{Colors.END}")
                 continue
 
             res = client.post(
