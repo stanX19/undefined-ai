@@ -111,6 +111,7 @@ def run_interactive_chat():
                     # Mark all events up to (and including) this one as seen
                     seen = socket.events_received.index(reply_event) + 1
                 if tts_event:
+                    seen = socket.events_received.index(tts_event) + 1
                     break
                 time.sleep(0.3)
 

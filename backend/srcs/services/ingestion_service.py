@@ -117,16 +117,16 @@ class IngestionService:
 
                 # Stage 2: Atomic split
                 _pipeline_status[topic_id] = "processing:stage_2"
-                await IngestionService._emit_progress(topic_id, "stage_2", "Extracting atomic facts…")
+                await IngestionService._emit_progress(topic_id, "stage_2", f"Extracting atomic facts ({len(chunk_facts)} chunks)…")
                 atomic_facts = await IngestionService._stage_2_atomic_split(
                     db, topic_id, chunk_facts,
                 )
 
                 # Stage 3: First compression → main facts
                 _pipeline_status[topic_id] = "processing:stage_3"
-                await IngestionService._emit_progress(topic_id, "stage_3", "Compressing to main facts…")
+                await IngestionService._emit_progress(topic_id, "stage_3", f"Compressing to main facts ({len(atomic_facts)} facts)…")
                 main_facts = await IngestionService._stage_3_compress(
-                    db, topic_id, atomic_facts, target_count=100, output_level=2,
+                    db, topic_id, atomic_facts, target_count=len(atomic_facts), output_level=2,
                 )
 
                 # Stage 4: Second compression → core concepts
@@ -216,22 +216,30 @@ class IngestionService:
     # ── Stage 2: Atomic split (LLM) ─────────────────────────────────────
 
     @staticmethod
+    async def _extract_facts_from_chunk(
+        chunk: AtomicFact,
+    ) -> tuple[AtomicFact, list[str]]:
+        """Send a single chunk to the LLM and return extracted fact strings."""
+        prompt: str = _ATOMIC_SPLIT_PROMPT.format(chunk_text=chunk.content)
+        response = await rotating_llm.send_message_get_json(
+            prompt, temperature=0.0,
+        )
+        extracted: list[str] = response.json_data if isinstance(response.json_data, list) else []
+        return chunk, extracted
+
+    @staticmethod
     async def _stage_2_atomic_split(
         db: AsyncSession,
         topic_id: str,
         chunk_facts: list[AtomicFact],
     ) -> list[AtomicFact]:
-        """Extract atomic facts from each chunk via LLM."""
+        """Extract atomic facts from each chunk via LLM (parallel)."""
+        results = await asyncio.gather(
+            *(IngestionService._extract_facts_from_chunk(chunk) for chunk in chunk_facts)
+        )
+
         all_atomic: list[AtomicFact] = []
-
-        for chunk in chunk_facts:
-            prompt: str = _ATOMIC_SPLIT_PROMPT.format(chunk_text=chunk.content)
-            response = await rotating_llm.send_message_get_json(
-                prompt, temperature=0.0,
-            )
-
-            extracted: list[str] = response.json_data if isinstance(response.json_data, list) else []
-
+        for chunk, extracted in results:
             for fact_text in extracted:
                 if not isinstance(fact_text, str) or not fact_text.strip():
                     continue
@@ -254,6 +262,32 @@ class IngestionService:
     # ── Stage 3 & 4: Compression (LLM) ──────────────────────────────────
 
     @staticmethod
+    async def _compress_batch(
+        batch: list[AtomicFact],
+        per_batch_target: int,
+    ) -> tuple[list[AtomicFact], list[str]]:
+        """Send a single batch to the LLM and return summary strings."""
+        facts_text: list[str] = [f.content for f in batch]
+        prompt: str = _COMPRESS_PROMPT.format(
+            target_count=per_batch_target,
+            facts_json=str(facts_text),
+        )
+        response = await rotating_llm.send_message_get_json(
+            prompt, temperature=0.0,
+        )
+        summaries: list[str] = response.json_data if isinstance(response.json_data, list) else []
+        return batch, summaries
+
+    @staticmethod
+    def _batch_source_range(
+        batch: list[AtomicFact],
+    ) -> tuple[int | None, int | None]:
+        """Compute min(source_start) and max(source_end) across facts in a batch."""
+        starts = [f.source_start for f in batch if f.source_start is not None]
+        ends = [f.source_end for f in batch if f.source_end is not None]
+        return (min(starts) if starts else None, max(ends) if ends else None)
+
+    @staticmethod
     async def _stage_3_compress(
         db: AsyncSession,
         topic_id: str,
@@ -261,10 +295,7 @@ class IngestionService:
         target_count: int,
         output_level: int,
     ) -> list[AtomicFact]:
-        """Compress facts from one level into fewer facts at the next level.
-
-        Processes in batches to stay within LLM context limits.
-        """
+        """Compress facts from one level into fewer facts at the next level (parallel)."""
         if not input_facts:
             return []
 
@@ -276,23 +307,16 @@ class IngestionService:
         ]
 
         per_batch_target: int = max(1, target_count // max(1, len(batches)))
+
+        results = await asyncio.gather(
+            *(IngestionService._compress_batch(batch, per_batch_target) for batch in batches)
+        )
+
         all_compressed: list[AtomicFact] = []
-
-        for batch in batches:
-            facts_text: list[str] = [f.content for f in batch]
-            prompt: str = _COMPRESS_PROMPT.format(
-                target_count=per_batch_target,
-                facts_json=str(facts_text),
-            )
-            response = await rotating_llm.send_message_get_json(
-                prompt, temperature=0.0,
-            )
-
-            summaries: list[str] = response.json_data if isinstance(response.json_data, list) else []
-
-            # Link each summary to the first fact in the batch as parent
+        for batch, summaries in results:
             parent_id: str = batch[0].fact_id
             source_chunk_id: str | None = batch[0].source_chunk_id
+            src_start, src_end = IngestionService._batch_source_range(batch)
 
             for summary_text in summaries:
                 if not isinstance(summary_text, str) or not summary_text.strip():
@@ -303,6 +327,8 @@ class IngestionService:
                     content=summary_text.strip(),
                     parent_fact_id=parent_id,
                     source_chunk_id=source_chunk_id,
+                    source_start=src_start,
+                    source_end=src_end,
                 )
                 db.add(fact)
                 all_compressed.append(fact)
