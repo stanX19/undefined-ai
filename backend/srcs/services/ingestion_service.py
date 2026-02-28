@@ -13,6 +13,7 @@ import traceback
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from srcs.models.atomic_fact import AtomicFact
+from srcs.models.topic import Topic
 from srcs.schemas.chat_dto import SseIngestionProgressData
 from srcs.services.agents.cached_llm import cached_llm as rotating_llm
 from srcs.services.sse_service import SseService
@@ -149,6 +150,11 @@ class IngestionService:
                 # Cross-tree: merge across knowledge trees if combined count exceeds threshold
                 await IngestionService._cross_tree_compress(db, topic_id)
 
+                # Classify material difficulty and store on the topic
+                await IngestionService._classify_and_store_difficulty(
+                    db, topic_id, document_text,
+                )
+
             _pipeline_status[topic_id] = "completed"
             await IngestionService._emit_progress(topic_id, "completed", "Ingestion complete.")
             print(f"[INGESTION] Pipeline completed for topic {topic_id} (max level {current_level})")
@@ -276,3 +282,20 @@ class IngestionService:
                 f"-> level {current_level + 1} ({len(compressed)})"
             )
             current_level += 1
+
+    @staticmethod
+    async def _classify_and_store_difficulty(
+        db: AsyncSession, topic_id: str, document_text: str,
+    ) -> None:
+        """Run LLM difficulty classification and persist to the topic row."""
+        from srcs.services.recommendation_service import RecommendationService
+
+        try:
+            level = await RecommendationService.classify_difficulty(document_text)
+            topic = await db.get(Topic, topic_id)
+            if topic:
+                topic.difficulty_level = level
+                await db.commit()
+                print(f"[INGESTION] Classified difficulty for topic {topic_id}: {level}")
+        except Exception as exc:
+            print(f"[INGESTION] Difficulty classification failed: {exc}")
