@@ -15,13 +15,19 @@ class UserService:
         return result.scalar_one_or_none()
 
     @staticmethod
-    async def get_or_create_user(db: AsyncSession, user_id: str) -> User:
+    async def get_or_create_user(db: AsyncSession, user_id: str, education_level: str | None = None) -> User:
         """Return existing user or create a new one with the given ID."""
         existing: User | None = await UserService.get_user(db, user_id)
+        
         if existing:
+            # Update education level if provided and different
+            if education_level and existing.education_level != education_level:
+                existing.education_level = education_level
+                await db.commit()
+                await db.refresh(existing)
             return existing
 
-        user = User(user_id=user_id)
+        user = User(user_id=user_id, education_level=education_level)
         db.add(user)
         await db.commit()
         await db.refresh(user)

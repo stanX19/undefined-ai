@@ -15,5 +15,9 @@ async def login(
     db: AsyncSession = Depends(get_db),
 ) -> LoginResponse:
     """Login (or register) by user ID. Returns user info."""
-    user = await UserService.get_or_create_user(db, body.user_id)
+    user = await UserService.get_or_create_user(
+        db, 
+        body.user_id, 
+        education_level=body.education_level
+    )
     return LoginResponse.model_validate(user)
