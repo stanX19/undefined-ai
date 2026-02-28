@@ -15,13 +15,21 @@ export interface ChatMessage {
   isAnimatable?: boolean;
 }
 
+export interface StreamingLog {
+  id: string;
+  message: string;
+  role: 'thought' | 'tool' | 'search';
+}
+
 interface ChatState {
   messages: ChatMessage[];
   isStreaming: boolean;
+  streamingLogs: StreamingLog[];
   topicId: string | null;
   addMessage: (message: Omit<ChatMessage, "id" | "timestamp">) => void;
   updateMessageAudio: (messageId: string, audioUrl: string) => void;
   setStreaming: (streaming: boolean) => void;
+  addStreamingLog: (log: Omit<StreamingLog, "id">) => void;
   setTopicId: (topicId: string | null) => void;
   clear: () => void;
 }
@@ -32,6 +40,7 @@ let activeEventSource: EventSource | null = null;
 export const useChatStore = create<ChatState>((set) => ({
   messages: [],
   isStreaming: false,
+  streamingLogs: [],
   topicId: null,
 
   addMessage: (msg) =>
@@ -49,9 +58,15 @@ export const useChatStore = create<ChatState>((set) => ({
       ),
     })),
 
-  setStreaming: (isStreaming) => set({ isStreaming }),
+  setStreaming: (isStreaming) => set((state) => ({
+    isStreaming,
+    streamingLogs: isStreaming ? state.streamingLogs : []
+  })),
+  addStreamingLog: (log) => set((state) => ({
+    streamingLogs: [...state.streamingLogs, { ...log, id: crypto.randomUUID() }]
+  })),
   setTopicId: (topicId) => set({ topicId }),
-  clear: () => set({ messages: [], isStreaming: false, topicId: null }),
+  clear: () => set({ messages: [], isStreaming: false, streamingLogs: [], topicId: null }),
 }));
 
 /**
@@ -175,14 +190,24 @@ function openSseStream(sessionId: string): Promise<void> {
       try {
         const data = JSON.parse(e.data);
         if (data.tool_name === "web_search") {
-          store.addMessage({
-            role: "system",
-            content: `🔍 Searching the web for: ${data.arguments?.query || data.arguments?.description || 'information'}...`
+          store.addStreamingLog({
+            role: 'search',
+            message: `Searching for: ${data.arguments?.query || data.arguments?.description || 'information'}`
           });
         } else if (data.tool_name === "edit_ui") {
-          store.addMessage({
-            role: "system",
-            content: `🎨 Generating custom UI for: ${data.arguments?.description || 'your request'}...`
+          store.addStreamingLog({
+            role: 'tool',
+            message: `Designing UI: ${data.arguments?.description || 'your request'}`
+          });
+        } else if (data.tool_name === "list_topic_facts" || data.tool_name === "retrieve_facts") {
+          store.addStreamingLog({
+            role: 'thought',
+            message: `Analyzing topic knowledge base...`
+          });
+        } else {
+          store.addStreamingLog({
+            role: 'tool',
+            message: `Using tool: ${data.tool_name}`
           });
         }
       } catch (err) {
@@ -198,6 +223,11 @@ function openSseStream(sessionId: string): Promise<void> {
         if (msgStr.startsWith("Error:")) {
           store.addMessage({ role: "system", content: msgStr });
           store.setStreaming(false);
+        } else if (msgStr) {
+          store.addStreamingLog({
+            role: 'thought',
+            message: msgStr
+          });
         }
       } catch {
         // ignore

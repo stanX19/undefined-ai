@@ -98,11 +98,13 @@
         },
         "height": { 
           "type": "string",
-          "enum": ["auto", "full", "screen"] 
+          "enum": ["auto", "full", "screen"],
+          "description": "Crucial for graphs and layouts. Use 'full' to match the parent container's vertical space." 
         },
         "flex_grow": { 
           "type": "number", 
-          "enum": [0, 1] 
+          "enum": [0, 1],
+          "description": "Set to 1 to allow the element to stretch and fill available vertical or horizontal space. Crucial for making graphs, tables, and root linear_layouts utilize the full workspace height dynamically."
         }
       },
       "additionalProperties": false

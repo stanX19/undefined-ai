@@ -28,6 +28,7 @@ modal:         { type, children: [element_id, ...] }
 
 ## Common fields (all elements)
 style?: { color?, background_color?, padding?, margin?, width?, height?, flex_grow? }
+  -> Note: Use `flex_grow: 1` or `height: "full"` on the root layout AND main elements (like graph/table) to make them stretch and fill the workspace nicely!
 state?: "ready"|"loading"|"error"|"disabled"
 metadata?: { any app-level data, e.g. source_fact_id }
 events?: { onClick?, onChange?, onMount? }

@@ -14,7 +14,7 @@ export const TableElement = memo(function TableElement({ element }: TableElement
     const cols = Array.from({ length: Math.max(element.total_columns, 1) });
 
     return (
-        <div className={`w-full overflow-x-auto rounded-xl border border-(--color-border) shadow-sm ${className}`} style={style}>
+        <div className={`w-full overflow-auto rounded-xl border border-(--color-border) shadow-sm ${className}`} style={style}>
             <table className="w-full text-left text-sm text-(--a2ui-text,var(--color-text-primary))">
                 {element.headers && element.headers.length > 0 && (
                     <thead className="bg-(--color-surface-hover) text-xs uppercase text-(--color-text-muted)">

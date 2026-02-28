@@ -1,0 +1,13 @@
+{
+  "text": "```json\n[\n  \"WebSockets provide persistent, two-way communication over a single TCP connection, enabling real-time applications like chat, live dashboards, online games, and collaborative tools, unlike HTTP's stateless request-response model.\",\n  \"WebSocket data is transmitted in frames via HTTP handshake upgrade, with clients created using `new WebSocket('ws://localhost:8080')` and event handlers (onopen, onmessage, onclose, onerror), while servers use Node.js with the `ws` library on port 8080.\",\n  \"Binary data can be sent using ArrayBuffer or Blob objects with the FileReader API.\",\n  \"For production, use `wss://` (WebSocket Secure) to encrypt connections and address CORS issues when client and server are on different domains.\",\n  \"Common WebSocket pitfalls include CORS issues, connection errors, compatibility problems, data format errors, and security vulnerabilities.\",\n  \"Advanced WebSocket concepts include load balancing, heartbeat mechanisms, and multiplexing.\"\n]\n```",
+  "model": "ChatMinimax (MiniMax-M2.5) {api=...NTUF42ohUc}",
+  "status": "ok",
+  "json_data": [
+    "WebSockets provide persistent, two-way communication over a single TCP connection, enabling real-time applications like chat, live dashboards, online games, and collaborative tools, unlike HTTP's stateless request-response model.",
+    "WebSocket data is transmitted in frames via HTTP handshake upgrade, with clients created using `new WebSocket('ws://localhost:8080')` and event handlers (onopen, onmessage, onclose, onerror), while servers use Node.js with the `ws` library on port 8080.",
+    "Binary data can be sent using ArrayBuffer or Blob objects with the FileReader API.",
+    "For production, use `wss://` (WebSocket Secure) to encrypt connections and address CORS issues when client and server are on different domains.",
+    "Common WebSocket pitfalls include CORS issues, connection errors, compatibility problems, data format errors, and security vulnerabilities.",
+    "Advanced WebSocket concepts include load balancing, heartbeat mechanisms, and multiplexing."
+  ]
+}
