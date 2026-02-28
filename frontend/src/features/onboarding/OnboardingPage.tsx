@@ -38,13 +38,15 @@ export function OnboardingPage() {
   return (
     <div className="flex h-full min-h-dvh flex-col items-center justify-center bg-(--color-bg) p-6 text-center">
       <div className="flex w-full max-w-lg flex-col items-center gap-6 rounded-3xl border border-border bg-surface p-12 shadow-(--shadow-level2)">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
-          <Sparkles className="h-8 w-8" />
+        <div className="flex items-center justify-center">
+          <img src="/logo.png" alt="Logo" className="h-35 w-auto object-contain" />
         </div>
 
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold leading-[1.2] text-text-primary">
-            Welcome to undefined ai
+          <h1 className="text-3xl leading-[1.2] text-text-primary">
+            Welcome to{" "}
+            <span className="font-bold tracking-tight text-[#212529]">undefined</span>
+            <span className="ml-1 font-medium tracking-normal text-[#868e96]">ai</span>
           </h1>
           <p className="text-[14px] leading-relaxed text-text-muted">
             Your AI-powered learning platform. Start exploring any topic — the
@@ -52,25 +54,35 @@ export function OnboardingPage() {
           </p>
         </div>
 
-        <div className="flex w-full flex-col gap-4 pt-4">
-          <label className="text-sm font-medium text-text-secondary text-left">
-            Before we recommend topics, what is your current education level?
-          </label>
-          <select
-            value={educationLevel}
-            onChange={(e) => setEducationLevel(e.target.value)}
-            disabled={isLoading}
-            className="w-full rounded-xl border border-border bg-surface-alt px-4 py-3 text-[14px] text-text-primary outline-none focus:border-primary disabled:opacity-50"
-          >
-            <option value="Primary School">Primary School</option>
-            <option value="Secondary School">Secondary School</option>
-            <option value="Undergraduate">Undergraduate</option>
-            <option value="Graduate">Graduate</option>
-            <option value="Professional / Self-Taught">Professional / Self-Taught</option>
-          </select>
+        <div className="flex w-full flex-col items-center gap-4 pt-2">
+          <p className="text-[14px] font-medium text-text-secondary">
+            Select your current education level to get started.
+          </p>
+          <div className="grid w-full grid-cols-2 gap-3">
+            {[
+              "Kindergarten",
+              "Primary School",
+              "Secondary School",
+              "Undergraduate",
+              "Graduate",
+              "PhD / Research",
+            ].map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => setEducationLevel(option)}
+                className={`flex items-center justify-center rounded-xl px-4 py-2.5 text-[14px] font-medium transition-colors cursor-pointer ${educationLevel === option
+                    ? "bg-[#212529] text-white"
+                    : "bg-[#f1f3f5] text-[#212529] hover:bg-[#e9ecef]"
+                  }`}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
           <button
             onClick={handleGetStarted}
-            disabled={isLoading}
+            disabled={isLoading || !educationLevel}
             className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-8 py-3.5 text-[14px] font-medium text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? (

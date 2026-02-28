@@ -181,8 +181,7 @@ async def replace_ui(topic_id: str, ui_json_str: str) -> str:
 # UIAgent class
 # ---------------------------------------------------------------------------
 
-# Reuse knowledge tools from the main chatbot's tool set
-from srcs.services.agents.tools import retrieve_facts, list_topic_facts
+
 
 
 class UIAgent:
@@ -195,7 +194,6 @@ class UIAgent:
         self.tools = [
             replace_ui, append_ui,
             set_element, remove_element, set_root_id,
-            retrieve_facts, list_topic_facts,
         ]
         self.system_prompt = UI_AGENT_PROMPT
 
