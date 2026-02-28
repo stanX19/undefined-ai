@@ -20,8 +20,9 @@ export function parseSafeStyle(style?: UISafeStyle): { className: string; style:
     const classNames = [];
     const inlineStyles: React.CSSProperties = {};
 
-    if (style.color) inlineStyles.color = style.color;
-    if (style.background_color) inlineStyles.backgroundColor = style.background_color;
+    // Ignore raw hex colors to strictly enforce the application's premium light theme
+    if (style.color && style.color.startsWith('var(')) inlineStyles.color = style.color;
+    if (style.background_color && style.background_color.startsWith('var(')) inlineStyles.backgroundColor = style.background_color;
 
     // Padding
     if (style.padding) {

@@ -42,7 +42,7 @@ export function UIRoot() {
     const activeModalId = uiJson.global_state?.active_modal_id;
 
     return (
-        <div className="relative h-full w-full animate-in fade-in duration-500">
+        <div className="relative h-full w-full flex flex-1 flex-col animate-in fade-in duration-500">
             <ElementRenderer elementId={rootId} />
 
             {/* Render Modal Overlay */}

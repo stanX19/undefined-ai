@@ -1,0 +1,10 @@
+{
+  "text": "```json\n[\n  \"WebSockets enable persistent, two-way real-time communication over a single TCP connection via HTTP upgrade, with clients using `new WebSocket('ws://localhost:8080')` with event handlers (onopen, onmessage, onclose, onerror) and servers using libraries like Node.js `ws`, supporting both text and binary data via ArrayBuffer or Blob objects.\",\n  \"For production, use `wss://` (WebSocket Secure) to encrypt connections and address CORS issues when client and server are on different domains, while mitigating common pitfalls like connection errors, compatibility problems, data format errors, and security vulnerabilities.\",\n  \"Advanced WebSocket concepts include load balancing, heartbeat mechanisms, and multiplexing.\"\n]\n```",
+  "model": "ChatMinimax (MiniMax-M2.5) {api=...NTUF42ohUc}",
+  "status": "ok",
+  "json_data": [
+    "WebSockets enable persistent, two-way real-time communication over a single TCP connection via HTTP upgrade, with clients using `new WebSocket('ws://localhost:8080')` with event handlers (onopen, onmessage, onclose, onerror) and servers using libraries like Node.js `ws`, supporting both text and binary data via ArrayBuffer or Blob objects.",
+    "For production, use `wss://` (WebSocket Secure) to encrypt connections and address CORS issues when client and server are on different domains, while mitigating common pitfalls like connection errors, compatibility problems, data format errors, and security vulnerabilities.",
+    "Advanced WebSocket concepts include load balancing, heartbeat mechanisms, and multiplexing."
+  ]
+}

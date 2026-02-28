@@ -1,0 +1,17 @@
+{
+  "text": "```json\n[\n  \"WebSockets provide persistent, two-way communication between clients and servers over a single TCP connection, enabling real-time applications.\",\n  \"Traditional HTTP uses a stateless request-response model with polling inefficiencies, while WebSockets maintain a persistent, bidirectional connection.\",\n  \"WebSocket data is transmitted in frames (text or binary) over a long-lived connection established via HTTP handshake upgrade.\",\n  \"A WebSocket client is created with `new WebSocket('ws://localhost:8080')` and uses event handlers: onopen, onmessage, onclose, and onerror.\",\n  \"The tutorial demonstrates a WebSocket server using Node.js and the `ws` library listening on port 8080.\",\n  \"Binary data can be sent using ArrayBuffer or Blob objects with the FileReader API.\",\n  \"For production, use `wss://` (WebSocket Secure) to encrypt connections; CORS issues arise when client and server are on different domains.\",\n  \"Common WebSocket mistakes include CORS issues, connection errors, compatibility problems, data format errors, and security vulnerabilities.\",\n  \"Advanced WebSocket concepts include load balancing, heartbeat mechanisms, and multiplexing.\",\n  \"WebSockets are ideal for real-time applications like chat, live dashboards, online games, and collaborative tools.\"\n]\n```",
+  "model": "ChatMinimax (MiniMax-M2.5) {api=...NTUF42ohUc}",
+  "status": "ok",
+  "json_data": [
+    "WebSockets provide persistent, two-way communication between clients and servers over a single TCP connection, enabling real-time applications.",
+    "Traditional HTTP uses a stateless request-response model with polling inefficiencies, while WebSockets maintain a persistent, bidirectional connection.",
+    "WebSocket data is transmitted in frames (text or binary) over a long-lived connection established via HTTP handshake upgrade.",
+    "A WebSocket client is created with `new WebSocket('ws://localhost:8080')` and uses event handlers: onopen, onmessage, onclose, and onerror.",
+    "The tutorial demonstrates a WebSocket server using Node.js and the `ws` library listening on port 8080.",
+    "Binary data can be sent using ArrayBuffer or Blob objects with the FileReader API.",
+    "For production, use `wss://` (WebSocket Secure) to encrypt connections; CORS issues arise when client and server are on different domains.",
+    "Common WebSocket mistakes include CORS issues, connection errors, compatibility problems, data format errors, and security vulnerabilities.",
+    "Advanced WebSocket concepts include load balancing, heartbeat mechanisms, and multiplexing.",
+    "WebSockets are ideal for real-time applications like chat, live dashboards, online games, and collaborative tools."
+  ]
+}

@@ -110,3 +110,27 @@ body {
   display: none;
   /* Chrome, Safari and Opera */
 }
+
+/* Modern Workspace Scrollbar */
+.workspace-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ds-border) transparent;
+}
+
+.workspace-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.workspace-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.workspace-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--ds-border);
+  border-radius: 10px;
+}
+
+.workspace-scrollbar::-webkit-scrollbar-corner {
+  background: transparent;
+}

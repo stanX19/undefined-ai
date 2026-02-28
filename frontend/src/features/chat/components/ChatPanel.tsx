@@ -11,11 +11,31 @@ export function ChatPanel({ inline = false }: { inline?: boolean }) {
   const isStreaming = useChatStore((s) => s.isStreaming);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Auto-scroll to bottom via MutationObserver
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages]);
+    const scrollEl = scrollRef.current;
+    if (!scrollEl) return;
+
+    const observer = new MutationObserver(() => {
+      // Small timeout ensures layout has updated
+      setTimeout(() => {
+        if (scrollEl) {
+          scrollEl.scrollTop = scrollEl.scrollHeight;
+        }
+      }, 0);
+    });
+
+    observer.observe(scrollEl, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+
+    // Initial scroll
+    scrollEl.scrollTop = scrollEl.scrollHeight;
+
+    return () => observer.disconnect();
+  }, [isOpen]); // Re-initialize when panel opens
 
   const handleSend = useCallback((message: string, files?: File[]) => {
     sendChatMessage(message, files);

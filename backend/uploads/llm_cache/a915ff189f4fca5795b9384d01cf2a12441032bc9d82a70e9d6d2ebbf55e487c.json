@@ -1,0 +1,24 @@
+{
+  "text": "```json\n[\n  \"WebSockets provide persistent, two-way communication between clients and servers, enabling real-time applications.\",\n  \"Traditional HTTP relies on a request-response model, which has drawbacks including resource consumption from frequent polling, latency from each request-response cycle, and inefficiency from constant polling.\",\n  \"A WebSocket connection is a long-lived connection between a client and a server established over TCP using a single connection for all communication.\",\n  \"WebSocket data is transmitted in frames, which can be text or binary data.\",\n  \"The WebSocket connection remains open until either the client or the server closes it.\",\n  \"The WebSocket connection process begins with an HTTP handshake that upgrades the connection from HTTP to WebSocket.\",\n  \"The tutorial demonstrates a WebSocket server using Node.js and the `ws` library listening on port 8080.\",\n  \"The client-side WebSocket API uses key event handlers: onopen, onmessage, onclose, and onerror.\",\n  \"A new WebSocket client is created using `new WebSocket('ws://localhost:8080')`.\",\n  \"WebSockets can transmit both text and binary data.\",\n  \"Binary data can be sent using ArrayBuffer or Blob objects with the FileReader API.\",\n  \"For production environments, `wss://` (WebSocket Secure) should be used to encrypt the connection.\",\n  \"CORS issues can occur when the client and server are on different domains.\",\n  \"Common WebSocket mistakes include CORS issues, connection refused errors, browser compatibility issues, data format errors, and security vulnerabilities.\",\n  \"Advanced WebSocket concepts include load balancing, heartbeat mechanisms, and multiplexing.\",\n  \"HTTP is a stateless protocol based on request-response, while WebSockets establish a persistent, two-way connection.\",\n  \"WebSockets are ideal for applications requiring real-time updates such as chat applications, live dashboards, online games, and collaborative tools.\"\n]\n```",
+  "model": "ChatMinimax (MiniMax-M2.5) {api=...NTUF42ohUc}",
+  "status": "ok",
+  "json_data": [
+    "WebSockets provide persistent, two-way communication between clients and servers, enabling real-time applications.",
+    "Traditional HTTP relies on a request-response model, which has drawbacks including resource consumption from frequent polling, latency from each request-response cycle, and inefficiency from constant polling.",
+    "A WebSocket connection is a long-lived connection between a client and a server established over TCP using a single connection for all communication.",
+    "WebSocket data is transmitted in frames, which can be text or binary data.",
+    "The WebSocket connection remains open until either the client or the server closes it.",
+    "The WebSocket connection process begins with an HTTP handshake that upgrades the connection from HTTP to WebSocket.",
+    "The tutorial demonstrates a WebSocket server using Node.js and the `ws` library listening on port 8080.",
+    "The client-side WebSocket API uses key event handlers: onopen, onmessage, onclose, and onerror.",
+    "A new WebSocket client is created using `new WebSocket('ws://localhost:8080')`.",
+    "WebSockets can transmit both text and binary data.",
+    "Binary data can be sent using ArrayBuffer or Blob objects with the FileReader API.",
+    "For production environments, `wss://` (WebSocket Secure) should be used to encrypt the connection.",
+    "CORS issues can occur when the client and server are on different domains.",
+    "Common WebSocket mistakes include CORS issues, connection refused errors, browser compatibility issues, data format errors, and security vulnerabilities.",
+    "Advanced WebSocket concepts include load balancing, heartbeat mechanisms, and multiplexing.",
+    "HTTP is a stateless protocol based on request-response, while WebSockets establish a persistent, two-way connection.",
+    "WebSockets are ideal for applications requiring real-time updates such as chat applications, live dashboards, online games, and collaborative tools."
+  ]
+}
