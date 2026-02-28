@@ -43,3 +43,8 @@ run.bat
 run_backend.bat
 run_frontend.bat
 *.db
+
+.github
+*.mp3
+*.m4a
+*.pdf
