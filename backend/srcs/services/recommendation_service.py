@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from srcs.models.topic import Topic
 from srcs.models.topic_progress import TopicProgress
 from srcs.models.atomic_fact import AtomicFact
-from srcs.services.agents.rotating_llm import rotating_llm
+from srcs.services.agents.cached_llm import cached_llm as rotating_llm
 
 _DIFFICULTY_LABELS = {
     1: "kindergarten",
