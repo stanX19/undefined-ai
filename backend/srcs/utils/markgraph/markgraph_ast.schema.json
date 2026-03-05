@@ -1,0 +1,235 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MarkGraph AST Protocol",
+  "description": "JSON Schema derived from markgraph_parser.py AST model for scene graph serialization.",
+  "type": "array",
+  "items": { "$ref": "#/definitions/Scene" },
+  "definitions": {
+    "Attr": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "Attr" },
+        "name": { "type": "string" }
+      },
+      "required": ["type", "name"]
+    },
+    "RedirLink": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "RedirLink" },
+        "label": { "type": "string" },
+        "target": { "type": "string" },
+        "kind": { "type": "string", "enum": ["link", "button"] }
+      },
+      "required": ["type", "label", "target", "kind"]
+    },
+    "Include": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "Include" },
+        "label": { "type": "string" },
+        "target": { "type": "string" }
+      },
+      "required": ["type", "label", "target"]
+    },
+    "InlineFragment": {
+      "anyOf": [
+        { "type": "string" },
+        { "$ref": "#/definitions/RedirLink" },
+        { "$ref": "#/definitions/Include" }
+      ]
+    },
+    "TextNode": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "TextNode" },
+        "markdown": { "type": "string" },
+        "explicit_id": { "type": ["string", "null"] },
+        "fragments": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/InlineFragment" }
+        }
+      },
+      "required": ["type", "markdown", "explicit_id", "fragments"]
+    },
+    "GraphVertex": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "GraphVertex" },
+        "id": { "type": "string" },
+        "display": { "type": "string" },
+        "nav_target": { "type": ["string", "null"] }
+      },
+      "required": ["type", "id", "display", "nav_target"]
+    },
+    "GraphEdge": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "GraphEdge" },
+        "src": { "type": "string" },
+        "op": { "type": "string" },
+        "dst": { "type": "string" }
+      },
+      "required": ["type", "src", "op", "dst"]
+    },
+    "GraphBlock": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "GraphBlock" },
+        "vertices": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/GraphVertex" }
+        },
+        "edges": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/GraphEdge" }
+        },
+        "explicit_id": { "type": ["string", "null"] }
+      },
+      "required": ["type", "vertices", "edges", "explicit_id"]
+    },
+    "QuizBlock": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "QuizBlock" },
+        "question": { "type": "string" },
+        "answers": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": [
+              { "type": "string" },
+              { "type": "boolean" }
+            ]
+          }
+        },
+        "explanation": { "type": ["string", "null"] },
+        "explicit_id": { "type": ["string", "null"] },
+        "user_answer_idx": { "type": ["number", "null"] }
+      },
+      "required": ["type", "question", "answers", "explanation", "explicit_id", "user_answer_idx"]
+    },
+    "CheckboxBlock": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "CheckboxBlock" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": [
+              { "type": "boolean" },
+              { "type": "string" }
+            ]
+          }
+        },
+        "explicit_id": { "type": ["string", "null"] }
+      },
+      "required": ["type", "items", "explicit_id"]
+    },
+    "InputBlock": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "InputBlock" },
+        "question": { "type": "string" },
+        "placeholder": { "type": ["string", "null"] },
+        "explicit_id": { "type": ["string", "null"] },
+        "user_text": { "type": "string" }
+      },
+      "required": ["type", "question", "placeholder", "explicit_id", "user_text"]
+    },
+    "ThresholdBody": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "ThresholdBody" },
+        "text": { "type": ["string", "null"] },
+        "include": { "$ref": "#/definitions/Include" }
+      },
+      "required": ["type", "text", "include"]
+    },
+    "Threshold": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "Threshold" },
+        "percent": { "type": "number" },
+        "body": { "$ref": "#/definitions/ThresholdBody" }
+      },
+      "required": ["type", "percent", "body"]
+    },
+    "ProgressBlock": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "ProgressBlock" },
+        "description": { "type": ["string", "null"] },
+        "value_fixed": { "type": ["number", "null"] },
+        "value_ids": {
+           "type": "array",
+           "items": { "type": "string" }
+        },
+        "thresholds": {
+           "type": "array",
+           "items": { "$ref": "#/definitions/Threshold" }
+        },
+        "explicit_id": { "type": ["string", "null"] }
+      },
+      "required": ["type", "description", "value_fixed", "value_ids", "thresholds", "explicit_id"]
+    },
+    "Element": {
+      "anyOf": [
+        { "$ref": "#/definitions/RedirLink" },
+        { "$ref": "#/definitions/Include" },
+        { "$ref": "#/definitions/TextNode" },
+        { "$ref": "#/definitions/GraphBlock" },
+        { "$ref": "#/definitions/QuizBlock" },
+        { "$ref": "#/definitions/CheckboxBlock" },
+        { "$ref": "#/definitions/InputBlock" },
+        { "$ref": "#/definitions/ProgressBlock" }
+      ]
+    },
+    "Container": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "Container" },
+        "id": { "type": "string" },
+        "depth": { "type": "number" },
+        "attrs": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Attr" }
+        },
+        "children": {
+          "type": "array",
+          "items": {
+             "anyOf": [
+               { "$ref": "#/definitions/Container" },
+               { "$ref": "#/definitions/Element" }
+             ]
+          }
+        },
+        "raw_heading": { "type": "string" }
+      },
+      "required": ["type", "id", "depth", "attrs", "children", "raw_heading"]
+    },
+    "Scene": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "Scene" },
+        "id": { "type": "string" },
+        "attrs": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Attr" }
+        },
+        "children": {
+           "type": "array",
+           "items": {
+             "anyOf": [
+               { "$ref": "#/definitions/Container" },
+               { "$ref": "#/definitions/Element" }
+             ]
+           }
+        },
+        "raw_heading": { "type": "string" }
+      },
+      "required": ["type", "id", "attrs", "children", "raw_heading"]
+    }
+  }
+}

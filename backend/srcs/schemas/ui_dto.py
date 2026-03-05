@@ -12,6 +12,7 @@ class SseUIUpdateData(BaseModel):
     topic_id: str
     scene_id: str
     ui_json: dict[str, Any]
+    ui_markdown: str
 
 
 # -- REST responses ------------------------------------------------------------
@@ -21,6 +22,7 @@ class UIResponse(BaseModel):
     scene_id: str
     topic_id: str
     ui_json: dict[str, Any]
+    ui_markdown: str
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -30,7 +32,8 @@ if __name__ == "__main__":
     sample = UIResponse(
         scene_id="s1",
         topic_id="t1",
-        ui_json={"version": "3.0", "root_id": "main", "elements": {}},
+        ui_json={"version": "0.2"},
+        ui_markdown="# Scene",
         created_at=datetime.now(),
     )
     print(sample.model_dump_json(indent=2))

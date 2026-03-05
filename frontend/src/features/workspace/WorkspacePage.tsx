@@ -1,14 +1,17 @@
 import { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { UIRoot } from "../ui_renderer/components/UIRoot.tsx";
-import { useUIStore, fetchUIForTopic } from "../ui_renderer/store.ts";
+import { useUIStore } from "../ui_renderer/store.ts";
+import { useMarkGraphStore, fetchMarkGraphUI } from "../markgraph/store.ts";
+import { MarkGraphRoot } from "../markgraph/components/MarkGraphRoot.tsx";
 import { ChatPanel } from "../chat/components/ChatPanel.tsx";
 import { TopicsSidebar } from "./components/TopicsSidebar.tsx";
 import { useChatStore, sendChatMessage } from "../chat/hooks/useChat.ts";
 
 export function WorkspacePage() {
   const { topicId: chatTopicId } = useChatStore();
-  const { topicId: uiTopicId } = useUIStore();
+  const { topicId: uiTopicId, uiJson: a2uiJson } = useUIStore();
+  const { ast: markGraphAst } = useMarkGraphStore();
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -17,7 +20,9 @@ export function WorkspacePage() {
   // Load UI when topic changes
   useEffect(() => {
     if (chatTopicId && chatTopicId !== uiTopicId) {
-      fetchUIForTopic(chatTopicId);
+      // Actually fetchMarkGraphUI replaces fetchUIForTopic because the backend now returns MarkGraph
+      // Store will populate both stores for fallback purposes
+      fetchMarkGraphUI(chatTopicId);
     }
   }, [chatTopicId, uiTopicId]);
 
@@ -52,8 +57,8 @@ export function WorkspacePage() {
             </p>
           </div>
         ) : (
-          <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 pb-20">
-            <UIRoot />
+          <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 pb-20 h-full relative">
+            {markGraphAst ? <MarkGraphRoot /> : (a2uiJson ? <UIRoot /> : null)}
           </div>
         )}
       </main>

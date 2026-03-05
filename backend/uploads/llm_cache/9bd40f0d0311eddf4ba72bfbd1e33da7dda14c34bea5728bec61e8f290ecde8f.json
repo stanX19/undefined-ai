@@ -1,0 +1,22 @@
+{
+  "text": "[\n  {\"title\": \"Introduction to Machine Learning\", \"difficulty\": 3, \"reason\": \"It provides foundational understanding of how algorithms learn from data, a core concept in AI.\"},\n  {\"title\": \"The History of Artificial Intelligence\", \"difficulty\": 2, \"reason\": \"It contextualizes the development of AI, showing how ideas and techniques evolved over decades.\"},\n  {\"title\": \"AI Ethics and Society\", \"difficulty\": 2, \"reason\": \"It explores the moral implications of AI, preparing learners to develop responsible and fair systems.\"}\n]",
+  "model": "ChatMinimax (MiniMax-M2.5) {api=...NTUF42ohUc}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Introduction to Machine Learning",
+      "difficulty": 3,
+      "reason": "It provides foundational understanding of how algorithms learn from data, a core concept in AI."
+    },
+    {
+      "title": "The History of Artificial Intelligence",
+      "difficulty": 2,
+      "reason": "It contextualizes the development of AI, showing how ideas and techniques evolved over decades."
+    },
+    {
+      "title": "AI Ethics and Society",
+      "difficulty": 2,
+      "reason": "It explores the moral implications of AI, preparing learners to develop responsible and fair systems."
+    }
+  ]
+}

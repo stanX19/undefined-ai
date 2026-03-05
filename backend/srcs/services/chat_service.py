@@ -103,6 +103,7 @@ class ChatService:
         """Background coroutine: build history, call agent, persist reply, emit SSE."""
         from srcs.database import AsyncSessionLocal
         from srcs.services.retrieval_service import RetrievalService
+        from srcs.services.ui_service import UIService
 
         session_id = topic_id  # Phase 1: topic_id == SSE session_id
 
@@ -123,6 +124,10 @@ class ChatService:
                 # Ensure the LLM always knows the current topic ID to pass to tools:
                 base_info = f"CURRENT TOPIC ID: '{topic_alias}'. You MUST use this topic_id for all tool calls (edit_ui, retrieve_facts, etc).\n\n"
                 
+                # Fetch current MarkGraph UI Document
+                current_ui = await UIService.get_ui_markdown(db, topic_id)
+                ui_info = f"--- CURRENT MARKGRAPH UI STATE ---\n{current_ui}\n--- END UI STATE ---\n\n"
+
                 context_text: str | None = document_text or "No document provided."
                 max_level = await RetrievalService.get_max_level(db, topic_id)
                 if max_level is not None and max_level >= 1:
@@ -137,7 +142,7 @@ class ChatService:
                             + "\n".join(concepts)
                         )
                 
-                context_text = base_info + context_text
+                context_text = base_info + ui_info + context_text
 
             async def _on_tool_call(tool_name: str, arguments: dict) -> None:
                 await SseService.emit(

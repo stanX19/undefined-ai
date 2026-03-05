@@ -1,25 +1,19 @@
-"""UIService — CRUD interface for A2UI scene documents.
+"""UIService — CRUD interface for MarkGraph scene documents.
 
-Manages scene persistence, element-level CRUD, and patch application.
-All mutating methods return the updated full ``ui_json``.
+Manages scene persistence.
 """
-import copy
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from srcs.models.scene import Scene
 
 
-# Default empty A2UI document
-_EMPTY_UI: dict = {
-    "version": "3.0",
-    "root_id": "root",
-    "elements": {},
-}
+# Default empty MarkGraph document
+_EMPTY_MARKGRAPH: str = "# Root Scene\n"
 
 
 class UIService:
-    """Static methods for scene + element CRUD."""
+    """Static methods for MarkGraph scene CRUD."""
 
     # -- Scene-level --------------------------------------------------------
 
@@ -41,7 +35,7 @@ class UIService:
         if scene is not None:
             return scene
 
-        scene = Scene(topic_id=topic_id, ui_json=copy.deepcopy(_EMPTY_UI))
+        scene = Scene(topic_id=topic_id, ui_markdown=_EMPTY_MARKGRAPH)
         db.add(scene)
         await db.flush()
         await db.commit()
@@ -58,128 +52,24 @@ class UIService:
     # -- Read helpers -------------------------------------------------------
 
     @staticmethod
-    async def get_ui_json(db: AsyncSession, topic_id: str) -> dict:
-        """Return the full A2UI JSON for a topic, or an empty default."""
+    async def get_ui_markdown(db: AsyncSession, topic_id: str) -> str:
+        """Return the full MarkGraph markdown for a topic, or an empty default."""
         scene = await UIService.get_scene(db, topic_id)
         if scene is None:
-            return copy.deepcopy(_EMPTY_UI)
-        return scene.ui_json
-
-    @staticmethod
-    async def get_element(
-        db: AsyncSession, topic_id: str, element_id: str,
-    ) -> dict | None:
-        """Return a single element by ID, or ``None``."""
-        ui = await UIService.get_ui_json(db, topic_id)
-        return ui.get("elements", {}).get(element_id)
-
-    @staticmethod
-    async def list_elements(
-        db: AsyncSession, topic_id: str,
-    ) -> list[dict]:
-        """Return a list of ``{id, type}`` dicts for all elements."""
-        ui = await UIService.get_ui_json(db, topic_id)
-        elements = ui.get("elements", {})
-        return [
-            {"id": eid, "type": data.get("type", "unknown")}
-            for eid, data in elements.items()
-        ]
+            return _EMPTY_MARKGRAPH
+        return scene.ui_markdown
 
     # -- Mutating helpers ---------------------------------------------------
 
     @staticmethod
-    async def set_element(
-        db: AsyncSession, topic_id: str, element_id: str, element_data: dict,
-    ) -> dict:
-        """Add or overwrite a single element. Returns updated ``ui_json``."""
+    async def replace_ui_markdown(
+        db: AsyncSession, topic_id: str, ui_markdown: str,
+    ) -> str:
+        """Replace the entire UI document wholesale. Returns the new markdown."""
         scene = await UIService.get_or_create_scene(db, topic_id)
-        ui = copy.deepcopy(scene.ui_json)
-        ui.setdefault("elements", {})[element_id] = element_data
-        scene.ui_json = ui
+        scene.ui_markdown = ui_markdown
         await UIService.save_scene(db, scene)
-        return ui
-
-    @staticmethod
-    async def append_elements(
-        db: AsyncSession, topic_id: str, elements: dict,
-    ) -> dict:
-        """Merge a dictionary of elements into the existing UI. Returns updated ``ui_json``."""
-        scene = await UIService.get_or_create_scene(db, topic_id)
-        ui = copy.deepcopy(scene.ui_json)
-        
-        target_elements = ui.setdefault("elements", {})
-        for eid, edata in elements.items():
-            target_elements[eid] = edata
-            
-        scene.ui_json = ui
-        await UIService.save_scene(db, scene)
-        return ui
-
-    @staticmethod
-    async def remove_element(
-        db: AsyncSession, topic_id: str, element_id: str,
-    ) -> dict:
-        """Remove an element by ID. Returns updated ``ui_json``."""
-        scene = await UIService.get_or_create_scene(db, topic_id)
-        ui = copy.deepcopy(scene.ui_json)
-        ui.get("elements", {}).pop(element_id, None)
-        scene.ui_json = ui
-        await UIService.save_scene(db, scene)
-        return ui
-
-    @staticmethod
-    async def set_root_id(
-        db: AsyncSession, topic_id: str, root_id: str,
-    ) -> dict:
-        """Set the root_id of the UI document. Returns updated ``ui_json``."""
-        scene = await UIService.get_or_create_scene(db, topic_id)
-        ui = copy.deepcopy(scene.ui_json)
-        ui["root_id"] = root_id
-        scene.ui_json = ui
-        await UIService.save_scene(db, scene)
-        return ui
-
-    @staticmethod
-    async def replace_ui_json(
-        db: AsyncSession, topic_id: str, ui_json: dict,
-    ) -> dict:
-        """Replace the entire UI document wholesale. Returns the new ``ui_json``."""
-        scene = await UIService.get_or_create_scene(db, topic_id)
-        scene.ui_json = copy.deepcopy(ui_json)
-        await UIService.save_scene(db, scene)
-        return scene.ui_json
-
-    @staticmethod
-    async def apply_patches(
-        db: AsyncSession, topic_id: str, patches: list[dict],
-    ) -> dict:
-        """Apply a list of patch operations. Returns updated ``ui_json``.
-
-        Each patch: ``{"op": "add"|"remove"|"update", "target_id": "...", "patch_data": {...}}``
-        """
-        scene = await UIService.get_or_create_scene(db, topic_id)
-        ui = copy.deepcopy(scene.ui_json)
-        elements = ui.setdefault("elements", {})
-
-        for patch in patches:
-            op = patch.get("op")
-            target = patch.get("target_id")
-            data = patch.get("patch_data", {})
-
-            if not target:
-                continue
-
-            if op == "add":
-                elements[target] = data
-            elif op == "remove":
-                elements.pop(target, None)
-            elif op == "update":
-                if target in elements:
-                    elements[target].update(data)
-
-        scene.ui_json = ui
-        await UIService.save_scene(db, scene)
-        return ui
+        return scene.ui_markdown
 
 
 if __name__ == "__main__":
@@ -192,15 +82,10 @@ if __name__ == "__main__":
             await conn.run_sync(Base.metadata.create_all)
 
         async with AsyncSessionLocal() as db:
-            ui = await UIService.get_ui_json(db, "test_topic")
-            print("Empty UI:", ui)
+            mg = await UIService.get_ui_markdown(db, "test_topic")
+            print("Empty Markdown:", mg)
 
-            ui = await UIService.set_element(db, "test_topic", "root", {
-                "type": "linear_layout", "orientation": "vertical", "children": []
-            })
-            print("After set_element:", ui)
-
-            items = await UIService.list_elements(db, "test_topic")
-            print("Elements:", items)
+            mg = await UIService.replace_ui_markdown(db, "test_topic", "# Title\nHello")
+            print("After replace:", mg)
 
     asyncio.run(_smoke())

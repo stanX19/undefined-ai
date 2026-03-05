@@ -1,0 +1,114 @@
+// MarkGraph Grammar v0.2
+// Formal EBNF specification for use with Lark (pip install lark)
+//
+// NOTE: This grammar describes the *structure* of each construct.
+// The MarkGraph parser operates line-by-line with explicit context switching
+// (Root / Fenced / Graph), which Lark's scannerless mode cannot fully express.
+// Use this file as the authoritative grammar reference and for validating
+// individual block content. The Python parser in markgraph_parser.py implements
+// the full context-aware compilation.
+
+// ─── TOP LEVEL ───────────────────────────────────────────────────────────────
+
+document    : scene+
+
+scene       : H1 attr* child*
+container   : HEADING attr* child*
+child       : container | element
+element     : fenced_block
+            | redir_button
+            | include
+            | text_node
+
+// ─── HEADINGS ────────────────────────────────────────────────────────────────
+
+H1          : /^# /
+HEADING     : /^#{2,6} /
+
+// ─── ATTRIBUTES (on heading lines only) ──────────────────────────────────────
+
+attr        : ATTR_TOKEN
+ATTR_TOKEN  : /@[a-z][a-z0-9_-]*/
+
+// ─── EXPLICIT ID ─────────────────────────────────────────────────────────────
+
+explicit_id : EXPLICIT_ID_TOKEN
+EXPLICIT_ID_TOKEN : /\{#[a-z0-9][a-z0-9_-]*\}/
+
+// ─── INTERACTIVE ELEMENTS ────────────────────────────────────────────────────
+
+redir_link  : "[" LABEL "]" "(" "#" TARGET_ID ")"
+redir_button: "[[" LABEL "]]" "(" "#" TARGET_ID ")"
+include     : "![" LABEL? "]" "(" "#" TARGET_ID ")"
+
+LABEL       : /[^\]]+/
+TARGET_ID   : /[A-Za-z0-9_-]+/
+
+// ─── TEXT NODE ───────────────────────────────────────────────────────────────
+
+text_node   : TEXT_LINE+
+TEXT_LINE   : /[^\n]+/
+
+// ─── FENCED BLOCKS ───────────────────────────────────────────────────────────
+
+fenced_block: graph_block
+            | quiz_block
+            | checkbox_block
+            | input_block
+            | progress_block
+
+FENCE_OPEN  : /^:::[a-z]+/
+FENCE_CLOSE : /^:::$/
+
+// ─── GRAPH BLOCK ─────────────────────────────────────────────────────────────
+
+graph_block : ":::graph" graph_line* ":::"
+graph_line  : vertex_def | edge
+vertex_def  : vertex_ref "::" display_text
+vertex_ref  : "[" VERTEX_ID "]" "(" "#" TARGET_ID ")"   // vertex with nav link
+            | VERTEX_ID                                   // plain vertex
+edge        : vertex_ref EDGE_OP vertex_ref
+EDGE_OP     : "->" | "<-" | "--"
+VERTEX_ID   : /[A-Za-z0-9_-]+/
+display_text: /[^\n]+/
+
+// ─── QUIZ BLOCK ──────────────────────────────────────────────────────────────
+
+quiz_block  : ":::quiz" question answer+ explanation? ":::"
+question    : QUESTION_TEXT "?"
+answer      : "- " ANSWER_TEXT "*"?         // trailing * = correct
+explanation : "> " EXPL_TEXT
+QUESTION_TEXT : /[^?\n]+/
+ANSWER_TEXT   : /[^*\n]+/
+EXPL_TEXT     : /[^\n]+/
+
+// ─── CHECKBOX BLOCK ──────────────────────────────────────────────────────────
+
+checkbox_block: ":::checkbox" checkbox_item+ ":::"
+checkbox_item : ("[ ]" | "[x]") ITEM_TEXT
+ITEM_TEXT     : /[^\n]+/
+
+// ─── INPUT BLOCK ─────────────────────────────────────────────────────────────
+
+input_block : ":::input" question placeholder? ":::"
+placeholder : "> " PLACEHOLDER_TEXT
+PLACEHOLDER_TEXT: /[^\n]+/
+
+// ─── PROGRESS BLOCK ──────────────────────────────────────────────────────────
+
+progress_block  : ":::progress" description? progress_value threshold* ":::"
+description     : DESCRIPTION_TEXT
+progress_value  : "=" FLOAT                         // fixed value
+                | "=" SIGNAL_ID ("+" SIGNAL_ID)*    // reactive
+threshold       : ">" PERCENT "::" threshold_body
+threshold_body  : include | THRESHOLD_TEXT
+DESCRIPTION_TEXT: /[^\n=][^\n]*/
+FLOAT           : /[0-9]+(\.[0-9]+)?/
+SIGNAL_ID       : /[a-z][a-z0-9_-]*/
+PERCENT         : /[0-9]+%/
+THRESHOLD_TEXT  : /[^\n]+/
+
+// ─── WHITESPACE ──────────────────────────────────────────────────────────────
+
+%ignore /[ \t]+/
+%ignore /\r/

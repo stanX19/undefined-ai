@@ -200,13 +200,20 @@ function openSseStream(sessionId: string): Promise<void> {
       }
     });
 
-    // ── V3 UI Updates ──
+    // ── V3 & MarkGraph UI Updates ──
     eventSource.addEventListener("UIUpdate", (e: MessageEvent) => {
       try {
         const data = JSON.parse(e.data);
         console.log("[USE-CHAT] Received SSE UIUpdate Event:", data);
-        const { topic_id, scene_id, ui_json } = data;
+        const { topic_id, scene_id, ui_json, ui_markdown } = data;
+        
+        // Push to legacy A2UI store
         useUIStore.getState().setUI(topic_id, scene_id, ui_json);
+        
+        // Push to new MarkGraph store
+        import("../../markgraph/store.ts").then(mod => {
+            mod.useMarkGraphStore.getState().setUI(topic_id, scene_id, ui_json, ui_markdown);
+        }).catch(err => console.warn("Could not import MarkGraph store", err));
       } catch (err) {
         console.warn("Failed to parse SSE UIUpdate event", e.data);
       }
@@ -349,6 +356,11 @@ export async function deleteChatHistory(): Promise<void> {
   // Clear local stores unconditionally so user always gets a clean slate 
   store.clear();
   useSurfaceStore.getState().clearAll();
+  useUIStore.getState().clear();
+  import("../../markgraph/store.ts")
+    .then(mod => mod.useMarkGraphStore.getState().clear())
+    .catch(() => {});
+  
   if (activeEventSource) {
     activeEventSource.close();
     activeEventSource = null;

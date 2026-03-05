@@ -157,9 +157,8 @@ async def ingest_url(topic_id: str, url: str) -> str:
 async def edit_ui(topic_id: str, description: str) -> str:
     """Design or edit the UI surface for a topic.
 
-    This delegates to a specialised UIAgent that reads the current UI state,
-    gathers content from the knowledge base, and applies element-level CRUD
-    operations to build or modify the A2UI document.
+    This delegates to a specialised UIAgent that reads the current MarkGraph UI state,
+    and returns a newly generated MarkGraph UI document.
 
     After editing, the updated UI is pushed to the frontend via SSE.
 
@@ -176,10 +175,13 @@ async def edit_ui(topic_id: str, description: str) -> str:
 
     topic_id = current_mapper().resolve(topic_id)
 
-    ui_json = await ui_agent.edit(topic_id, description)
+    # ui_agent.edit returns {"ui_json": {...}, "ui_markdown": "..."} or {"error": "..."}
+    result = await ui_agent.edit(topic_id, description)
 
-    if "error" in ui_json:
-        return f"UI editing failed: {ui_json['error']}"
+    if "error" in result:
+        return f"UI editing failed: {result['error']}"
+
+    ui_json = result["ui_json"]
 
     # Read the scene_id so we can include it in the SSE event
     from srcs.database import AsyncSessionLocal
@@ -196,13 +198,15 @@ async def edit_ui(topic_id: str, description: str) -> str:
             topic_id=topic_id,
             scene_id=scene_id,
             ui_json=ui_json,
+            ui_markdown=result["ui_markdown"],
         ),
     )
 
-    element_count = len(ui_json.get("elements", {}))
+    # In MarkGraph, element count is scenes/containers/elements, roughly sum of all nodes
+    scene_cnt = len(ui_json.get("scenes", []))
     return (
         f"UI updated successfully. "
-        f"The scene now has {element_count} element(s) "
+        f"The scene now has {scene_cnt} root container(s) "
         f"and has been pushed to the frontend."
     )
 
