@@ -232,7 +232,7 @@ function ChildRenderer({ node }: { node: Container | MarkGraphElement }) {
 /* ── root ─────────────────────────────────────────────────────────────────── */
 
 export function MarkGraphRoot() {
-  const { ast, sceneId, scrollTarget } = useMarkGraphStore();
+  const { ast, sceneId, scrollTarget, history, goBack } = useMarkGraphStore();
 
   // Handle scrolling when scrollTarget changes
   useEffect(() => {
@@ -256,6 +256,16 @@ export function MarkGraphRoot() {
 
   return (
     <div className="flex flex-col gap-8 w-full animate-in fade-in duration-300 pb-20">
+      {history.length > 0 && (
+        <div className="sticky top-0 z-10 pt-2 pb-4 bg-bg/60 backdrop-blur-md">
+          <button
+            onClick={() => goBack()}
+            className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-text-secondary bg-surface/80 border border-border rounded-full hover:bg-surface hover:text-primary hover:border-primary/30 transition-all shadow-sm active:scale-95 group"
+          >
+            <span className="group-hover:-translate-x-1 transition-transform">←</span> Back
+          </button>
+        </div>
+      )}
       <SceneRenderer key={activeScene.id} scene={activeScene} />
     </div>
   );

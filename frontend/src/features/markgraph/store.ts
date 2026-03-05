@@ -12,7 +12,9 @@ interface MarkGraphState {
     // Actions
     setUI: (topicId: string, sceneId: string, ast: MarkGraphAST, markdown: string) => void;
     navigateScene: (targetId: string) => void;
+    goBack: () => void;
     scrollTarget: { id: string; ts: number } | null;
+    history: string[]; // Stack of scene IDs
     
     // For reactive state
     updateSignal: (elementId: string, value: any) => void;
@@ -28,9 +30,10 @@ export const useMarkGraphStore = create<MarkGraphState>((set) => ({
     isLoading: false,
     error: null,
     scrollTarget: null,
+    history: [],
 
     setUI: (topicId, sceneId, ast, markdown) => 
-        set({ topicId, sceneId, ast, markdown, error: null, scrollTarget: null }),
+        set({ topicId, sceneId, ast, markdown, error: null, scrollTarget: null, history: [] }),
 
     navigateScene: (targetId) => 
         set((state) => {
@@ -55,9 +58,30 @@ export const useMarkGraphStore = create<MarkGraphState>((set) => ({
                 }
             }
 
+            const newHistory = [...state.history];
+            // Only push to history if we are actually changing scenes
+            if (foundSceneId !== state.sceneId) {
+                newHistory.push(state.sceneId!);
+            }
+
             return { 
                 sceneId: foundSceneId,
+                history: newHistory,
                 scrollTarget: { id: targetId, ts: Date.now() }
+            };
+        }),
+
+    goBack: () => 
+        set((state) => {
+            if (state.history.length === 0) return state;
+            
+            const newHistory = [...state.history];
+            const prevSceneId = newHistory.pop();
+            
+            return {
+                sceneId: prevSceneId,
+                history: newHistory,
+                scrollTarget: null // Clear scroll target when going back
             };
         }),
 
@@ -91,7 +115,7 @@ export const useMarkGraphStore = create<MarkGraphState>((set) => ({
             };
         }),
 
-    clear: () => set({ sceneId: null, topicId: null, ast: null, markdown: null, error: null }),
+    clear: () => set({ sceneId: null, topicId: null, ast: null, markdown: null, error: null, history: [] }),
 }));
 
 export async function fetchMarkGraphUI(topicId: string) {
