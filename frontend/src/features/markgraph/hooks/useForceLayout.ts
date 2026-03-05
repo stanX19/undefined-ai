@@ -34,12 +34,12 @@ export function useForceLayout(initialNodes: NodeData[], initialEdges: EdgeData[
 
     // Create the simulation
     const simulation = d3.forceSimulation<NodeData>(nodesCopy)
-      .force("charge", d3.forceManyBody().strength(-1500)) // Repel nodes strongly
-      .force("center", d3.forceCenter(width / 2, height / 2).strength(0.05)) // Soft gravity to center
-      .force("collide", d3.forceCollide<NodeData>().radius(d => Math.max(d.width, d.height) / 2 + 30).iterations(2)) // Avoid overlap using bounding boxes
+      .force("charge", d3.forceManyBody().strength(-400)) // Moderated repel nodes strongly so it doesnt vanish on alpha=0.3
+      .force("center", d3.forceCenter(width / 2, height / 2).strength(0.1)) // Soft gravity to center
+      .force("collide", d3.forceCollide<NodeData>().radius(d => Math.max(d.width, d.height) / 2 + 10).iterations(2)) // Avoid overlap using bounding boxes
       .force("link", d3.forceLink<NodeData, EdgeData>(edgesCopy)
         .id(d => d.id)
-        .distance(150) // Desired resting distance of links
+        .distance(100) // Desired resting distance of links
         .strength(0.5)
       )
       .alphaDecay(0.02) // Cool down slower for smoother settling
