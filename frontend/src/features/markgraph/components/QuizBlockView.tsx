@@ -1,8 +1,11 @@
 import { useMarkGraphStore } from "../store.ts";
 import type { QuizBlock } from "../types.ts";
 
-export function QuizBlockView({ block }: { block: QuizBlock }) {
-  const { updateSignal } = useMarkGraphStore();
+export function QuizBlockView({ block: initialBlock }: { block: QuizBlock }) {
+  const { updateSignal, ast } = useMarkGraphStore();
+  const block = initialBlock.explicit_id && ast?.id_map?.[initialBlock.explicit_id]
+      ? (ast.id_map[initialBlock.explicit_id] as QuizBlock)
+      : initialBlock;
 
   const handleSelect = (idx: number) => {
     if (block.explicit_id) {

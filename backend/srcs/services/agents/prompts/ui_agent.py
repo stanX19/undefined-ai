@@ -18,4 +18,6 @@ Do not output anything else but the raw markdown document. DO NOT wrap it in mar
 - Ensure proper use of headings and fenced blocks (`:::block ... :::`).
 - IDs are auto-generated from headings, but use `{{#explicit-id}}` when necessary for linking.
 - Do not output explanations, only the raw MarkGraph document.
+- Prioritise using different `# scenes` and `[links](#different-scenes)` for navigation, its the soul of MarkGraph.
+- Prioritise using `:::graph` for knowledge or data representation
 """

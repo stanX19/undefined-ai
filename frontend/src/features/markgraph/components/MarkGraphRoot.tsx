@@ -1,18 +1,5 @@
-import { useRef, useState } from "react";
 import { useMarkGraphStore } from "../store.ts";
-import type {
-  MarkGraphElement,
-  Container,
-  Scene,
-  CheckboxBlock,
-  QuizBlock,
-  InputBlock,
-  ProgressBlock,
-  GraphBlock,
-  RedirLink,
-  Include,
-  TextNode,
-} from "../types.ts";
+import type { MarkGraphElement, Container, Scene } from "../types.ts";
 import { CheckboxBlockView } from "./CheckboxBlockView.tsx";
 import { QuizBlockView } from "./QuizBlockView.tsx";
 import { InputBlockView } from "./InputBlockView.tsx";
@@ -20,330 +7,240 @@ import { ProgressBlockView } from "./ProgressBlockView.tsx";
 import { GraphBlockView } from "./GraphBlockView.tsx";
 import ReactMarkdown from "react-markdown";
 
-const GAP = 12;
+/* ── helpers ─────────────────────────────────────────────────────────────── */
 
-type ASTNode = Scene | Container | MarkGraphElement;
-
-/** Returns true if the container has @row attribute. */
-function hasAttr(node: ASTNode, name: string): boolean {
-  if ("attrs" in node && Array.isArray(node.attrs)) {
-    return node.attrs.some((a) => a.name === name);
+/** Return the flex-direction hint from container attrs (@row / @column). */
+function layoutDirection(attrs: { name: string }[]): "row" | "column" {
+  for (const a of attrs) {
+    if (a.name === "row") return "row";
+    if (a.name === "column") return "column";
   }
-  return false;
+  return "column"; // default
 }
 
-// ─── Card wrapper — draggable + resizable ────────────────────────────────
-
-function DraggableCard({
-  children,
-  className = "",
-  style = {},
-}: {
-  children: React.ReactNode;
-  className?: string;
-  style?: React.CSSProperties;
-}) {
-  const elRef = useRef<HTMLDivElement>(null);
-  const draggingRef = useRef(false);
-  const offsetRef = useRef({ dx: 0, dy: 0 });
-  const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null);
-  const [dragSize, setDragSize] = useState<{ w: number; h: number } | null>(null);
-  const resizingRef = useRef(false);
-  const resizeStartRef = useRef({ mx: 0, my: 0, w: 0, h: 0 });
-
-  const onPointerDown = (e: React.PointerEvent) => {
-    if (e.button !== 0) return;
-    const tag = (e.target as HTMLElement).tagName;
-    if (["INPUT", "TEXTAREA", "BUTTON", "SELECT", "LABEL", "A"].includes(tag)) return;
-
-    // Only drag from this card itself (not child cards)
-    const el = e.currentTarget as HTMLElement;
-    const targetCard = (e.target as HTMLElement).closest("[data-mg-card]");
-    if (targetCard && targetCard !== el) return;
-
-    e.stopPropagation();
-    el.setPointerCapture(e.pointerId);
-    draggingRef.current = true;
-
-    const rect = el.getBoundingClientRect();
-    offsetRef.current = { dx: e.clientX - rect.left, dy: e.clientY - rect.top };
-  };
-
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (!draggingRef.current) return;
-    e.preventDefault();
-    const parent = (e.currentTarget as HTMLElement).offsetParent as HTMLElement | null;
-    const parentRect = parent?.getBoundingClientRect() ?? { left: 0, top: 0 };
-    setDragPos({
-      x: e.clientX - parentRect.left - offsetRef.current.dx,
-      y: e.clientY - parentRect.top - offsetRef.current.dy,
-    });
-  };
-
-  const onPointerUp = (e: React.PointerEvent) => {
-    if (!draggingRef.current) return;
-    draggingRef.current = false;
-    (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-  };
-
-  const onResizeDown = (e: React.PointerEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    resizingRef.current = true;
-    const el = elRef.current;
-    resizeStartRef.current = {
-      mx: e.clientX,
-      my: e.clientY,
-      w: el?.offsetWidth ?? 200,
-      h: el?.offsetHeight ?? 100,
-    };
-  };
-
-  const onResizeMove = (e: React.PointerEvent) => {
-    if (!resizingRef.current) return;
-    e.preventDefault();
-    setDragSize({
-      w: Math.max(120, resizeStartRef.current.w + (e.clientX - resizeStartRef.current.mx)),
-      h: Math.max(60, resizeStartRef.current.h + (e.clientY - resizeStartRef.current.my)),
-    });
-  };
-
-  const onResizeUp = (e: React.PointerEvent) => {
-    if (!resizingRef.current) return;
-    resizingRef.current = false;
-    (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-  };
-
-  const posStyle: React.CSSProperties = dragPos
-    ? { position: "absolute", left: dragPos.x, top: dragPos.y, zIndex: 50 }
-    : {};
-
-  const sizeStyle: React.CSSProperties = dragSize
-    ? { width: dragSize.w, minHeight: dragSize.h }
-    : {};
-
-  return (
-    <div
-      ref={elRef}
-      data-mg-card
-      className={`relative group ${className}`}
-      style={{ cursor: "grab", ...style, ...posStyle, ...sizeStyle }}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-    >
-      {children}
-
-      {/* SE resize handle */}
-      <div
-        className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize opacity-0 group-hover:opacity-50 transition-opacity z-10"
-        style={{
-          background: "linear-gradient(135deg, transparent 50%, var(--ds-border) 50%)",
-          borderRadius: "0 0 8px 0",
-        }}
-        onPointerDown={onResizeDown}
-        onPointerMove={onResizeMove}
-        onPointerUp={onResizeUp}
-      />
-    </div>
-  );
+/** Check if attr list contains a "card" hint (:::card containers). */
+function hasCardAttr(attrs: { name: string }[]): boolean {
+  return attrs.some((a) => a.name === "card");
 }
 
-// ─── Main MarkGraphRoot ─────────────────────────────────────────────────
+/* ── element renderer ────────────────────────────────────────────────────── */
 
-export function MarkGraphRoot() {
-  const { ast } = useMarkGraphStore();
-
-  if (!ast?.scenes?.length) return null;
-
-  return (
-    <div className="w-full flex flex-col gap-4">
-      {ast.scenes.map((scene, i) => (
-        <SceneRenderer key={scene.id || `scene-${i}`} scene={scene} />
-      ))}
-    </div>
-  );
-}
-
-// ─── Scene Renderer ─────────────────────────────────────────────────────
-
-function SceneRenderer({ scene }: { scene: Scene }) {
-  const isRowLayout = hasAttr(scene, "row");
-
-  return (
-    <DraggableCard
-      className="rounded-xl border border-border/40 bg-surface/70 backdrop-blur-sm shadow-level1 overflow-hidden"
-    >
-      {/* Scene heading */}
-      {scene.raw_heading && (
-        <div className="px-5 pt-4 pb-3 border-b border-border/30">
-          <h2 className="text-lg font-bold text-text-primary">
-            {scene.raw_heading}
-          </h2>
-        </div>
-      )}
-
-      {/* Scene children */}
-      <div
-        className="p-4"
-        style={{
-          display: "flex",
-          flexDirection: isRowLayout ? "row" : "column",
-          gap: GAP,
-          flexWrap: isRowLayout ? "wrap" : "nowrap",
-        }}
-      >
-        {scene.children.map((child, i) => (
-          <ChildRenderer key={childKey(child, i)} node={child} parentIsRow={isRowLayout} />
-        ))}
-      </div>
-    </DraggableCard>
-  );
-}
-
-// ─── Child Renderer (recursive) ──────────────────────────────────────────
-
-function ChildRenderer({
-  node,
-  parentIsRow,
-}: {
-  node: ASTNode;
-  parentIsRow: boolean;
-}) {
-  const isContainer = node.type === "Container";
-  const hasChildren =
-    isContainer &&
-    "children" in node &&
-    Array.isArray(node.children) &&
-    node.children.length > 0;
-
-  if (isContainer && hasChildren) {
-    return (
-      <ContainerRenderer
-        container={node as Container}
-        flex={parentIsRow ? 1 : undefined}
-      />
-    );
-  }
-
-  // Leaf element
-  return (
-    <DraggableCard
-      className="rounded-lg border border-border/30 bg-white/80 p-3 backdrop-blur-sm hover:shadow-level1 transition-shadow"
-      style={{ flex: parentIsRow ? 1 : undefined, minWidth: parentIsRow ? 100 : undefined }}
-    >
-      <ElementRenderer element={node} />
-    </DraggableCard>
-  );
-}
-
-// ─── Container Renderer ─────────────────────────────────────────────────
-
-function ContainerRenderer({
-  container,
-  flex,
-}: {
-  container: Container;
-  flex?: number;
-}) {
-  const isRowLayout = hasAttr(container, "row");
-  const isCard = hasAttr(container, "card");
-
-  // Visual depth styling
-  const depthColors = [
-    "bg-surface/50",       // depth 2
-    "bg-surface/40",       // depth 3
-    "bg-surface/30",       // depth 4
-    "bg-surface/20",       // depth 5+
-  ];
-  const bgClass = depthColors[Math.min(container.depth - 2, depthColors.length - 1)] ?? "bg-surface/40";
-
-  return (
-    <DraggableCard
-      className={`rounded-lg border border-border/30 ${bgClass} backdrop-blur-sm overflow-hidden ${isCard ? "shadow-level1" : ""}`}
-      style={{ flex, minWidth: flex ? 100 : undefined }}
-    >
-      {/* Container heading */}
-      {container.raw_heading && (
-        <div className="px-4 pt-3 pb-2 border-b border-border/20">
-          <h3
-            className="font-semibold text-text-primary uppercase tracking-wide"
-            style={{ fontSize: Math.max(11, 15 - container.depth) }}
-          >
-            {container.raw_heading}
-          </h3>
-        </div>
-      )}
-
-      {/* Container children */}
-      <div
-        className="p-3"
-        style={{
-          display: "flex",
-          flexDirection: isRowLayout ? "row" : "column",
-          gap: GAP,
-          flexWrap: isRowLayout ? "wrap" : "nowrap",
-        }}
-      >
-        {container.children.map((child, i) => (
-          <ChildRenderer
-            key={childKey(child, i)}
-            node={child}
-            parentIsRow={isRowLayout}
-          />
-        ))}
-      </div>
-    </DraggableCard>
-  );
-}
-
-// ─── Element Renderer ───────────────────────────────────────────────────
-
-function ElementRenderer({ element }: { element: ASTNode }) {
-  if (element.type === "Container" || element.type === "Scene") {
-    const heading = (element as Scene | Container).raw_heading;
-    return heading ? (
-      <h3 className="text-sm font-semibold text-text-primary">{heading}</h3>
-    ) : null;
-  }
+function ElementRenderer({ element }: { element: MarkGraphElement }) {
   if (element.type === "TextNode") {
+    // Render Fragments directly instead of passing the raw string to ReactMarkdown.
+    // This allows custom syntaxes like [[Button]](#target) which the python parser
+    // extracted into RedirLink objects to be rendered properly.
+    if (element.fragments && element.fragments.length > 0) {
+      return (
+        <div className="prose prose-sm dark:prose-invert max-w-none text-text-primary">
+          {element.fragments.map((frag: any, i: number) => {
+            if (typeof frag === "string") {
+              return (
+                <span key={i}>
+                  <ReactMarkdown
+                    components={{
+                      p: ({ node, ...props }) => <span {...props} />, // Prevent block-level paragraphs inside fragments
+                    }}
+                  >
+                    {frag}
+                  </ReactMarkdown>
+                </span>
+              );
+            }
+            if (frag.type === "RedirLink") {
+              const targetId = frag.target.replace(/^#/, "");
+              if (frag.kind === "button") {
+                return (
+                  <button
+                    key={i}
+                    onClick={() => useMarkGraphStore.getState().navigateScene(targetId)}
+                    className="inline-flex items-center gap-1 text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg transition-colors mx-1"
+                  >
+                    {frag.label} →
+                  </button>
+                );
+              } else {
+                return (
+                  <a
+                    key={i}
+                    href={frag.target}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      useMarkGraphStore.getState().navigateScene(targetId);
+                    }}
+                    className="text-primary hover:underline mx-1 cursor-pointer"
+                  >
+                    {frag.label}
+                  </a>
+                );
+              }
+            }
+            if (frag.type === "Include") {
+              return (
+                <span key={i} className="text-xs italic text-text-muted mx-1">
+                  [include: {frag.target}]
+                </span>
+              );
+            }
+            return null;
+          })}
+        </div>
+      );
+    }
+
+    // Fallback if there are no fragments (older ASTs)
     return (
-      <div className="text-sm prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-        <ReactMarkdown>{(element as TextNode).markdown}</ReactMarkdown>
+      <div className="prose prose-sm dark:prose-invert max-w-none text-text-primary">
+        <ReactMarkdown
+          components={{
+            a: ({ node, href, children, ...props }) => {
+              if (href?.startsWith("#")) {
+                return (
+                  <a
+                    href={href}
+                    {...props}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const targetId = href.replace(/^#/, "");
+                      useMarkGraphStore.getState().navigateScene(targetId);
+                    }}
+                  >
+                    {children}
+                  </a>
+                );
+              }
+              return (
+                <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
+                  {children}
+                </a>
+              );
+            },
+          }}
+        >
+          {element.markdown}
+        </ReactMarkdown>
       </div>
     );
   }
   if (element.type === "CheckboxBlock") {
-    return <CheckboxBlockView block={element as CheckboxBlock} />;
+    return <CheckboxBlockView block={element} />;
   }
   if (element.type === "QuizBlock") {
-    return <QuizBlockView block={element as QuizBlock} />;
+    return <QuizBlockView block={element} />;
   }
   if (element.type === "InputBlock") {
-    return <InputBlockView block={element as InputBlock} />;
+    return <InputBlockView block={element} />;
   }
   if (element.type === "ProgressBlock") {
-    return <ProgressBlockView block={element as ProgressBlock} />;
+    return <ProgressBlockView block={element} />;
   }
   if (element.type === "GraphBlock") {
-    return <GraphBlockView block={element as GraphBlock} />;
+    return <GraphBlockView block={element} />;
   }
-  if (element.type === "RedirLink" || element.type === "Include") {
-    const el = element as RedirLink | Include;
+  if (element.type === "RedirLink") {
     return (
-      <span className="text-xs text-primary bg-primary/10 px-2 py-1 rounded-md inline-block">
-        {el.label} {"→"} {el.target}
+      <button 
+        onClick={() => {
+          const targetId = element.target.replace(/^#/, '');
+          useMarkGraphStore.getState().navigateScene(targetId);
+        }}
+        className="inline-flex items-center gap-1 text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg transition-colors"
+      >
+        {element.label} →
+      </button>
+    );
+  }
+  if (element.type === "Include") {
+    return (
+      <span className="text-xs italic text-text-muted">
+        [include: {element.target}]
       </span>
     );
   }
-  return <div className="text-xs text-red-500">Unknown: {(element as any).type}</div>;
+  return null;
 }
 
-// ─── Helpers ────────────────────────────────────────────────────────────
+/* ── container / scene renderer ──────────────────────────────────────────── */
 
-function childKey(node: ASTNode, index: number): string {
-  if ("id" in node && node.id) return node.id;
-  if ("explicit_id" in node && node.explicit_id) return node.explicit_id;
-  return `_i${index}`;
+/** Map heading depth (2-6) to a Tailwind text class. */
+const HEADING_CLASSES: Record<number, string> = {
+  2: "text-xl font-bold",
+  3: "text-lg font-semibold",
+  4: "text-base font-semibold",
+  5: "text-sm font-semibold",
+  6: "text-sm font-medium",
+};
+
+function ContainerRenderer({ container }: { container: Container }) {
+  const dir = layoutDirection(container.attrs);
+  const isCard = hasCardAttr(container.attrs);
+  const headingCls = HEADING_CLASSES[container.depth] || "text-base font-semibold";
+
+  const wrapperCls = isCard
+    ? "flex flex-col gap-3 p-4 rounded-xl border border-border/50 bg-surface/80 backdrop-blur-sm shadow-sm"
+    : "flex flex-col gap-3";
+
+  return (
+    <div className={wrapperCls}>
+      {container.raw_heading && (
+        <div className={`${headingCls} text-text-primary`}>
+          {container.raw_heading}
+        </div>
+      )}
+      <div
+        className={`flex gap-4 ${dir === "row" ? "flex-row flex-wrap" : "flex-col"}`}
+      >
+        {container.children.map((child, i) => (
+          <ChildRenderer key={i} node={child} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SceneRenderer({ scene }: { scene: Scene }) {
+  return (
+    <section className="flex flex-col gap-5">
+      {scene.raw_heading && (
+        <h1 className="text-2xl font-bold text-text-primary">
+          {scene.raw_heading}
+        </h1>
+      )}
+      <div className="flex flex-col gap-4">
+        {scene.children.map((child, i) => (
+          <ChildRenderer key={i} node={child} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** Recursively dispatch to the right renderer based on node type. */
+function ChildRenderer({ node }: { node: Container | MarkGraphElement }) {
+  if (!node) return null;
+
+  if (node.type === "Container") {
+    return <ContainerRenderer container={node as Container} />;
+  }
+
+  // All leaf element types
+  return <ElementRenderer element={node as MarkGraphElement} />;
+}
+
+/* ── root ─────────────────────────────────────────────────────────────────── */
+
+export function MarkGraphRoot() {
+  const { ast, sceneId } = useMarkGraphStore();
+
+  if (!ast || !ast.scenes || ast.scenes.length === 0) {
+    return null;
+  }
+
+  const activeScene = ast.scenes.find(s => s.id === sceneId) || ast.scenes[0];
+
+  return (
+    <div className="flex flex-col gap-8 w-full animate-in fade-in duration-300">
+      <SceneRenderer key={activeScene.id} scene={activeScene} />
+    </div>
+  );
 }

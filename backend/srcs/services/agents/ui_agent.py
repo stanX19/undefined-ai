@@ -14,9 +14,7 @@ from srcs.services.agents.rotating_llm import rotating_llm, LLMResponse
 from srcs.services.agents.prompts.ui_agent import UI_AGENT_PROMPT
 from srcs.services.agents.id_mapper import current_mapper
 from srcs.utils.markgraph.markgraph_parser import compile_markgraph, export_to_dict
-
-_MARKGRAPH_SPEC = (pathlib.Path(__file__).resolve().parent.parent.parent
-                   / "utils" / "markgraph" / "MarkGraph.md").read_text(encoding="utf-8")
+from srcs.utils.markgraph.markgraph_spec import MARKGRAPH_SPEC
 
 
 class UIAgent:
@@ -26,7 +24,7 @@ class UIAgent:
     """
 
     def __init__(self) -> None:
-        self.system_prompt = UI_AGENT_PROMPT + "\n\n" + _MARKGRAPH_SPEC
+        self.system_prompt = UI_AGENT_PROMPT + "\n\n" + MARKGRAPH_SPEC
 
     async def edit(self, topic_id: str, prompt: str) -> dict:
         """Run the agent to edit the UI for *topic_id* per *prompt*.

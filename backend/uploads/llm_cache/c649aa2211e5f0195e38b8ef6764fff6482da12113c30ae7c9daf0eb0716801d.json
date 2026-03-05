@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Responsive Web Design with CSS Grid and Flexbox\",\n    \"difficulty\": 4,\n    \"reason\": \"Mastering modern CSS layout techniques is essential for creating sophisticated, adaptable UIs that look impressive across all devices.\"\n  },\n  {\n    \"title\": \"Three.js and WebGL 3D Graphics\",\n    \"difficulty\": 5,\n    \"reason\": \"This topic introduces hardware-accelerated 3D graphics in the browser, enabling truly immersive and cutting-edge visual experiences.\"\n  },\n  {\n    \"title\": \"Computational Design Automation in UI\",\n    \"difficulty\": 6,\n    \"reason\": \"This research-level topic explores using algorithms and AI to automatically generate and optimize user interfaces, representing the frontier of UI innovation.\"\n  }\n]\n```",
+  "model": "ChatMinimax (MiniMax-M2.5) {api=...NTUF42ohUc}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Responsive Web Design with CSS Grid and Flexbox",
+      "difficulty": 4,
+      "reason": "Mastering modern CSS layout techniques is essential for creating sophisticated, adaptable UIs that look impressive across all devices."
+    },
+    {
+      "title": "Three.js and WebGL 3D Graphics",
+      "difficulty": 5,
+      "reason": "This topic introduces hardware-accelerated 3D graphics in the browser, enabling truly immersive and cutting-edge visual experiences."
+    },
+    {
+      "title": "Computational Design Automation in UI",
+      "difficulty": 6,
+      "reason": "This research-level topic explores using algorithms and AI to automatically generate and optimize user interfaces, representing the frontier of UI innovation."
+    }
+  ]
+}

@@ -510,10 +510,9 @@ def parse_block_token(tok: Token, diags: list[Diagnostic]) -> Element | None:
     if btype == "progress":
         return parse_progress_block(lines, ln, diags)
 
-    diags.append(Diagnostic("warning",
-        f"Unknown fenced block type ':::{btype}' — treated as text", ln))
-    # Treat unrecognised block types (e.g. :::card) as markdown text
-    return TextNode(markdown="\n".join(lines), fragments=parse_inline("\n".join(lines)))
+    diags.append(Diagnostic("error",
+        f"Unknown fenced block type ':::{btype}' (skipped)", ln))
+    return None
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Pass 2 — Parse  (token stream → Scene Graph)
@@ -644,6 +643,8 @@ def _collect_ids(scenes: list[Scene]) -> dict[str, Any]:
                     if signal_children and child is signal_children[0]:
                         # First signal child inherits parent container id
                         registry[node.id] = child
+                        if not child.explicit_id:
+                            child.explicit_id = node.id
                 else:
                     walk(child)
 

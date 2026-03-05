@@ -1,8 +1,11 @@
 import { useMarkGraphStore } from "../store.ts";
 import type { InputBlock } from "../types.ts";
 
-export function InputBlockView({ block }: { block: InputBlock }) {
-  const { updateSignal } = useMarkGraphStore();
+export function InputBlockView({ block: initialBlock }: { block: InputBlock }) {
+  const { updateSignal, ast } = useMarkGraphStore();
+  const block = initialBlock.explicit_id && ast?.id_map?.[initialBlock.explicit_id]
+      ? (ast.id_map[initialBlock.explicit_id] as InputBlock)
+      : initialBlock;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (block.explicit_id) {

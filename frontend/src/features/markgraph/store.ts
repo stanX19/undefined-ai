@@ -11,6 +11,7 @@ interface MarkGraphState {
 
     // Actions
     setUI: (topicId: string, sceneId: string, ast: MarkGraphAST, markdown: string) => void;
+    navigateScene: (sceneId: string) => void;
     
     // For reactive state
     updateSignal: (elementId: string, value: any) => void;
@@ -28,6 +29,8 @@ export const useMarkGraphStore = create<MarkGraphState>((set) => ({
 
     setUI: (topicId, sceneId, ast, markdown) => 
         set({ topicId, sceneId, ast, markdown, error: null }),
+
+    navigateScene: (sceneId) => set({ sceneId }),
 
     updateSignal: (elementId, value) =>
         set((state) => {

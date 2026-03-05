@@ -1,0 +1,8 @@
+{
+  "text": "{\"difficulty\": 6}",
+  "model": "ChatMinimax (MiniMax-M2.5) {api=...NTUF42ohUc}",
+  "status": "ok",
+  "json_data": {
+    "difficulty": 6
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Efficient Transformers: Longformer, Reformer, and Linear Attention Mechanisms\",\n    \"difficulty\": 6,\n    \"reason\": \"These models address the quadratic complexity bottleneck of self-attention in standard Transformers, offering O(n) or O(1) attention patterns while maintaining competitive performance—essential research for scaling to longer sequences.\"\n  },\n  {\n    \"title\": \"Attention Mechanisms beyond Self-Attention: Sparse, Gated, and Multi-Query Attention\",\n    \"difficulty\": 6,\n    \"reason\": \"Exploring alternative attention formulations advances understanding of how information flows in neural architectures and can lead to improved efficiency, expressiveness, or specialized capabilities for different sequence modeling tasks.\"\n  },\n  {\n    \"title\": \"Vision Transformers (ViT) and Multi-Modal Transformer Architectures\",\n    \"difficulty\": 6,\n    \"reason\": \"Extending the Transformer architecture beyond NLP to computer vision and multi-modal tasks demonstrates the framework's generalizability and represents a frontier in unified model design across domains.\"\n  }\n]\n```",
+  "model": "ChatMinimax (MiniMax-M2.5) {api=...NTUF42ohUc}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Efficient Transformers: Longformer, Reformer, and Linear Attention Mechanisms",
+      "difficulty": 6,
+      "reason": "These models address the quadratic complexity bottleneck of self-attention in standard Transformers, offering O(n) or O(1) attention patterns while maintaining competitive performance—essential research for scaling to longer sequences."
+    },
+    {
+      "title": "Attention Mechanisms beyond Self-Attention: Sparse, Gated, and Multi-Query Attention",
+      "difficulty": 6,
+      "reason": "Exploring alternative attention formulations advances understanding of how information flows in neural architectures and can lead to improved efficiency, expressiveness, or specialized capabilities for different sequence modeling tasks."
+    },
+    {
+      "title": "Vision Transformers (ViT) and Multi-Modal Transformer Architectures",
+      "difficulty": 6,
+      "reason": "Extending the Transformer architecture beyond NLP to computer vision and multi-modal tasks demonstrates the framework's generalizability and represents a frontier in unified model design across domains."
+    }
+  ]
+}

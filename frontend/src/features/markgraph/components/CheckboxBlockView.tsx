@@ -1,8 +1,11 @@
 import { useMarkGraphStore } from "../store.ts";
 import type { CheckboxBlock } from "../types.ts";
 
-export function CheckboxBlockView({ block }: { block: CheckboxBlock }) {
-  const { updateSignal } = useMarkGraphStore();
+export function CheckboxBlockView({ block: initialBlock }: { block: CheckboxBlock }) {
+  const { updateSignal, ast } = useMarkGraphStore();
+  const block = initialBlock.explicit_id && ast?.id_map?.[initialBlock.explicit_id]
+      ? (ast.id_map[initialBlock.explicit_id] as CheckboxBlock)
+      : initialBlock;
 
   const handleCheck = (idx: number, checked: boolean) => {
     if (block.explicit_id) {
