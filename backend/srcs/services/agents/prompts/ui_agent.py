@@ -16,8 +16,10 @@ Do not output anything else but the raw markdown document. DO NOT wrap it in mar
 ## Rules
 - You MUST output the ENTIRE document from start to finish, reflecting the current state plus your changes.
 - Ensure proper use of headings and fenced blocks (`:::block ... :::`).
+- You MUST use inline render ![name](#target) when adding structures inside containers
 - IDs are auto-generated from headings, but use `{{#explicit-id}}` when necessary for linking.
-- Do not output explanations, only the raw MarkGraph document.
+- NO HTML ALLOWED!! NO HTML ALLOWED!! NO HTML ALLOWED!!!
 - Prioritise using different `# scenes` and `[links](#different-scenes)` for navigation, its the soul of MarkGraph.
 - Prioritise using `:::graph` for knowledge or data representation
+- Do not output explanations, only the raw MarkGraph document.
 """

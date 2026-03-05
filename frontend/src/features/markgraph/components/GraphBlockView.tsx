@@ -1,15 +1,30 @@
-import { useEffect, useMemo } from "react";
-import { ReactFlow, Controls, Handle, Position, useNodesState, useEdgesState } from "@xyflow/react";
+import { useEffect, useMemo, useRef } from "react";
+import { 
+  ReactFlow, 
+  Controls, 
+  Handle, 
+  Position, 
+  useNodesState, 
+  useEdgesState, 
+  MarkerType,
+  ReactFlowProvider,
+  useReactFlow,
+  Panel
+} from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import type { GraphBlock } from "../types.ts";
 import { useForceLayout } from "../hooks/useForceLayout.ts";
 import type { NodeData, EdgeData } from "../hooks/useForceLayout.ts";
 import { useMarkGraphStore } from "../store.ts";
 
-function NeoNode({ data }: any) {
+function NeoNode({ data, id }: any) {
+  // If the explicit label (display text) is different from the ID, 
+  // we show the ID in parentheses as context if it fits.
+  const displayLabel = data.label === id ? id : `(${id}) ${data.label}`;
+  
   return (
-    <div className="flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 rounded-full border-4 border-blue-500/20 shadow-lg cursor-pointer hover:ring-2 hover:ring-blue-500/50 transition-all font-bold text-[10px] text-center px-1 leading-tight overflow-hidden break-all">
-      <span className="line-clamp-3">{data.label}</span>
+    <div title={displayLabel} className="flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 rounded-full border-4 border-blue-500/20 shadow-lg cursor-pointer hover:ring-2 hover:ring-blue-500/50 transition-all font-bold text-[9px] text-center px-1 leading-tight overflow-hidden break-all">
+      <span className="line-clamp-3">{displayLabel}</span>
       <Handle type="source" position={Position.Bottom} style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} className="opacity-0 w-0 h-0" />
       <Handle type="target" position={Position.Top} style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} className="opacity-0 w-0 h-0" />
     </div>
@@ -19,6 +34,81 @@ function NeoNode({ data }: any) {
 const nodeTypes = {
   neo: NeoNode,
 };
+
+/** 
+ * Internal component that processes the actual ReactFlow logic. 
+ * This MUST be nested inside <ReactFlowProvider> so useReactFlow hooks work.
+ */
+function GraphInner({ 
+  nodes, 
+  edgesState, 
+  onNodesChange, 
+  onEdgesChange, 
+  onNodeDragStart, 
+  onNodeDrag, 
+  onNodeDragStop, 
+  onNodeClick,
+  simulationAlpha 
+}: any) {
+  const { fitView, getNodes } = useReactFlow();
+  const hasInitialFit = useRef(false);
+
+  // Auto-fit when d3-force settles for the first time
+  useEffect(() => {
+    if (!hasInitialFit.current && simulationAlpha < 0.1 && nodes.length > 0) {
+      fitView({ duration: 800, padding: 0.2 });
+      hasInitialFit.current = true;
+    }
+  }, [simulationAlpha, nodes.length, fitView]);
+
+  return (
+    <ReactFlow 
+      nodes={nodes} 
+      edges={edgesState}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      nodeTypes={nodeTypes}
+      onNodeDragStart={onNodeDragStart}
+      onNodeDrag={onNodeDrag}
+      onNodeDragStop={onNodeDragStop}
+      onNodeClick={onNodeClick}
+      fitView
+      fitViewOptions={{ padding: 0.2, maxZoom: 1.5 }}
+      minZoom={0.2} 
+      maxZoom={2}
+      onMoveEnd={(_, viewport) => {
+         // Lost Prevention: Check if any nodes are even remotely visible
+         const currentNodes = getNodes();
+         if (currentNodes.length === 0) return;
+
+         const margin = 150; 
+         // container is 400px high, width is likely similar or more
+         const isAnyNodeVisible = currentNodes.some(node => {
+            const x = (node.position.x * viewport.zoom) + viewport.x;
+            const y = (node.position.y * viewport.zoom) + viewport.y;
+            return (
+              x > -margin && x < 800 + margin && 
+              y > -margin && y < 400 + margin
+            );
+         });
+
+         if (!isAnyNodeVisible) {
+           fitView({ duration: 1000, padding: 0.2 });
+         }
+      }}
+    >
+      <Controls showInteractive={false} />
+      <Panel position="bottom-right">
+        <button 
+          onClick={() => fitView({ duration: 400, padding: 0.2 })}
+          className="bg-background/80 hover:bg-background border border-border px-2 py-1 rounded shadow-sm text-[10px] font-bold transition-all active:scale-95"
+        >
+          Re-center
+        </button>
+      </Panel>
+    </ReactFlow>
+  );
+}
 
 export function GraphBlockView({ block }: { block: GraphBlock }) {
   const initialNodes: NodeData[] = useMemo(() => block.vertices.map((v) => ({
@@ -36,7 +126,7 @@ export function GraphBlockView({ block }: { block: GraphBlock }) {
     target: e.dst,
   })), [block.edges]);
 
-  const { nodes: animatedNodes, onNodeDragStart, onNodeDrag, onNodeDragStop } = useForceLayout(
+  const { nodes: animatedNodes, alpha, onNodeDragStart, onNodeDrag, onNodeDragStop } = useForceLayout(
     initialNodes,
     initialEdges,
     600,
@@ -52,10 +142,10 @@ export function GraphBlockView({ block }: { block: GraphBlock }) {
   })), [animatedNodes]);
 
   const initialReactEdges = useMemo(() => block.edges.map((e, i) => {
-    let style: any = { strokeWidth: 3 };
+    let style: any = { strokeWidth: 5 };
     if (e.op === "--") style.strokeDasharray = "5 5";
     
-    return {
+    const edge: any = {
       id: `e-${e.src}-${e.dst}-${i}`,
       source: e.src,
       target: e.dst,
@@ -63,6 +153,15 @@ export function GraphBlockView({ block }: { block: GraphBlock }) {
       type: "straight",
       style,
     };
+
+    if (e.op === "->" || e.op === "<->") {
+      edge.markerEnd = { type: MarkerType.ArrowClosed, width: 10, height: 10, color: '#3b82f6' };
+    }
+    if (e.op === "<-" || e.op === "<->") {
+      edge.markerStart = { type: MarkerType.ArrowClosed, width: 10, height: 10, color: '#3b82f6' };
+    }
+    
+    return edge;
   }), [block.edges]);
   
   const [nodes, setNodes, onNodesChange] = useNodesState<any>(reactFlowNodes);
@@ -103,23 +202,23 @@ export function GraphBlockView({ block }: { block: GraphBlock }) {
   };
 
   return (
-    <div className="w-full h-[400px] border border-border rounded-lg overflow-hidden bg-surface">
-      <ReactFlow 
-        nodes={nodes} 
-        edges={edgesState}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        nodeTypes={nodeTypes}
-        onNodeDragStart={onNodeDragStart}
-        onNodeDrag={onNodeDrag}
-        onNodeDragStop={onNodeDragStop}
-        onNodeClick={onNodeClick}
-        fitView 
-        minZoom={0.5} 
-        maxZoom={2}
-      >
-        <Controls showInteractive={false} />
-      </ReactFlow>
+    <div className="w-full h-[400px] border border-border rounded-lg overflow-hidden bg-surface relative">
+      <ReactFlowProvider>
+        <GraphInner 
+          block={block}
+          nodes={nodes}
+          edgesState={edgesState}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onNodeDragStart={onNodeDragStart}
+          onNodeDrag={onNodeDrag}
+          onNodeDragStop={onNodeDragStop}
+          onNodeClick={onNodeClick}
+          simulationAlpha={alpha}
+        />
+      </ReactFlowProvider>
     </div>
   );
 }
+
+

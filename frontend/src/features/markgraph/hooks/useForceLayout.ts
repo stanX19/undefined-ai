@@ -17,6 +17,7 @@ export interface EdgeData extends d3.SimulationLinkDatum<NodeData> {
 export function useForceLayout(initialNodes: NodeData[], initialEdges: EdgeData[], width: number, height: number) {
   // We keep the nodes in state so the ReactFlow view can re-render as they move
   const [nodes, setNodes] = useState<NodeData[]>([]);
+  const [alpha, setAlpha] = useState(1);
   const simulationRef = useRef<d3.Simulation<NodeData, EdgeData> | null>(null);
 
   // Initialize the simulation only once or when the network structurally changes
@@ -32,9 +33,12 @@ export function useForceLayout(initialNodes: NodeData[], initialEdges: EdgeData[
     // d3-force modifies the source/target to object references, so clone edges
     const edgesCopy = initialEdges.map(e => ({ ...e }));
 
+    // Dynamic charge based on node count. A few nodes need less repulsion so they don't fly off screen.
+    const chargeStrength = nodesCopy.length < 5 ? -150 : (nodesCopy.length < 10 ? -250 : -400);
+
     // Create the simulation
     const simulation = d3.forceSimulation<NodeData>(nodesCopy)
-      .force("charge", d3.forceManyBody().strength(-400)) // Moderated repel nodes strongly so it doesnt vanish on alpha=0.3
+      .force("charge", d3.forceManyBody().strength(chargeStrength)) // Moderated repel
       .force("center", d3.forceCenter(width / 2, height / 2).strength(0.1)) // Soft gravity to center
       .force("collide", d3.forceCollide<NodeData>().radius(d => Math.max(d.width, d.height) / 2 + 10).iterations(2)) // Avoid overlap using bounding boxes
       .force("link", d3.forceLink<NodeData, EdgeData>(edgesCopy)
@@ -46,6 +50,7 @@ export function useForceLayout(initialNodes: NodeData[], initialEdges: EdgeData[
       .on("tick", () => {
         // Trigger React re-render with new positions on every animation frame
         setNodes([...simulation.nodes()]);
+        setAlpha(simulation.alpha());
       });
 
     simulationRef.current = simulation;
@@ -95,5 +100,5 @@ export function useForceLayout(initialNodes: NodeData[], initialEdges: EdgeData[
     simulationRef.current.alphaTarget(0);
   };
 
-  return { nodes, onNodeDragStart, onNodeDrag, onNodeDragStop };
+  return { nodes, alpha, onNodeDragStart, onNodeDrag, onNodeDragStop };
 }
