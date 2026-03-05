@@ -9,7 +9,7 @@ import traceback
 
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, BaseMessage
 
-from srcs.services.agents.rotating_llm import rotating_llm
+from srcs.services.agents.rotating_llm import rotating_llm, LLMResponse
 from srcs.services.agents.prompts.ui_agent import UI_AGENT_PROMPT
 from srcs.services.agents.id_mapper import current_mapper
 from srcs.utils.markgraph.markgraph_parser import compile_markgraph, export_to_dict
@@ -48,18 +48,8 @@ class UIAgent:
         max_retries = 3
         for attempt in range(max_retries):
             try:
-                llm = await rotating_llm.get_runnable(temperature=0.3)
-                response = await llm.ainvoke(messages)
-                content = str(response.content).strip()
-
-                # Strip markdown code block wrapping if LLM hallucinates it
-                if content.startswith("```markdown"):
-                    content = content[11:]
-                elif content.startswith("```"):
-                    content = content[3:]
-                if content.endswith("```"):
-                    content = content[:-3]
-                content = content.strip()
+                llm_response: LLMResponse = await rotating_llm.send_message(messages, temperature=0.3)
+                content: str = rotating_llm.strip_code_block(llm_response.text)
 
                 # Parse and validate the new MarkGraph text
                 result = compile_markgraph(content)
@@ -67,7 +57,7 @@ class UIAgent:
                 if result.errors:
                     print(f"UIAgent syntax error on attempt {attempt + 1}. Retrying.")
                     error_lines = [f"Line {e.line}: {e.message}" for e in result.errors]
-                    messages.append(AIMessage(content=content))
+                    messages.append(AIMessage(content=llm_response.text))
                     messages.append(
                         HumanMessage(content=(
                             "The MarkGraph parser reported the following syntax errors:\n"

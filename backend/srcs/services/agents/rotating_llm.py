@@ -323,14 +323,18 @@ class RotatingLLM:
             return key_list[0].api_key
 
     @staticmethod
+    def strip_code_block(text: str):
+        clean_text = re.sub(
+            r'^\s*```.*\s*([\s\S]*?)\s*```\s*$',
+            r'\1',
+            text.strip(),
+        ).strip()
+        return clean_text
+
+    @staticmethod
     def try_get_json(text: str):
         try:
-            clean_text = re.sub(
-                r'^\s*```json\s*([\s\S]*?)\s*```\s*$',
-                r'\1',
-                text.strip(),
-            ).strip()
-            return json.loads(clean_text)
+            return json.loads(RotatingLLM.strip_code_block(text))
         except json.JSONDecodeError:
             return None
 
@@ -501,8 +505,10 @@ if __name__ == "__main__":
         print("With max_tokens:", result3)
 
 
-    import sys
+    # import sys
+    #
+    # if sys.platform.startswith("win") and sys.version_info < (3, 14):
+    #     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    # asyncio.run(main())
 
-    if sys.platform.startswith("win") and sys.version_info < (3, 14):
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-    asyncio.run(main())
+    print(rotating_llm.strip_code_block("```markdown\nhi\nhi\naa```"))
