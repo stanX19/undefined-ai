@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\"title\": \"Graph Connectivity and Network Resilience\", \"difficulty\": 4, \"reason\": \"Extends understanding of complete graphs by exploring how removing edges affects graph connectivity and network robustness.\"},\n  {\"title\": \"Graph Algorithms and Optimization\", \"difficulty\": 5, \"reason\": \"Introduces algorithmic approaches to solve practical problems like shortest path and minimum spanning tree on complex networks.\"},\n  {\"title\": \"Spectral Graph Theory\", \"difficulty\": 6, \"reason\": \"Advanced mathematical framework using eigenvalues of adjacency matrices to analyze graph structure and properties at research level.\"}\n]\n```",
+  "model": "ChatMinimax (MiniMax-M2.5) {api=...NTUF42ohUc}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Graph Connectivity and Network Resilience",
+      "difficulty": 4,
+      "reason": "Extends understanding of complete graphs by exploring how removing edges affects graph connectivity and network robustness."
+    },
+    {
+      "title": "Graph Algorithms and Optimization",
+      "difficulty": 5,
+      "reason": "Introduces algorithmic approaches to solve practical problems like shortest path and minimum spanning tree on complex networks."
+    },
+    {
+      "title": "Spectral Graph Theory",
+      "difficulty": 6,
+      "reason": "Advanced mathematical framework using eigenvalues of adjacency matrices to analyze graph structure and properties at research level."
+    }
+  ]
+}

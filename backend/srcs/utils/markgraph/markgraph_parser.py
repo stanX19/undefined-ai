@@ -182,7 +182,7 @@ def parse_inline(text: str) -> list[Any]:
 # block sub-parsers
 RE_GRAPH_VERTEX_DEF  = re.compile(r'^\[([^\]]+)\]\(#([^)]+)\)\s*::\s*(.+)$')  # [id](#nav) :: text
 RE_GRAPH_VERTEX_BARE = re.compile(r'^([A-Za-z0-9_-]+)\s*::\s*(.+)$')           # id :: text
-RE_GRAPH_EDGE        = re.compile(r'^([A-Za-z0-9_-]+)\s*(->|<-|--)\s*([A-Za-z0-9_-]+)$')
+RE_GRAPH_EDGE        = re.compile(r'^([A-Za-z0-9_-]+)\s*(->|<-|--|<->)\s*([A-Za-z0-9_-]+)$')
 
 RE_QUIZ_ANSWER       = re.compile(r'^-\s+(.+?)(\s+\*)?\s*$')
 RE_QUIZ_EXPL         = re.compile(r'^>\s+(.+)$')

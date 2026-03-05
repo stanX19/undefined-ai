@@ -68,7 +68,7 @@ vertex_def  : vertex_ref "::" display_text
 vertex_ref  : "[" VERTEX_ID "]" "(" "#" TARGET_ID ")"   // vertex with nav link
             | VERTEX_ID                                   // plain vertex
 edge        : vertex_ref EDGE_OP vertex_ref
-EDGE_OP     : "->" | "<-" | "--"
+EDGE_OP     : "->" | "<-" | "--" | "<->"
 VERTEX_ID   : /[A-Za-z0-9_-]+/
 display_text: /[^\n]+/
 

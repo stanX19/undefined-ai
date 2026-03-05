@@ -34,7 +34,7 @@ export interface GraphVertex {
 export interface GraphEdge {
     type: "GraphEdge";
     src: string;
-    op: "->" | "<-" | "--";
+    op: "->" | "<-" | "--" | "<->";
     dst: string;
 }
 
