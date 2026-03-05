@@ -138,7 +138,7 @@ RE_SCENE        = re.compile(r'^#\s+(.+)$')
 RE_CONTAINER    = re.compile(r'^(#{2,6})\s+(.+)$')
 RE_ATTR         = re.compile(r'@([a-z][a-z0-9_-]*)')
 RE_EXPLICIT_ID  = re.compile(r'\{#([a-z0-9][a-z0-9_-]*)\}')
-RE_BUTTON       = re.compile(r'^\[\[([^\]]+)\]\]\(#([^)]+)\)\s*$')
+RE_BUTTON       = re.compile(r'^(?:\[\[([^\]]+)\]\]\(#([^)]+)\)|\[\[([^\]]+)\]\(#([^)]+)\)\])\s*$')
 RE_INCLUDE_ONLY = re.compile(r'^!\[([^\]]*)\]\(#([^)]+)\)\s*$')
 RE_FENCE_OPEN   = re.compile(r'^:::([a-z]+)\s*$')
 RE_FENCE_CLOSE  = re.compile(r'^:::\s*$')
@@ -146,10 +146,11 @@ RE_HR           = re.compile(r'^[-=]{3,}\s*$')
 
 # inline patterns (used inside text / threshold bodies)
 RE_INLINE_INCLUDE = re.compile(r'!\[([^\]]*)\]\(#([^)]+)\)')
-RE_INLINE_BUTTON  = re.compile(r'\[\[([^\]]+)\]\]\(#([^)]+)\)')
+RE_INLINE_BUTTON  = re.compile(r'(?:\[\[([^\]]+)\]\]\(#([^)]+)\)|\[\[([^\]]+)\]\(#([^)]+)\)\])')
 
 RE_INLINE = re.compile(
     r'(?P<button>\[\[(?P<btn_label>[^\]]+)\]\]\(#(?P<btn_target>[^)]+)\))|'
+    r'(?P<button2>\[\[(?P<btn2_label>[^\]]+)\]\(#(?P<btn2_target>[^)]+)\)\])|'
     r'(?P<include>!\[(?P<inc_label>[^\]]*)\]\(#(?P<inc_target>[^)]+)\))|'
     r'(?P<link>(?<!\[)\[(?P<lnk_label>[^\]]+)\]\(#(?P<lnk_target>[^)]+)\))'
 )
@@ -164,6 +165,8 @@ def parse_inline(text: str) -> list[Any]:
         
         if m.group('button'):
             fragments.append(RedirLink(label=m.group('btn_label'), target=m.group('btn_target'), kind='button'))
+        elif m.group('button2'):
+            fragments.append(RedirLink(label=m.group('btn2_label'), target=m.group('btn2_target'), kind='button'))
         elif m.group('include'):
             fragments.append(Include(label=m.group('inc_label'), target=m.group('inc_target')))
         elif m.group('link'):
@@ -508,8 +511,9 @@ def parse_block_token(tok: Token, diags: list[Diagnostic]) -> Element | None:
         return parse_progress_block(lines, ln, diags)
 
     diags.append(Diagnostic("warning",
-        f"Unknown fenced block type ':::{btype}' (skipped)", ln))
-    return None
+        f"Unknown fenced block type ':::{btype}' — treated as text", ln))
+    # Treat unrecognised block types (e.g. :::card) as markdown text
+    return TextNode(markdown="\n".join(lines), fragments=parse_inline("\n".join(lines)))
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Pass 2 — Parse  (token stream → Scene Graph)

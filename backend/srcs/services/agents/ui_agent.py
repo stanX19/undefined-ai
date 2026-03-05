@@ -5,6 +5,7 @@ MarkGraph state wholesale. Automatically reiterates if the parser finds syntax e
 Called by the ``edit_ui`` chatbot tool.
 """
 import json
+import pathlib
 import traceback
 
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, BaseMessage
@@ -14,6 +15,9 @@ from srcs.services.agents.prompts.ui_agent import UI_AGENT_PROMPT
 from srcs.services.agents.id_mapper import current_mapper
 from srcs.utils.markgraph.markgraph_parser import compile_markgraph, export_to_dict
 
+_MARKGRAPH_SPEC = (pathlib.Path(__file__).resolve().parent.parent.parent
+                   / "utils" / "markgraph" / "MarkGraph.md").read_text(encoding="utf-8")
+
 
 class UIAgent:
     """Agent for MarkGraph UI protocol generation.
@@ -22,7 +26,7 @@ class UIAgent:
     """
 
     def __init__(self) -> None:
-        self.system_prompt = UI_AGENT_PROMPT
+        self.system_prompt = UI_AGENT_PROMPT + "\n\n" + _MARKGRAPH_SPEC
 
     async def edit(self, topic_id: str, prompt: str) -> dict:
         """Run the agent to edit the UI for *topic_id* per *prompt*.

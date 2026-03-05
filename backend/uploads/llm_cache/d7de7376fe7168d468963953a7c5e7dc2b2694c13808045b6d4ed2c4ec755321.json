@@ -1,0 +1,11 @@
+{
+  "text": "```json\n[\n  \"Full stack development combines front-end (HTML, CSS, JavaScript, React, Vue.js, Angular), back-end (Node.js, Python, Ruby, Java), and database (MySQL, MongoDB, PostgreSQL) technologies, with JavaScript (68% adoption) dominating through MEAN, MERN, JAMstack, and LAMP stacks.\",\n  \"Full stack developer job growth is projected at 8-13% annually (22% from 2020-2030 per BLS) with 64,000+ U.S. openings, offering salaries from $85,000-$107,000 entry-level to $161,000-$284,000 senior-level (averaging $190,333 in San Francisco, $173,000 in NYC, $150,000 in Austin).\",\n  \"Git has 93% adoption for version control alongside DevOps tools like Docker and Jenkins, and with full-time dedication one can become job-ready in 90 days by mastering HTML, CSS, JavaScript basics then progressing to frameworks and back-end technologies.\",\n  \"Full stack developers have clear career progression from Junior Developer to Technical Lead, Architect, or CTO.\"\n]\n```",
+  "model": "ChatMinimax (MiniMax-M2.5) {api=...NTUF42ohUc}",
+  "status": "ok",
+  "json_data": [
+    "Full stack development combines front-end (HTML, CSS, JavaScript, React, Vue.js, Angular), back-end (Node.js, Python, Ruby, Java), and database (MySQL, MongoDB, PostgreSQL) technologies, with JavaScript (68% adoption) dominating through MEAN, MERN, JAMstack, and LAMP stacks.",
+    "Full stack developer job growth is projected at 8-13% annually (22% from 2020-2030 per BLS) with 64,000+ U.S. openings, offering salaries from $85,000-$107,000 entry-level to $161,000-$284,000 senior-level (averaging $190,333 in San Francisco, $173,000 in NYC, $150,000 in Austin).",
+    "Git has 93% adoption for version control alongside DevOps tools like Docker and Jenkins, and with full-time dedication one can become job-ready in 90 days by mastering HTML, CSS, JavaScript basics then progressing to frameworks and back-end technologies.",
+    "Full stack developers have clear career progression from Junior Developer to Technical Lead, Architect, or CTO."
+  ]
+}

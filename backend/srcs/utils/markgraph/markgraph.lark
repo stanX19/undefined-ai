@@ -38,7 +38,7 @@ EXPLICIT_ID_TOKEN : /\{#[a-z0-9][a-z0-9_-]*\}/
 // ─── INTERACTIVE ELEMENTS ────────────────────────────────────────────────────
 
 redir_link  : "[" LABEL "]" "(" "#" TARGET_ID ")"
-redir_button: "[[" LABEL "]]" "(" "#" TARGET_ID ")"
+redir_button: "[[" LABEL "]" "(" "#" TARGET_ID ")" "]"
 include     : "![" LABEL? "]" "(" "#" TARGET_ID ")"
 
 LABEL       : /[^\]]+/

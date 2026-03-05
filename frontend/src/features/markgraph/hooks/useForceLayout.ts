@@ -1,141 +1,177 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 
-export interface NodeData {
+export interface ForceNode {
   id: string;
-  type: string;
   x: number;
   y: number;
   vx: number;
   vy: number;
   width: number;
   height: number;
-  data: any;
 }
 
-export interface EdgeData {
+export interface ForceEdge {
   source: string;
   target: string;
 }
 
-export function useForceLayout(nodes: NodeData[], edges: EdgeData[], width: number, height: number) {
+export interface ForceBounds {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+/**
+ * Force-directed layout simulation bounded within a container.
+ * Used specifically for :::graph blocks.
+ *
+ * Supports:
+ * - Node repulsion (Coulomb-like)
+ * - Edge spring attraction (Hooke-like)
+ * - Center gravity
+ * - Wall repulsion (soft inward force near edges)
+ */
+export function useForceLayout(
+  nodes: ForceNode[],
+  edges: ForceEdge[],
+  bounds: ForceBounds,
+) {
   const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>({});
-  const nodesRef = useRef(nodes);
-  const edgesRef = useRef(edges);
+
+  // Stable identity for nodes/edges via JSON key
+  const nodeKey = useMemo(() => nodes.map((n) => n.id).join(","), [nodes]);
+  const edgeKey = useMemo(
+    () => edges.map((e) => `${e.source}-${e.target}`).join(","),
+    [edges],
+  );
 
   useEffect(() => {
-    nodesRef.current = nodes;
-    edgesRef.current = edges;
-  }, [nodes, edges]);
+    if (nodes.length === 0) return;
 
-  useEffect(() => {
     let animationFrameId: number;
-    const K = 0.5; // Spring constant
-    const REPULSION = 40000;
-    const DAMPING = 0.8;
-    const CENTER_GRAVITY = 0.05;
+    let iteration = 0;
+    const MAX_ITERATIONS = 300;
 
-    // Initialize node state if empty
-    const layoutNodes = nodesRef.current.map((n, i) => ({
+    const REPULSION = 30000;
+    const K_SPRING = 0.3;
+    const SPRING_REST = 140;
+    const DAMPING = 0.85;
+    const CENTER_GRAVITY = 0.03;
+    const WALL_FORCE = 200;
+    const WALL_MARGIN = 40;
+
+    const cx = bounds.x + bounds.w / 2;
+    const cy = bounds.y + bounds.h / 2;
+
+    // Clone nodes for simulation state
+    const simNodes = nodes.map((n, i) => ({
       ...n,
-      x: n.x || width / 2 + (Math.random() * 100 - 50),
-      y: n.y || height / 2 + (Math.random() * 100 - 50),
+      x: cx + (Math.cos((i / nodes.length) * Math.PI * 2) * bounds.w * 0.25),
+      y: cy + (Math.sin((i / nodes.length) * Math.PI * 2) * bounds.h * 0.25),
       vx: 0,
       vy: 0,
     }));
 
-    function tick() {
-      // Repulsion
-      for (let i = 0; i < layoutNodes.length; i++) {
-        const n1 = layoutNodes[i];
-        
-        // Gravity to center
-        n1.vx += (width / 2 - n1.x) * CENTER_GRAVITY;
-        n1.vy += (height / 2 - n1.y) * CENTER_GRAVITY;
+    const nodeById = new Map(simNodes.map((n) => [n.id, n]));
 
-        for (let j = i + 1; j < layoutNodes.length; j++) {
-          const n2 = layoutNodes[j];
+    function tick() {
+      iteration++;
+
+      // --- Repulsion between all pairs ---
+      for (let i = 0; i < simNodes.length; i++) {
+        const n1 = simNodes[i];
+
+        // Center gravity
+        n1.vx += (cx - n1.x) * CENTER_GRAVITY;
+        n1.vy += (cy - n1.y) * CENTER_GRAVITY;
+
+        for (let j = i + 1; j < simNodes.length; j++) {
+          const n2 = simNodes[j];
           const dx = n1.x - n2.x;
           const dy = n1.y - n2.y;
           const distSq = dx * dx + dy * dy || 1;
           const dist = Math.sqrt(distSq);
 
-          // Calculate overlap / repulsive force
-          // We want nodes to repel based on their bounding boxes roughly
-          const minD = (n1.width + n2.width) / 2 + 20; 
-          
-          if (dist < minD * 2) {
-             const force = REPULSION / distSq;
-             const fx = (dx / dist) * force;
-             const fy = (dy / dist) * force;
-             n1.vx += fx;
-             n1.vy += fy;
-             n2.vx -= fx;
-             n2.vy -= fy;
-          }
+          const force = REPULSION / distSq;
+          const fx = (dx / dist) * force;
+          const fy = (dy / dist) * force;
+          n1.vx += fx;
+          n1.vy += fy;
+          n2.vx -= fx;
+          n2.vy -= fy;
         }
       }
 
-      // Spring attraction (if edges exist)
-      for (const edge of edgesRef.current) {
-        const source = layoutNodes.find((n) => n.id === edge.source);
-        const target = layoutNodes.find((n) => n.id === edge.target);
-        if (source && target) {
-          const targetDist = 200;
-          const dx = target.x - source.x;
-          const dy = target.y - source.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist > 0) {
-            const force = (dist - targetDist) * K;
-            const fx = (dx / dist) * force;
-            const fy = (dy / dist) * force;
-            source.vx += fx;
-            source.vy += fy;
-            target.vx -= fx;
-            target.vy -= fy;
-          }
-        }
+      // --- Spring attraction along edges ---
+      for (const edge of edges) {
+        const source = nodeById.get(edge.source);
+        const target = nodeById.get(edge.target);
+        if (!source || !target) continue;
+
+        const dx = target.x - source.x;
+        const dy = target.y - source.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const force = (dist - SPRING_REST) * K_SPRING;
+        const fx = (dx / dist) * force;
+        const fy = (dy / dist) * force;
+        source.vx += fx;
+        source.vy += fy;
+        target.vx -= fx;
+        target.vy -= fy;
       }
 
-      // Apply forces
+      // --- Wall repulsion (soft inward force) ---
+      for (const node of simNodes) {
+        const left = node.x - bounds.x;
+        const right = (bounds.x + bounds.w) - node.x;
+        const top = node.y - bounds.y;
+        const bottom = (bounds.y + bounds.h) - node.y;
+
+        if (left < WALL_MARGIN) node.vx += WALL_FORCE / (left * left || 1);
+        if (right < WALL_MARGIN) node.vx -= WALL_FORCE / (right * right || 1);
+        if (top < WALL_MARGIN) node.vy += WALL_FORCE / (top * top || 1);
+        if (bottom < WALL_MARGIN) node.vy -= WALL_FORCE / (bottom * bottom || 1);
+      }
+
+      // --- Apply velocity, damping, clamping ---
       const newPos: Record<string, { x: number; y: number }> = {};
-      let maxVelocity = 0;
+      let maxSpeed = 0;
 
-      for (const node of layoutNodes) {
+      for (const node of simNodes) {
         node.vx *= DAMPING;
         node.vy *= DAMPING;
-        
-        // Limit max velocity
-        const speed = Math.sqrt(node.vx*node.vx + node.vy*node.vy);
-        if (speed > 20) {
-           node.vx = (node.vx/speed) * 20;
-           node.vy = (node.vy/speed) * 20;
+
+        // Speed limit
+        const speed = Math.sqrt(node.vx * node.vx + node.vy * node.vy);
+        if (speed > 15) {
+          node.vx = (node.vx / speed) * 15;
+          node.vy = (node.vy / speed) * 15;
         }
 
         node.x += node.vx;
         node.y += node.vy;
-        
-        // Keep within bounds
-        node.x = Math.max(node.width / 2, Math.min(width - node.width / 2, node.x));
-        node.y = Math.max(node.height / 2, Math.min(height - node.height / 2, node.y));
+
+        // Hard clamp to bounds
+        const hw = node.width / 2;
+        const hh = node.height / 2;
+        node.x = Math.max(bounds.x + hw, Math.min(bounds.x + bounds.w - hw, node.x));
+        node.y = Math.max(bounds.y + hh, Math.min(bounds.y + bounds.h - hh, node.y));
 
         newPos[node.id] = { x: node.x, y: node.y };
-        maxVelocity = Math.max(maxVelocity, speed);
+        maxSpeed = Math.max(maxSpeed, speed);
       }
 
       setPositions(newPos);
 
-      // Stop loop if it cools down
-      if (maxVelocity > 0.5) {
+      if (maxSpeed > 0.3 && iteration < MAX_ITERATIONS) {
         animationFrameId = requestAnimationFrame(tick);
       }
     }
 
-    if (nodesRef.current.length > 0) {
-       animationFrameId = requestAnimationFrame(tick);
-    }
-
+    animationFrameId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [width, height]);
+  }, [nodeKey, edgeKey, bounds.x, bounds.y, bounds.w, bounds.h]);
 
   return positions;
 }

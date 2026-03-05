@@ -1,0 +1,14 @@
+{
+  "text": "```json\n[\n  \"Full stack development combines front-end (HTML, CSS, JavaScript, React, Vue.js, Angular), back-end (Node.js, Python, Ruby, Java), and database management (MySQL, MongoDB, PostgreSQL) to build complete web applications.\",\n  \"JavaScript dominates web development with 68% adoption and powers popular stacks like MEAN (MongoDB, Express.js, Angular, Node.js), MERN (MongoDB, Express.js, React, Node.js), and JAMstack (JavaScript, APIs, Markup), while LAMP uses Linux, Apache, MySQL, and PHP.\",\n  \"Full stack developer job growth is projected at 8-13% annually through 2024, with the U.S. Bureau of Labor Statistics predicting 22% growth from 2020 to 2030, totaling over 64,000 current job openings in the U.S.\",\n  \"Full stack developer salaries range from $85,000-$107,000 (entry-level) to $161,000-$284,000 (senior-level), averaging $190,333 in San Francisco, $173,000 in New York City, and $150,000 in Austin.\",\n  \"Git is essential for full stack developers with 93% adoption for version control, alongside DevOps tools like Docker and Jenkins.\",\n  \"With full-time dedication, one can become a full stack developer in as little as 90 days by mastering HTML, CSS, and JavaScript basics, then progressing to frameworks and back-end technologies.\",\n  \"Full stack development offers clear career progression from Junior Developer to Technical Lead, Architect, or CTO.\"\n]\n```",
+  "model": "ChatMinimax (MiniMax-M2.5) {api=...NTUF42ohUc}",
+  "status": "ok",
+  "json_data": [
+    "Full stack development combines front-end (HTML, CSS, JavaScript, React, Vue.js, Angular), back-end (Node.js, Python, Ruby, Java), and database management (MySQL, MongoDB, PostgreSQL) to build complete web applications.",
+    "JavaScript dominates web development with 68% adoption and powers popular stacks like MEAN (MongoDB, Express.js, Angular, Node.js), MERN (MongoDB, Express.js, React, Node.js), and JAMstack (JavaScript, APIs, Markup), while LAMP uses Linux, Apache, MySQL, and PHP.",
+    "Full stack developer job growth is projected at 8-13% annually through 2024, with the U.S. Bureau of Labor Statistics predicting 22% growth from 2020 to 2030, totaling over 64,000 current job openings in the U.S.",
+    "Full stack developer salaries range from $85,000-$107,000 (entry-level) to $161,000-$284,000 (senior-level), averaging $190,333 in San Francisco, $173,000 in New York City, and $150,000 in Austin.",
+    "Git is essential for full stack developers with 93% adoption for version control, alongside DevOps tools like Docker and Jenkins.",
+    "With full-time dedication, one can become a full stack developer in as little as 90 days by mastering HTML, CSS, and JavaScript basics, then progressing to frameworks and back-end technologies.",
+    "Full stack development offers clear career progression from Junior Developer to Technical Lead, Architect, or CTO."
+  ]
+}
