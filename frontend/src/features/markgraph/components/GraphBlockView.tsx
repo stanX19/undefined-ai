@@ -202,7 +202,7 @@ export function GraphBlockView({ block }: { block: GraphBlock }) {
   };
 
   return (
-    <div className="w-full h-[400px] border border-border rounded-lg overflow-hidden bg-surface relative">
+    <div id={block.explicit_id || undefined} className="w-full h-[400px] border border-border rounded-lg overflow-hidden bg-surface relative">
       <ReactFlowProvider>
         <GraphInner 
           block={block}

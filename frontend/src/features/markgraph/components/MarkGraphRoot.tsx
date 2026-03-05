@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useMarkGraphStore } from "../store.ts";
 import type { MarkGraphElement, Container, Scene } from "../types.ts";
 import { CheckboxBlockView } from "./CheckboxBlockView.tsx";
@@ -32,7 +33,7 @@ function ElementRenderer({ element }: { element: MarkGraphElement }) {
     // extracted into RedirLink objects to be rendered properly.
     if (element.fragments && element.fragments.length > 0) {
       return (
-        <div className="prose prose-sm dark:prose-invert max-w-none text-text-primary">
+        <div id={element.explicit_id || undefined} className="prose prose-sm dark:prose-invert max-w-none text-text-primary">
           {element.fragments.map((frag: any, i: number) => {
             if (typeof frag === "string") {
               return (
@@ -90,7 +91,7 @@ function ElementRenderer({ element }: { element: MarkGraphElement }) {
 
     // Fallback if there are no fragments (older ASTs)
     return (
-      <div className="prose prose-sm dark:prose-invert max-w-none text-text-primary">
+      <div id={element.explicit_id || undefined} className="prose prose-sm dark:prose-invert max-w-none text-text-primary">
         <ReactMarkdown
           components={{
             a: ({ node, href, children, ...props }) => {
@@ -123,16 +124,16 @@ function ElementRenderer({ element }: { element: MarkGraphElement }) {
     );
   }
   if (element.type === "CheckboxBlock") {
-    return <CheckboxBlockView block={element} />;
+    return <CheckboxBlockView id={element.explicit_id || undefined} block={element} />;
   }
   if (element.type === "QuizBlock") {
-    return <QuizBlockView block={element} />;
+    return <QuizBlockView id={element.explicit_id || undefined} block={element} />;
   }
   if (element.type === "InputBlock") {
-    return <InputBlockView block={element} />;
+    return <InputBlockView id={element.explicit_id || undefined} block={element} />;
   }
   if (element.type === "ProgressBlock") {
-    return <ProgressBlockView block={element} />;
+    return <ProgressBlockView id={element.explicit_id || undefined} block={element} />;
   }
   if (element.type === "GraphBlock") {
     return <GraphBlockView block={element} />;
@@ -140,6 +141,7 @@ function ElementRenderer({ element }: { element: MarkGraphElement }) {
   if (element.type === "RedirLink") {
     return (
       <button 
+        id={element.target?.replace(/^#/, '') + '-btn'} // Optional: Buttons usually aren't targets but good for consistency
         onClick={() => {
           const targetId = element.target.replace(/^#/, '');
           useMarkGraphStore.getState().navigateScene(targetId);
@@ -181,7 +183,7 @@ function ContainerRenderer({ container }: { container: Container }) {
     : "flex flex-col gap-3";
 
   return (
-    <div className={wrapperCls}>
+    <div id={container.id} className={wrapperCls}>
       {container.raw_heading && (
         <div className={`${headingCls} text-text-primary`}>
           {container.raw_heading}
@@ -200,7 +202,7 @@ function ContainerRenderer({ container }: { container: Container }) {
 
 function SceneRenderer({ scene }: { scene: Scene }) {
   return (
-    <section className="flex flex-col gap-5">
+    <section id={scene.id} className="flex flex-col gap-5">
       {scene.raw_heading && (
         <h1 className="text-2xl font-bold text-text-primary">
           {scene.raw_heading}
@@ -230,7 +232,21 @@ function ChildRenderer({ node }: { node: Container | MarkGraphElement }) {
 /* ── root ─────────────────────────────────────────────────────────────────── */
 
 export function MarkGraphRoot() {
-  const { ast, sceneId } = useMarkGraphStore();
+  const { ast, sceneId, scrollTarget } = useMarkGraphStore();
+
+  // Handle scrolling when scrollTarget changes
+  useEffect(() => {
+    if (scrollTarget) {
+      // Use a small timeout to ensure the scene has rendered if it just changed
+      const timer = setTimeout(() => {
+        const el = document.getElementById(scrollTarget.id);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [scrollTarget]);
 
   if (!ast || !ast.scenes || ast.scenes.length === 0) {
     return null;
@@ -239,7 +255,7 @@ export function MarkGraphRoot() {
   const activeScene = ast.scenes.find(s => s.id === sceneId) || ast.scenes[0];
 
   return (
-    <div className="flex flex-col gap-8 w-full animate-in fade-in duration-300">
+    <div className="flex flex-col gap-8 w-full animate-in fade-in duration-300 pb-20">
       <SceneRenderer key={activeScene.id} scene={activeScene} />
     </div>
   );

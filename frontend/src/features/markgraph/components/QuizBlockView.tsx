@@ -1,7 +1,7 @@
 import { useMarkGraphStore } from "../store.ts";
 import type { QuizBlock } from "../types.ts";
 
-export function QuizBlockView({ block: initialBlock }: { block: QuizBlock }) {
+export function QuizBlockView({ id, block: initialBlock }: { id?: string, block: QuizBlock }) {
   const { updateSignal, ast } = useMarkGraphStore();
   const block = initialBlock.explicit_id && ast?.id_map?.[initialBlock.explicit_id]
       ? (ast.id_map[initialBlock.explicit_id] as QuizBlock)
@@ -16,7 +16,7 @@ export function QuizBlockView({ block: initialBlock }: { block: QuizBlock }) {
   const hasAnswered = block.user_answer_idx !== undefined && block.user_answer_idx !== null;
 
   return (
-    <div className="flex flex-col gap-3 p-3 bg-surface rounded-md border border-border">
+    <div id={id} className="flex flex-col gap-3 p-3 bg-surface rounded-md border border-border">
       <h4 className="font-semibold text-text-primary text-sm">{block.question}</h4>
       <div className="flex flex-col gap-2">
         {block.answers.map(([text, isCorrect], idx) => {

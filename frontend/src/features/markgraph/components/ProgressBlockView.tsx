@@ -41,7 +41,7 @@ function evaluateProgress(node: ProgressBlock, idMap: Record<string, any>) {
   return totalScore / maxScore; // 0.0 to 1.0
 }
 
-export function ProgressBlockView({ block }: { block: ProgressBlock }) {
+export function ProgressBlockView({ id, block }: { id?: string, block: ProgressBlock }) {
   const { ast } = useMarkGraphStore();
   const idMap = ast?.id_map || {};
 
@@ -58,7 +58,7 @@ export function ProgressBlockView({ block }: { block: ProgressBlock }) {
   }
 
   return (
-    <div className="flex flex-col gap-3 p-3 bg-surface rounded-md border border-border">
+    <div id={id} className="flex flex-col gap-3 p-3 bg-surface rounded-md border border-border">
       {block.description && (
         <div className="text-sm font-semibold text-text-primary">{block.description}</div>
       )}

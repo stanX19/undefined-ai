@@ -1,7 +1,7 @@
 import { useMarkGraphStore } from "../store.ts";
 import type { InputBlock } from "../types.ts";
 
-export function InputBlockView({ block: initialBlock }: { block: InputBlock }) {
+export function InputBlockView({ id, block: initialBlock }: { id?: string, block: InputBlock }) {
   const { updateSignal, ast } = useMarkGraphStore();
   const block = initialBlock.explicit_id && ast?.id_map?.[initialBlock.explicit_id]
       ? (ast.id_map[initialBlock.explicit_id] as InputBlock)
@@ -14,7 +14,7 @@ export function InputBlockView({ block: initialBlock }: { block: InputBlock }) {
   };
 
   return (
-    <div className="flex flex-col gap-2 p-3 bg-surface rounded-md border border-border">
+    <div id={id} className="flex flex-col gap-2 p-3 bg-surface rounded-md border border-border">
       <label className="font-semibold text-text-primary text-sm">
         {block.question}
       </label>

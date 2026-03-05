@@ -11,7 +11,8 @@ interface MarkGraphState {
 
     // Actions
     setUI: (topicId: string, sceneId: string, ast: MarkGraphAST, markdown: string) => void;
-    navigateScene: (sceneId: string) => void;
+    navigateScene: (targetId: string) => void;
+    scrollTarget: { id: string; ts: number } | null;
     
     // For reactive state
     updateSignal: (elementId: string, value: any) => void;
@@ -26,11 +27,39 @@ export const useMarkGraphStore = create<MarkGraphState>((set) => ({
     markdown: null,
     isLoading: false,
     error: null,
+    scrollTarget: null,
 
     setUI: (topicId, sceneId, ast, markdown) => 
-        set({ topicId, sceneId, ast, markdown, error: null }),
+        set({ topicId, sceneId, ast, markdown, error: null, scrollTarget: null }),
 
-    navigateScene: (sceneId) => set({ sceneId }),
+    navigateScene: (targetId) => 
+        set((state) => {
+            if (!state.ast) return state;
+
+            // 1. Find which scene contains this targetId
+            let foundSceneId = state.sceneId; // default to current
+
+            // Helper to recursively check if a container or element has the ID
+            const hasId = (node: any, id: string): boolean => {
+                if (node.id === id || node.explicit_id === id) return true;
+                if (node.children) {
+                    return node.children.some((child: any) => hasId(child, id));
+                }
+                return false;
+            };
+
+            for (const scene of state.ast.scenes) {
+                if (scene.id === targetId || hasId(scene, targetId)) {
+                    foundSceneId = scene.id;
+                    break;
+                }
+            }
+
+            return { 
+                sceneId: foundSceneId,
+                scrollTarget: { id: targetId, ts: Date.now() }
+            };
+        }),
 
     updateSignal: (elementId, value) =>
         set((state) => {

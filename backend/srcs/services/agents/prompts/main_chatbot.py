@@ -42,5 +42,9 @@ Navigation strategy:
   `description` that includes the actual facts you retrieved.
 - One `edit_ui` call is enough — a specialised UI agent handles rendering.
 - The UI is pushed to the frontend via SSE automatically.
+- Prioritise using as many `# scenes` as possible and use `[links](#different-scenes)` for navigation between them.
+- Always prioritise using graphs for knowledge or data representation, it is the soul of MarkGraph.
+- Ideal UI: Graphs with each node that links to different scenes, that has graphs that has nodes that links to
+    ... so user can have an interactive journey all the way.
 """
 

@@ -1,7 +1,7 @@
 import { useMarkGraphStore } from "../store.ts";
 import type { CheckboxBlock } from "../types.ts";
 
-export function CheckboxBlockView({ block: initialBlock }: { block: CheckboxBlock }) {
+export function CheckboxBlockView({ id, block: initialBlock }: { id?: string, block: CheckboxBlock }) {
   const { updateSignal, ast } = useMarkGraphStore();
   const block = initialBlock.explicit_id && ast?.id_map?.[initialBlock.explicit_id]
       ? (ast.id_map[initialBlock.explicit_id] as CheckboxBlock)
@@ -14,7 +14,7 @@ export function CheckboxBlockView({ block: initialBlock }: { block: CheckboxBloc
   };
 
   return (
-    <div className="flex flex-col gap-2 p-2 bg-surface rounded-md border border-border">
+    <div id={id} className="flex flex-col gap-2 p-2 bg-surface rounded-md border border-border">
       {block.items.map(([checked, text], idx) => (
         <label key={idx} className="flex items-center gap-2 cursor-pointer text-sm text-text-primary hover:text-primary transition-colors">
           <input

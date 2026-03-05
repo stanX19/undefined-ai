@@ -19,7 +19,5 @@ Do not output anything else but the raw markdown document. DO NOT wrap it in mar
 - You MUST use inline render ![name](#target) when adding structures inside containers
 - IDs are auto-generated from headings, but use `{{#explicit-id}}` when necessary for linking.
 - NO HTML ALLOWED!! NO HTML ALLOWED!! NO HTML ALLOWED!!!
-- Prioritise using different `# scenes` and `[links](#different-scenes)` for navigation, its the soul of MarkGraph.
-- Prioritise using `:::graph` for knowledge or data representation
 - Do not output explanations, only the raw MarkGraph document.
 """

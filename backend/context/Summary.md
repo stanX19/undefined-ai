@@ -19,7 +19,21 @@ This document summarizes the current state, progress made, and remaining issues 
 - We discovered that `ReactMarkdown` was exclusively rendering the raw `element.markdown` string and blindly ignoring the advanced inline constructs (like custom `[[Button]](#target)` components) that `markgraph_parser.py` had painstakingly identified and included in `element.fragments`. 
 - Overhauled `MarkGraphRoot.tsx`'s `TextNode` renderer to manually map through `TextNode.fragments`, allowing us to dynamically return interactive `RedirLink` (`<button>` and `<a>`) and `Include` placeholders alongside native markdown parsing.
 
-## 4. Pending / Next Steps
-- **Critical Bug during handoff:** The graph disappeared immediately after applying `useNodesState` and `useEdgesState`. The root cause is `animatedNodes` starts empty during the first cycle. When `useEffect` triggers, `nds` (the internal React Flow node state) maps over an empty array and never populates the graph! 
-- *Fix included below but should be verified in next chat: `useEffect` should assign the array wholesale on first successful tick if `nds` is empty.*
-- Needs thorough testing on other interactive fields (checkboxes, inputs) to ensure they integrate seamlessly with `markgraph_parser.py` reactive signals.
+## 4. Stability and Loop Prevention
+- Resolved a critical **Maximum update depth exceeded** crash in `GraphBlockView.tsx`. The issue was caused by an infinite re-render loop between the d3-force simulation and React Flow's state updates. 
+- Implemented strict equality checks and used `useMemo` for node/edge arrays to ensure state updates only trigger when coordinates actually change.
+
+## 5. Viewport Intelligence and "Lost Prevention"
+- **Auto-Fit**: Integrated `ReactFlowProvider` and the `useReactFlow` hook to trigger an automatic `fitView` once the d3-force simulation has settled (`alpha < 0.1`).
+- **Lost Prevention**: Implemented a viewport monitor that detects when all nodes have been panned off-screen. If the user gets "lost" in the infinite canvas, the view smoothly animates back to center the graph.
+- **Recenter Control**: Added a manual "Re-center" button in a React Flow `Panel` for quick manual resets.
+
+## 6. Visual and Protocol Refinement
+- **Advanced Labeling**: Updated `NeoNode` to show both the unique ID and descriptive text: `(ID) Description`. Added `title` attributes for native browser tooltips and `line-clamp-3` for long identifiers.
+- **Edge UI**: Thickened edges (`strokeWidth: 5`) and moved hidden handles to the exact node center (`50%, 50%`). This ensures edges point toward the center and intersect the circle's border perfectly at any angle.
+- **Bidirectional Edges**: Updated `markgraph.lark` and the frontend renderer to support the `<->` bidirectional edge operator, including blue markers for both start and end points.
+- **Adaptive Physics**: Modified `useForceLayout.ts` to dynamically scale repulsion (`charge`) based on node count—ensuring small graphs stay integrated while large graphs have room to detangle.
+
+## 7. Current State
+- The MarkGraph renderer is now highly stable, interactive, and visually polished.
+- **Next Steps**: Refine the responsive behavior for mobile viewports and ensure `:::progress` bars correctly track these new graph vertex IDs.
