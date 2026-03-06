@@ -37,3 +37,10 @@ This document summarizes the current state, progress made, and remaining issues 
 ## 7. Current State
 - The MarkGraph renderer is now highly stable, interactive, and visually polished.
 - **Next Steps**: Refine the responsive behavior for mobile viewports and ensure `:::progress` bars correctly track these new graph vertex IDs.
+
+## 8. Partial UI Editing Integration
+- **Context**: For extremely large AI-generated MarkGraph UIs, it's inefficient to pass the entire document back and forth to the `UIAgent` for small changes.
+- **Parser Enhancements**: Modified `markgraph_parser.py` (specifically augmenting `Scene` and `Container` AST nodes with 1-indexed line numbers) to implement `get_section_range(source, header_name)`. This allows robust extraction of any specific container or scene from the raw markdown string. 
+- **Tooling Updates**: Updated the `edit_ui` function in `tools.py` to accept an optional `header_name: str` argument.
+- **Agent Focus**: The `UIAgent` now dynamically splices the targeted section out of the document, provides only that fragment to the LLM (with specific prompt rules ensuring it only edits and returns that fragment), and automatically performs string replacement to stitch the modified code back into the full `.mg` document before saving to the database.
+- **Bug Fixes**: Handled Python's duck-typing quirks during AST traversal by checking attributes (`hasattr`, `getattr`) instead of strict `isinstance` checks, which bypassed import context issues when running tests. Resolved an issue where indented python strings in tests threw off the markdown parser expecting `#` at the start of a line. Let's remember to strictly dedent multi-line markdown strings!

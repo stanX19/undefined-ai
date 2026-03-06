@@ -154,7 +154,7 @@ async def ingest_url(topic_id: str, url: str) -> str:
 
 
 @tool
-async def edit_ui(topic_id: str, description: str) -> str:
+async def edit_ui(topic_id: str, description: str, header_name: str | None = None) -> str:
     """Design or edit the UI surface for a topic.
 
     This delegates to a specialised UIAgent that reads the current MarkGraph UI state,
@@ -165,6 +165,7 @@ async def edit_ui(topic_id: str, description: str) -> str:
     Args:
         topic_id: The topic whose UI to edit.
         description: Natural language description of the desired UI changes.
+        header_name: Optional name or ID of the container/scene to edit. If provided, ONLY that specific container/scene section will be edited.
 
     Returns:
         Confirmation with a brief summary of changes.
@@ -176,7 +177,7 @@ async def edit_ui(topic_id: str, description: str) -> str:
     topic_id = current_mapper().resolve(topic_id)
 
     # ui_agent.edit returns {"ui_json": {...}, "ui_markdown": "..."} or {"error": "..."}
-    result = await ui_agent.edit(topic_id, description)
+    result = await ui_agent.edit(topic_id, description, header_name)
 
     if "error" in result:
         return f"UI editing failed: {result['error']}"

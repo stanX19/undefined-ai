@@ -115,6 +115,7 @@ class Container:
     attrs: list[Attr]
     children: list[Any] = field(default_factory=list)   # Container | Element
     raw_heading: str = ""
+    line: int = 0
 
 @dataclass
 class Scene:
@@ -122,6 +123,7 @@ class Scene:
     attrs: list[Attr]
     children: list[Any] = field(default_factory=list)   # Container | Element
     raw_heading: str = ""
+    line: int = 0
 
 @dataclass
 class CompileResult:
@@ -578,7 +580,7 @@ def build_scene_graph(tokens: list[Token], diags: list[Diagnostic]) -> list[Scen
             ht = tok.meta["heading_text"]
             clean, attrs, eid = _parse_heading_meta(ht)
             sid = register_id(eid or _derive_id(clean), tok.line)
-            current_scene = Scene(id=sid, attrs=attrs, raw_heading=clean)
+            current_scene = Scene(id=sid, attrs=attrs, raw_heading=clean, line=tok.line)
             scenes.append(current_scene)
             continue
 
@@ -594,7 +596,7 @@ def build_scene_graph(tokens: list[Token], diags: list[Diagnostic]) -> list[Scen
             clean, attrs, eid = _parse_heading_meta(ht)
             cid = register_id(eid or _derive_id(clean), tok.line)
             pop_to_depth(depth)
-            c = Container(id=cid, depth=depth, attrs=attrs, raw_heading=clean)
+            c = Container(id=cid, depth=depth, attrs=attrs, raw_heading=clean, line=tok.line)
             parent = current_parent()
             if parent is not None:
                 parent.children.append(c)
@@ -748,6 +750,65 @@ def compile_markgraph(source: str) -> CompileResult:
     errors   = [d for d in diags if d.level == "error"]
     return CompileResult(scenes=scenes, warnings=warnings, errors=errors, id_map=id_map)
 
+def get_section_range(source: str, header_id_or_name: str) -> tuple[int, int] | None:
+    """Find the 1-indexed [start, end] line range of a section.
+
+    Matches against node ID (slugified) or raw heading text (case-insensitive).
+    """
+    result = compile_markgraph(source)
+    target_node = None
+
+    # Flatten the scene graph to find the node
+    all_nodes = []
+    def walk(node: Any):
+        if hasattr(node, "children"):
+            all_nodes.append(node)
+            for child in node.children:
+                walk(child)
+
+    for s in result.scenes:
+        walk(s)
+
+    # Search for the node
+    for node in all_nodes:
+        # Check both id and raw_heading safely
+        nid = getattr(node, "id", "")
+        nheading = getattr(node, "raw_heading", "")
+        
+        if nid == header_id_or_name or nheading.lower() == header_id_or_name.lower():
+            target_node = node
+            break
+
+    if target_node is None:
+        return None
+
+    start_line = target_node.line
+
+    # The end line is either the line before the next heading of same or higher depth,
+    # or the last line of the source.
+    lines = source.splitlines()
+    end_line = len(lines)
+
+    target_depth = getattr(target_node, "depth", 1)
+
+    next_node_line = float('inf')
+    for node in all_nodes:
+        if getattr(node, "line", 0) <= getattr(target_node, "line", 0):
+            continue
+
+        node_depth = getattr(node, "depth", 1)
+        if node_depth <= target_depth:
+            next_node_line = min(next_node_line, getattr(node, "line", 0))
+
+    if next_node_line != float('inf'):
+        end_line = int(next_node_line) - 1
+
+    # Strip trailing empty lines from the range
+    while end_line > start_line and end_line <= len(lines) and not lines[end_line-1].strip():
+        end_line -= 1
+
+    return (start_line, end_line)
+
 def export_to_dict(obj: Any) -> Any:
     """Recursively converts Scene Graph AST nodes to plain dictionaries, injecting a 'type' field."""
     if isinstance(obj, list):
@@ -765,38 +826,44 @@ def export_to_dict(obj: Any) -> Any:
 if __name__ == "__main__":
     import sys, json
 
-    path    = "input.mg"
-    as_json = True
+    content = """# Root Scene
+## Section A
+Some content A
 
-    with open(path, encoding="utf-8") as f:
-        src = f.read()
+## Section B
+Some content B
+:::quiz
+Question?
+- Answer *
+:::
 
-    result = compile_markgraph(src)
+## Section C
+Some content C
+"""
 
-    if as_json:
-        print(json.dumps(export_to_dict(result.scenes), indent=2))
-    else:
-        print(f"✓ Compiled {len(result.scenes)} scene(s)\n")
+    result = compile_markgraph(content)
 
-        if result.errors:
-            print("ERRORS:")
-            for d in result.errors:
-                loc = f" (line {d.line})" if d.line else ""
-                print(f"  ✗ {d.message}{loc}")
-            print()
+    print(json.dumps(export_to_dict(result.scenes), indent=2))
 
-        if result.warnings:
-            print("WARNINGS:")
-            for d in result.warnings:
-                loc = f" (line {d.line})" if d.line else ""
-                print(f"  ⚠ {d.message}{loc}")
-            print()
+    if result.errors:
+        print("ERRORS:")
+        for d in result.errors:
+            loc = f" (line {d.line})" if d.line else ""
+            print(f"  ✗ {d.message}{loc}")
+        print()
 
-        if not result.errors and not result.warnings:
-            print("  No issues found.")
-            print()
+    if result.warnings:
+        print("WARNINGS:")
+        for d in result.warnings:
+            loc = f" (line {d.line})" if d.line else ""
+            print(f"  ⚠ {d.message}{loc}")
+        print()
 
-        print("SCENES:")
-        for scene in result.scenes:
-            layout = next((a.name for a in scene.attrs), "column")
-            print(f"  [{scene.id}]  @{layout}  ({len(scene.children)} children)")
+    if not result.errors and not result.warnings:
+        print("  No issues found.")
+        print()
+
+    print("SCENES:")
+    for scene in result.scenes:
+        layout = next((a.name for a in scene.attrs), "column")
+        print(f"  [{scene.id}]  @{layout}  ({len(scene.children)} children)")
