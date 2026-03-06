@@ -39,7 +39,6 @@ archive.zip
 .codspeed
 activate.bat
 .agent
-run.bat
 run_backend.bat
 run_frontend.bat
 *.db
