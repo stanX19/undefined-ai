@@ -69,7 +69,7 @@ export function MenuPage() {
 
     const handleNewTopic = () => {
         clearChat();
-        navigate("/workspace");
+        navigate("/home");
     };
 
     const handleSelectRecommendation = (rec: Recommendation) => {

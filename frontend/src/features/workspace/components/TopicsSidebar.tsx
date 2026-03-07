@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { Plus, MessageSquare, LogOut, PanelLeft, PanelLeftClose, Home, Network, Menu } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { Plus, MessageSquare, LogOut, PanelLeft, PanelLeftClose, Home, Network, Menu, Pin } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
     useTopicListStore,
     fetchTopics,
@@ -12,11 +12,14 @@ import { useWorkspaceLayoutStore } from "../layoutStore";
 
 export function TopicsSidebar() {
     const topics = useTopicListStore((s) => s.topics);
+    const pinnedTopicIds = useTopicListStore((s) => s.pinnedTopicIds);
     const isLoading = useTopicListStore((s) => s.isLoading);
     const currentTopicId = useChatStore((s) => s.topicId);
     const clearChat = useChatStore((s) => s.clear);
     const logout = useAuthStore((s) => s.logout);
     const navigate = useNavigate();
+    const location = useLocation();
+    const isHomeRoute = location.pathname === "/home";
 
     const isCollapsed = useWorkspaceLayoutStore((s) => s.isSidebarCollapsed);
     const setIsCollapsed = useWorkspaceLayoutStore((s) => s.setSidebarCollapsed);
@@ -76,22 +79,23 @@ export function TopicsSidebar() {
 
     const handleSelectTopic = useCallback(
         (topicId: string) => {
-            if (topicId === currentTopicId) return;
+            if (topicId === currentTopicId && location.pathname === "/workspace") return;
 
-            // Clear current chat & surfaces, then load the selected topic
             const chatStore = useChatStore.getState();
             chatStore.clear();
             useSurfaceStore.getState().clearAll();
             chatStore.setTopicId(topicId);
             loadChatHistory(topicId);
+            navigate("/workspace");
         },
-        [currentTopicId],
+        [currentTopicId, location.pathname, navigate],
     );
 
     const handleNewTopic = useCallback(() => {
         clearChat();
         useSurfaceStore.getState().clearAll();
-    }, [clearChat]);
+        navigate("/home");
+    }, [clearChat, navigate]);
 
     const handleLogout = useCallback(() => {
         clearChat();
@@ -100,6 +104,16 @@ export function TopicsSidebar() {
     }, [clearChat, logout, navigate]);
 
     const isExpanded = !isCollapsed || isHovering;
+
+    const sortedTopics = useMemo(() => {
+        return [...topics].sort((a, b) => {
+            const aPinned = pinnedTopicIds.includes(a.topic_id);
+            const bPinned = pinnedTopicIds.includes(b.topic_id);
+            if (aPinned && !bPinned) return -1;
+            if (!aPinned && bPinned) return 1;
+            return 0; // retain original order (assuming fetched order) otherwise
+        });
+    }, [topics, pinnedTopicIds]);
 
     return (
         <>
@@ -161,8 +175,12 @@ export function TopicsSidebar() {
                 {/* Main Links */}
                 <div className="flex flex-col gap-1 px-4 mb-6">
                     <button 
-                        onClick={() => navigate("/menu")}
-                        className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-4 py-2.5 text-[14px] font-medium text-gray-600 transition-colors hover:bg-[#d5fba8]/30 hover:text-[#212529]"
+                        onClick={() => navigate("/home")}
+                        className={`flex w-full cursor-pointer items-center gap-3 rounded-xl px-4 py-2.5 text-[14px] font-medium transition-colors ${
+                            isHomeRoute
+                                ? "bg-[#d5fba8] text-[#212529]"
+                                : "text-gray-600 hover:bg-[#d5fba8]/30 hover:text-[#212529]"
+                        }`}
                     >
                         <Home size={18} />
                         Home
@@ -201,7 +219,9 @@ export function TopicsSidebar() {
                         </div>
                     ) : (
                         <div className="flex flex-col gap-0.5">
-                            {topics.map((topic) => (
+                            {sortedTopics.map((topic) => {
+                                const isPinned = pinnedTopicIds.includes(topic.topic_id);
+                                return (
                                 <button
                                     key={topic.topic_id}
                                     onClick={() => handleSelectTopic(topic.topic_id)}
@@ -211,10 +231,14 @@ export function TopicsSidebar() {
                                         : "text-gray-600 hover:bg-[#d5fba8]/30 hover:text-[#212529]"
                                     }`}
                                 >
-                                    <MessageSquare size={16} className={`shrink-0 ${topic.topic_id === currentTopicId ? "text-[#212529]" : "text-gray-400 group-hover:text-[#212529]"}`} />
-                                    <span className="truncate">{topic.title}</span>
+                                    {isPinned ? (
+                                        <Pin size={16} className={`shrink-0 ${topic.topic_id === currentTopicId ? "text-red-500" : "text-red-400 group-hover:text-red-500"}`} fill="currentColor" />
+                                    ) : (
+                                        <MessageSquare size={16} className={`shrink-0 ${topic.topic_id === currentTopicId ? "text-[#212529]" : "text-gray-400 group-hover:text-[#212529]"}`} />
+                                    )}
+                                    <span className="truncate flex-1">{topic.title}</span>
                                 </button>
-                            ))}
+                            )})}
                         </div>
                     )}
                 </div>

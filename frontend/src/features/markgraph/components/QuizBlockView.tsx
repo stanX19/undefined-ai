@@ -24,11 +24,11 @@ export function QuizBlockView({ id, block: initialBlock }: { id?: string, block:
           let btnClass = "text-left px-3 py-2 text-sm rounded-md border transition-colors";
           
           if (hasAnswered) {
-             if (isCorrect) {
-                btnClass += " bg-green-500/20 border-green-500/50 text-green-700 dark:text-green-300";
-             } else if (isSelected) {
-                btnClass += " bg-red-500/20 border-red-500/50 text-red-700 dark:text-red-300";
-             } else {
+            if (isCorrect) {
+               btnClass += " bg-success border-success-text/50 text-success-text";
+            } else if (isSelected) {
+               btnClass += " bg-error border-error-text/50 text-error-text";
+            } else {
                 btnClass += " bg-surface border-border opacity-50";
              }
           } else {

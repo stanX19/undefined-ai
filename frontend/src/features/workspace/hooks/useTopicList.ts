@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { useAuthStore } from "../../auth/hooks/useAuthStore";
 
 export interface Topic {
@@ -12,16 +13,32 @@ export interface Topic {
 interface TopicListState {
     topics: Topic[];
     isLoading: boolean;
+    pinnedTopicIds: string[];
     setTopics: (topics: Topic[]) => void;
     setLoading: (loading: boolean) => void;
+    togglePin: (topicId: string) => void;
 }
 
-export const useTopicListStore = create<TopicListState>((set) => ({
-    topics: [],
-    isLoading: false,
-    setTopics: (topics) => set({ topics }),
-    setLoading: (isLoading) => set({ isLoading }),
-}));
+export const useTopicListStore = create<TopicListState>()(
+    persist(
+        (set) => ({
+            topics: [],
+            isLoading: false,
+            pinnedTopicIds: [],
+            setTopics: (topics) => set({ topics }),
+            setLoading: (isLoading) => set({ isLoading }),
+            togglePin: (topicId) => set((state) => ({
+                pinnedTopicIds: state.pinnedTopicIds.includes(topicId)
+                    ? state.pinnedTopicIds.filter((id) => id !== topicId)
+                    : [...state.pinnedTopicIds, topicId]
+            })),
+        }),
+        {
+            name: "topic-list-storage",
+            partialize: (state) => ({ pinnedTopicIds: state.pinnedTopicIds }), // Only persist pins
+        }
+    )
+);
 
 /**
  * Fetch all topics for the current user from GET /api/v1/topics/?user_id=

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useMarkGraphStore } from "../store.ts";
 import type { MarkGraphElement, Container, Scene } from "../types.ts";
 import { CheckboxBlockView } from "./CheckboxBlockView.tsx";
@@ -7,6 +7,10 @@ import { InputBlockView } from "./InputBlockView.tsx";
 import { ProgressBlockView } from "./ProgressBlockView.tsx";
 import { GraphBlockView } from "./GraphBlockView.tsx";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 
 /* ── helpers ─────────────────────────────────────────────────────────────── */
 
@@ -37,15 +41,24 @@ function ElementRenderer({ element }: { element: MarkGraphElement }) {
           {element.fragments.map((frag: any, i: number) => {
             if (typeof frag === "string") {
               return (
-                <span key={i}>
+                <React.Fragment key={i}>
                   <ReactMarkdown
+                    remarkPlugins={[remarkGfm, remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
                     components={{
-                      p: ({ node, ...props }) => <span {...props} />, // Prevent block-level paragraphs inside fragments
+                      p: ({ node, children }) => <>{children}</>, // Prevent block-level paragraphs inside fragments to keep inline flow
+                      table: ({ node, ...props }) => (
+                        <div className="overflow-x-auto my-4 w-full rounded-lg border border-border/50">
+                          <table className="w-full text-left border-collapse my-0!" {...props} />
+                        </div>
+                      ),
+                      th: ({ node, ...props }) => <th className="bg-surface/50 border-b border-border/50 p-3 font-semibold text-sm" {...props} />,
+                      td: ({ node, ...props }) => <td className="border-b border-border/50 p-3 text-sm" {...props} />,
                     }}
                   >
                     {frag}
                   </ReactMarkdown>
-                </span>
+                </React.Fragment>
               );
             }
             if (frag.type === "RedirLink") {
@@ -93,7 +106,16 @@ function ElementRenderer({ element }: { element: MarkGraphElement }) {
     return (
       <div id={element.explicit_id || undefined} className="prose prose-sm dark:prose-invert max-w-none text-text-primary">
         <ReactMarkdown
+          remarkPlugins={[remarkGfm, remarkMath]}
+          rehypePlugins={[rehypeKatex]}
           components={{
+            table: ({ node, ...props }) => (
+              <div className="overflow-x-auto my-4 w-full rounded-lg border border-border/50">
+                <table className="w-full text-left border-collapse !my-0" {...props} />
+              </div>
+            ),
+            th: ({ node, ...props }) => <th className="bg-surface/50 border-b border-border/50 p-3 font-semibold text-sm" {...props} />,
+            td: ({ node, ...props }) => <td className="border-b border-border/50 p-3 text-sm" {...props} />,
             a: ({ node, href, children, ...props }) => {
               if (href?.startsWith("#")) {
                 return (
