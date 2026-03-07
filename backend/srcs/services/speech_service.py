@@ -111,9 +111,8 @@ class SpeechService:
             await asyncio.to_thread(_call)
             return f"/media/tts/{filename}"
         except Exception as exc:
-            traceback.print_exc()
-            print(f"ElevenLabs TTS Error: {exc}")
-            return None
+            print(f"ElevenLabs TTS Error: {exc}. Falling back to gTTS.")
+            return await SpeechService._tts_gtts(text, filepath, filename)
 
     @staticmethod
     async def _stt_elevenlabs(audio_data: bytes) -> str | None:
@@ -128,8 +127,67 @@ class SpeechService:
 
             return await asyncio.to_thread(_call)
         except Exception as exc:
+            print(f"ElevenLabs STT Error: {exc}. Falling back to Gemini.")
+            return await SpeechService._stt_gemini(audio_data)
+
+    # -- Fallback implementations ----------------------------------------------
+
+    @staticmethod
+    async def _tts_gtts(
+        text: str,
+        filepath: str,
+        filename: str,
+    ) -> str | None:
+        """Fallback TTS using gTTS when ElevenLabs is unavailable."""
+        try:
+            from gtts import gTTS
+
+            def _call() -> None:
+                tts = gTTS(text=text, lang="en")
+                tts.save(filepath)
+
+            await asyncio.to_thread(_call)
+            return f"/media/tts/{filename}"
+        except Exception as exc:
             traceback.print_exc()
-            print(f"ElevenLabs STT Error: {exc}")
+            print(f"gTTS Fallback Error: {exc}")
+            return None
+
+    @staticmethod
+    async def _stt_gemini(audio_data: bytes) -> str | None:
+        """Fallback STT using Gemini via rotating_llm when ElevenLabs is unavailable."""
+        try:
+            import base64
+            from srcs.services.agents.rotating_llm import rotating_llm
+            from langchain_core.messages import HumanMessage
+
+            b64_audio = base64.b64encode(audio_data).decode("utf-8")
+
+            message = HumanMessage(
+                content=[
+                    {
+                        "type": "text",
+                        "text": (
+                            "Please transcribe the following audio directly. "
+                            "Return ONLY the transcribed text, nothing else."
+                        ),
+                    },
+                    {
+                        "type": "media",
+                        "mime_type": "audio/mp3",
+                        "data": b64_audio,
+                    },
+                ]
+            )
+
+            response = await rotating_llm.send_message([message])
+            if response.status == "ok":
+                return response.text
+            print(f"Gemini STT Fallback Failed: {response.text}")
+            return None
+        except Exception as exc:
+            traceback.print_exc()
+            print(f"Gemini STT Fallback Error: {exc}")
             return None
 
 
