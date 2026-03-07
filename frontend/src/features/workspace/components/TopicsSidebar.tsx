@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Plus, MessageSquare, LogOut, PanelLeft, PanelLeftClose, Home, Network, MoreHorizontal, Menu } from "lucide-react";
+import { Plus, MessageSquare, LogOut, PanelLeft, PanelLeftClose, Home, Network, Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
     useTopicListStore,

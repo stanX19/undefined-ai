@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Menu, PanelLeft, Home, FolderOpen, Share, Pin, Star, MoreHorizontal, Sparkles } from "lucide-react";
+import { PanelLeft, Home, FolderOpen, Pin, Star, MoreHorizontal, Sparkles } from "lucide-react";
 import { UIRoot } from "../ui_renderer/components/UIRoot.tsx";
 import { useUIStore } from "../ui_renderer/store.ts";
 import { useMarkGraphStore, fetchMarkGraphUI } from "../markgraph/store.ts";
@@ -134,13 +134,13 @@ export function WorkspacePage() {
 
         {/* Right — Chat Panel */}
         <div 
-          className={`shrink-0 bg-surface flex flex-col z-20 transition-[width,height,opacity] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden ${
+          className={`shrink-0 bg-surface flex flex-col z-20 transition-[width,height,opacity] duration-300 ease-in-out overflow-hidden ${
             isChatCollapsed 
               ? "w-0 h-0 md:h-full opacity-0 border-none" 
               : "w-full md:w-[400px] h-[50vh] md:h-full opacity-100 border-t md:border-t-0 md:border-l border-border"
           }`}
         >
-          <div className="w-[100dvw] md:w-[400px] h-[50vh] md:h-full flex flex-col">
+          <div className="w-dvw md:w-[400px] h-[50vh] md:h-full flex flex-col">
             <ChatPanel inline={true} />
           </div>
         </div>

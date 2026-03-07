@@ -110,28 +110,28 @@ export function ChatInput({ onSend, isStreaming }: Props) {
   };
 
   return (
-    <div className="bg-[var(--color-surface)] p-4">
+    <div className="bg-surface p-4">
       {files.length > 0 && (
         <div className="mb-3 flex flex-col gap-2">
           {files.map((file, i) => (
             <div
               key={i}
-              className="relative flex items-center gap-2.5 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-1.5 pr-3 shadow-sm self-start"
+              className="relative flex items-center gap-2.5 rounded-2xl border border-border bg-surface p-1.5 pr-3 shadow-sm self-start"
             >
               <div className="flex h-8 w-8 items-center justify-center rounded-[0.6rem] bg-[#d1fb9f] text-gray-600">
                 <FileText size={16} strokeWidth={2.5} />
               </div>
               <div className="flex flex-col">
-                <span className="max-w-[140px] truncate text-xs font-semibold text-[var(--color-text-primary)]">
+                <span className="max-w-[140px] truncate text-xs font-semibold text-text-primary">
                   {file.name}
                 </span>
-                <span className="text-[10px] font-medium leading-none text-[var(--color-text-muted)]">
+                <span className="text-[10px] font-medium leading-none text-text-muted">
                   {file.name.split('.').pop()?.toUpperCase() || "FILE"}
                 </span>
               </div>
               <button
                 onClick={() => removeFile(i)}
-                className="absolute -right-1.5 -top-1.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-sm transition-transform hover:scale-110"
+                className="absolute -right-1.5 -top-1.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border border-border bg-surface text-text-primary shadow-sm transition-transform hover:scale-110"
               >
                 <X size={12} strokeWidth={3} />
               </button>
@@ -140,7 +140,7 @@ export function ChatInput({ onSend, isStreaming }: Props) {
         </div>
       )}
 
-      <div className="relative flex flex-col rounded-3xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm transition-shadow focus-within:ring-1 focus-within:ring-[var(--color-border)]">
+      <div className="relative flex flex-col rounded-3xl border border-border bg-surface shadow-sm transition-shadow focus-within:ring-1 focus-within:ring-border">
         <input
           ref={fileInputRef}
           type="file"
@@ -157,7 +157,7 @@ export function ChatInput({ onSend, isStreaming }: Props) {
             onKeyDown={handleKeyDown}
             placeholder="Ask a question..."
             rows={1}
-            className="max-h-32 flex-1 resize-none bg-transparent px-4 py-2 text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none hide-scrollbar"
+            className="max-h-32 flex-1 resize-none bg-transparent px-4 py-2 text-sm text-text-primary placeholder-text-muted focus:outline-none hide-scrollbar"
           />
         </div>
 
@@ -165,7 +165,7 @@ export function ChatInput({ onSend, isStreaming }: Props) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[var(--color-surface-alt)] text-[var(--color-text-muted)] transition-colors hover:bg-gray-200 hover:text-[var(--color-text-primary)]"
+              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-(--color-surface-alt) text-text-muted transition-colors hover:bg-gray-200 hover:text-text-primary"
               title="Attach file"
             >
               <Paperclip size={18} />
@@ -176,12 +176,12 @@ export function ChatInput({ onSend, isStreaming }: Props) {
               className={`flex h-8 cursor-pointer items-center overflow-hidden rounded-full transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] border ${
                 isWebSearchEnabled 
                   ? "bg-[#e1f5fd] text-[#0288d1] border-[#81d4fa] w-[90px]" 
-                  : "bg-[var(--color-surface-alt)] text-[var(--color-text-muted)] hover:bg-gray-200 hover:text-[var(--color-text-primary)] border-transparent w-8"
+                  : "bg-(--color-surface-alt) text-text-muted hover:bg-gray-200 hover:text-text-primary border-transparent w-8"
               }`}
               title="Toggle Web Search"
             >
               <div className="flex h-full w-[30px] shrink-0 items-center justify-center">
-                <Globe size={18} className={`transition-transform duration-300 ${isWebSearchEnabled ? "rotate-[360deg]" : "rotate-0"}`} />
+                <Globe size={18} className={`transition-transform duration-300 ${isWebSearchEnabled ? "rotate-360" : "rotate-0"}`} />
               </div>
               <span 
                 className={`text-sm font-medium transition-all duration-300 whitespace-nowrap ${
@@ -199,7 +199,7 @@ export function ChatInput({ onSend, isStreaming }: Props) {
               disabled={isStreaming || isProcessing}
               className={`flex h-8 w-8 cursor-pointer items-center justify-center rounded-full transition-all duration-300 ${isRecording
                 ? "bg-red-500 text-white animate-pulse"
-                : "bg-transparent text-[var(--color-text-muted)] hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text-primary)]"
+                : "bg-transparent text-text-muted hover:bg-(--color-surface-alt) hover:text-text-primary"
                 }`}
               title={isRecording ? "Stop recording" : "Voice mode"}
             >
@@ -216,7 +216,7 @@ export function ChatInput({ onSend, isStreaming }: Props) {
               <button
                 onClick={handleSubmit}
                 disabled={isStreaming || (!text.trim() && files.length === 0)}
-                className={`flex items-center justify-center bg-[var(--color-primary)] text-[var(--color-surface)] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] origin-center ${
+                className={`flex items-center justify-center bg-primary text-surface transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] origin-center ${
                   isStreaming
                     ? "h-4 w-4 rounded-[5px] animate-[spin_3s_linear_infinite]"
                     : "h-8 w-8 rounded-full " +
