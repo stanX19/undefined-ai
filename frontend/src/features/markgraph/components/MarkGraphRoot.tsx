@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useMarkGraphStore } from "../store.ts";
 import type { MarkGraphElement, Container, Scene } from "../types.ts";
 import { CheckboxBlockView } from "./CheckboxBlockView.tsx";
@@ -7,6 +7,10 @@ import { InputBlockView } from "./InputBlockView.tsx";
 import { ProgressBlockView } from "./ProgressBlockView.tsx";
 import { GraphBlockView } from "./GraphBlockView.tsx";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 
 /* ── helpers ─────────────────────────────────────────────────────────────── */
 
@@ -37,15 +41,17 @@ function ElementRenderer({ element }: { element: MarkGraphElement }) {
           {element.fragments.map((frag: any, i: number) => {
             if (typeof frag === "string") {
               return (
-                <span key={i}>
+                <React.Fragment key={i}>
                   <ReactMarkdown
+                    remarkPlugins={[remarkGfm, remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
                     components={{
                       p: ({ node, ...props }) => <span {...props} />, // Prevent block-level paragraphs inside fragments
                     }}
                   >
                     {frag}
                   </ReactMarkdown>
-                </span>
+                </React.Fragment>
               );
             }
             if (frag.type === "RedirLink") {
@@ -93,6 +99,8 @@ function ElementRenderer({ element }: { element: MarkGraphElement }) {
     return (
       <div id={element.explicit_id || undefined} className="prose prose-sm dark:prose-invert max-w-none text-text-primary">
         <ReactMarkdown
+          remarkPlugins={[remarkGfm, remarkMath]}
+          rehypePlugins={[rehypeKatex]}
           components={{
             a: ({ node, href, children, ...props }) => {
               if (href?.startsWith("#")) {

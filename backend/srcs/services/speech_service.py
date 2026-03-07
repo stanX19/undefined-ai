@@ -6,6 +6,7 @@ import traceback
 from elevenlabs.client import ElevenLabs
 
 from srcs.config import get_settings
+from srcs.database import settings
 
 # -- ElevenLabs client (lazy singleton) ----------------------------------------
 
@@ -14,8 +15,10 @@ _elevenlabs_client: ElevenLabs | None = None
 
 def _get_elevenlabs_client() -> ElevenLabs:
     global _elevenlabs_client
+    settings = get_settings()
+    if not settings.ELEVENLABS_API_KEY:
+        raise RuntimeError("No elevenlabs api key")
     if _elevenlabs_client is None:
-        settings = get_settings()
         _elevenlabs_client = ElevenLabs(api_key=settings.ELEVENLABS_API_KEY)
     return _elevenlabs_client
 
@@ -35,7 +38,19 @@ class SpeechService:
         language_code: str | None = None,
     ) -> str | None:
         """Generate speech from text using ElevenLabs."""
-        return await SpeechService._tts_elevenlabs(text, voice_id=voice_id, model_id=model_id)
+        try:
+            return await SpeechService._tts_elevenlabs(text, voice_id=voice_id, model_id=model_id)
+        except Exception as exc:
+            traceback.print_exc()
+            print(f"ElevenLabs TTS Error: {exc}. Falling back to gTTS.")
+
+        try:
+            return await SpeechService._tts_gtts(text)
+        except Exception as exc:
+            traceback.print_exc()
+            print(f"gTTS Fallback Error: {exc}")
+
+        return None
 
     # -- STT (public) ------------------------------------------------------
 
@@ -45,7 +60,19 @@ class SpeechService:
         language_code: str | None = None,
     ) -> str | None:
         """Transcribe audio bytes to text using ElevenLabs Scribe."""
-        return await SpeechService._stt_elevenlabs(audio_data)
+        try:
+            return await SpeechService._stt_elevenlabs(audio_data)
+        except Exception as exc:
+            traceback.print_exc()
+            print(f"ElevenLabs STT Error: {exc}. Falling back to Gemini.")
+
+        try:
+            return await SpeechService._stt_gemini(audio_data)
+        except Exception as exc:
+            traceback.print_exc()
+            print(f"Gemini STT Fallback Error: {exc}")
+
+        return None
 
     @staticmethod
     async def transcribe_audio_file(
@@ -84,111 +111,100 @@ class SpeechService:
     # -- ElevenLabs implementations ----------------------------------------
 
     @staticmethod
+    def _create_tts_filename() -> str:
+        return f"tts_{uuid.uuid4().hex[:8]}.mp3"
+
+    @staticmethod
+    def _get_tts_filename_full_path(filename: str) -> str:
+        settings = get_settings()
+        upload_dir = os.path.join(settings.UPLOAD_DIR, "tts")
+        os.makedirs(upload_dir, exist_ok=True)
+        return os.path.join(upload_dir, filename)
+
+    @staticmethod
     async def _tts_elevenlabs(
         text: str,
         voice_id: str | None = None,
         model_id: str | None = None,
     ) -> str | None:
-        settings = get_settings()
-        try:
-            filename = f"tts_{uuid.uuid4().hex[:8]}.mp3"
-            upload_dir = os.path.join(settings.UPLOAD_DIR, "tts")
-            os.makedirs(upload_dir, exist_ok=True)
-            filepath = os.path.join(upload_dir, filename)
+        filename = SpeechService._create_tts_filename()
+        filepath = SpeechService._get_tts_filename_full_path(filename)
 
-            def _call() -> None:
-                client = _get_elevenlabs_client()
-                audio_iterator = client.text_to_speech.convert(
-                    text=text,
-                    voice_id=voice_id or settings.ELEVENLABS_DEFAULT_VOICE_ID,
-                    model_id=model_id or settings.ELEVENLABS_MODEL,
-                )
-                with open(filepath, "wb") as f:
-                    for chunk in audio_iterator:
-                        if isinstance(chunk, bytes):
-                            f.write(chunk)
+        def _call() -> None:
+            settings = get_settings()
+            client = _get_elevenlabs_client()
+            audio_iterator = client.text_to_speech.convert(
+                text=text,
+                voice_id=voice_id or settings.ELEVENLABS_DEFAULT_VOICE_ID,
+                model_id=model_id or settings.ELEVENLABS_MODEL,
+            )
+            with open(filepath, "wb") as f:
+                for chunk in audio_iterator:
+                    if isinstance(chunk, bytes):
+                        f.write(chunk)
 
-            await asyncio.to_thread(_call)
-            return f"/media/tts/{filename}"
-        except Exception as exc:
-            print(f"ElevenLabs TTS Error: {exc}. Falling back to gTTS.")
-            return await SpeechService._tts_gtts(text, filepath, filename)
+        await asyncio.to_thread(_call)
+        return f"/media/tts/{filename}"
 
     @staticmethod
     async def _stt_elevenlabs(audio_data: bytes) -> str | None:
-        try:
-            def _call() -> str:
-                client = _get_elevenlabs_client()
-                result = client.speech_to_text.convert(
-                    file=audio_data,
-                    model_id="scribe_v1",
-                )
-                return result.text
+        def _call() -> str:
+            client = _get_elevenlabs_client()
+            result = client.speech_to_text.convert(
+                file=audio_data,
+                model_id="scribe_v1",
+            )
+            return result.text
 
-            return await asyncio.to_thread(_call)
-        except Exception as exc:
-            print(f"ElevenLabs STT Error: {exc}. Falling back to Gemini.")
-            return await SpeechService._stt_gemini(audio_data)
+        return await asyncio.to_thread(_call)
 
     # -- Fallback implementations ----------------------------------------------
 
     @staticmethod
-    async def _tts_gtts(
-        text: str,
-        filepath: str,
-        filename: str,
-    ) -> str | None:
+    async def _tts_gtts(text: str) -> str | None:
         """Fallback TTS using gTTS when ElevenLabs is unavailable."""
-        try:
-            from gtts import gTTS
+        filename = SpeechService._create_tts_filename()
+        filepath = SpeechService._get_tts_filename_full_path(filename)
+        from gtts import gTTS
 
-            def _call() -> None:
-                tts = gTTS(text=text, lang="en")
-                tts.save(filepath)
+        def _call() -> None:
+            tts = gTTS(text=text, lang="en")
+            tts.save(filepath)
 
-            await asyncio.to_thread(_call)
-            return f"/media/tts/{filename}"
-        except Exception as exc:
-            traceback.print_exc()
-            print(f"gTTS Fallback Error: {exc}")
-            return None
+        await asyncio.to_thread(_call)
+        return f"/media/tts/{filename}"
 
     @staticmethod
     async def _stt_gemini(audio_data: bytes) -> str | None:
         """Fallback STT using Gemini via rotating_llm when ElevenLabs is unavailable."""
-        try:
-            import base64
-            from srcs.services.agents.rotating_llm import rotating_llm
-            from langchain_core.messages import HumanMessage
+        import base64
+        from srcs.services.agents.rotating_llm import rotating_llm
+        from langchain_core.messages import HumanMessage
 
-            b64_audio = base64.b64encode(audio_data).decode("utf-8")
+        b64_audio = base64.b64encode(audio_data).decode("utf-8")
 
-            message = HumanMessage(
-                content=[
-                    {
-                        "type": "text",
-                        "text": (
-                            "Please transcribe the following audio directly. "
-                            "Return ONLY the transcribed text, nothing else."
-                        ),
-                    },
-                    {
-                        "type": "media",
-                        "mime_type": "audio/mp3",
-                        "data": b64_audio,
-                    },
-                ]
-            )
+        message = HumanMessage(
+            content=[
+                {
+                    "type": "text",
+                    "text": (
+                        "Please transcribe the following audio directly. "
+                        "Return ONLY the transcribed text, nothing else."
+                    ),
+                },
+                {
+                    "type": "media",
+                    "mime_type": "audio/mp3",
+                    "data": b64_audio,
+                },
+            ]
+        )
 
-            response = await rotating_llm.send_message([message])
-            if response.status == "ok":
-                return response.text
-            print(f"Gemini STT Fallback Failed: {response.text}")
-            return None
-        except Exception as exc:
-            traceback.print_exc()
-            print(f"Gemini STT Fallback Error: {exc}")
-            return None
+        response = await rotating_llm.send_message([message])
+        if response.status == "ok":
+            return response.text
+        print(f"Gemini STT Fallback Failed: {response.text}")
+        return None
 
 
 if __name__ == "__main__":
