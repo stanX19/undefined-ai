@@ -5,9 +5,11 @@ import { X, Paperclip, FileText, Mic, Loader2, Square, Globe } from "lucide-reac
 interface Props {
   onSend: (message: string, files?: File[]) => void;
   isStreaming: boolean;
+  /** When true, outer wrapper is transparent (e.g. on home page with gradient background) */
+  embedded?: boolean;
 }
 
-export function ChatInput({ onSend, isStreaming }: Props) {
+export function ChatInput({ onSend, isStreaming, embedded }: Props) {
   const [text, setText] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -110,9 +112,9 @@ export function ChatInput({ onSend, isStreaming }: Props) {
   };
 
   return (
-    <div className="bg-surface p-4">
+    <div className={embedded ? "bg-transparent p-4" : "bg-surface p-4"}>
       {files.length > 0 && (
-        <div className="mb-3 flex flex-col gap-2">
+        <div className={`mb-3 flex gap-2 ${embedded ? "flex-row flex-wrap" : "flex-col"}`}>
           {files.map((file, i) => (
             <div
               key={i}
@@ -150,18 +152,20 @@ export function ChatInput({ onSend, isStreaming }: Props) {
           className="hidden"
         />
 
-        <div className="flex w-full pt-2">
+        <div className="flex w-full pt-3">
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask a question..."
-            rows={1}
-            className="max-h-32 flex-1 resize-none bg-transparent px-4 py-2 text-sm text-text-primary placeholder-text-muted focus:outline-none hide-scrollbar"
+            rows={embedded ? 4 : 1}
+            className={`flex-1 resize-none bg-transparent px-6 text-sm text-text-primary placeholder-text-muted focus:outline-none hide-scrollbar max-h-48 ${
+              embedded ? "min-h-[96px] py-4" : "min-h-[40px] py-2"
+            }`}
           />
         </div>
 
-        <div className="flex items-center justify-between px-2 pb-2 mt-1">
+        <div className="flex items-center justify-between px-3 pb-3 mt-1">
           <div className="flex items-center gap-2">
             <button
               onClick={() => fileInputRef.current?.click()}

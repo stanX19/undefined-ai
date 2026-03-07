@@ -13,7 +13,7 @@ import { useWorkspaceLayoutStore } from "./layoutStore.ts";
 import { useTopicListStore } from "./hooks/useTopicList.ts";
 
 export function WorkspacePage() {
-  const { topicId: chatTopicId } = useChatStore();
+  const { topicId: chatTopicId, clear: clearChat } = useChatStore();
   const { topicId: uiTopicId, uiJson: a2uiJson } = useUIStore();
   const { ast: markGraphAst } = useMarkGraphStore();
   const topics = useTopicListStore((s) => s.topics);
@@ -80,7 +80,7 @@ export function WorkspacePage() {
                   <div className="flex items-center gap-1.5 text-sm font-medium text-gray-500">
                     <Home size={16} />
                     <button
-                      onClick={() => navigate("/home")}
+                      onClick={() => { clearChat(); navigate("/home"); }}
                       className="cursor-pointer hover:text-[#212529] transition-colors"
                     >
                       Workspace

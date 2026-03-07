@@ -108,7 +108,7 @@ class RecommendationService:
 
         try:
             response = await rotating_llm.send_message_get_json(
-                prompt, temperature=0.0, model="MiniMax-M2.5",
+                prompt, temperature=0.0,
             )
             if isinstance(response.json_data, dict):
                 level = int(response.json_data.get("difficulty", 4))
@@ -158,7 +158,7 @@ class RecommendationService:
 
         try:
             response = await rotating_llm.send_message_get_json(
-                prompt, temperature=0.7, model="MiniMax-M2.5",
+                prompt, temperature=0.7,
             )
             if isinstance(response.json_data, list):
                 return [
@@ -185,7 +185,7 @@ class RecommendationService:
 
         try:
             response = await rotating_llm.send_message_get_json(
-                prompt, temperature=0.9, model="MiniMax-M2.5",
+                prompt, temperature=0.9,
             )
             if isinstance(response.json_data, list):
                 return [

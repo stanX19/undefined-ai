@@ -8,6 +8,8 @@ import {
 import { useChatStore, loadChatHistory } from "../../chat/hooks/useChat";
 import { useAuthStore } from "../../auth/hooks/useAuthStore";
 import { useSurfaceStore } from "../../a2ui/store";
+import { useUIStore } from "../../ui_renderer/store";
+import { useMarkGraphStore } from "../../markgraph/store";
 import { useWorkspaceLayoutStore } from "../layoutStore";
 
 export function TopicsSidebar() {
@@ -94,6 +96,8 @@ export function TopicsSidebar() {
     const handleNewTopic = useCallback(() => {
         clearChat();
         useSurfaceStore.getState().clearAll();
+        useUIStore.getState().clear();
+        useMarkGraphStore.getState().clear();
         navigate("/home");
     }, [clearChat, navigate]);
 
@@ -175,7 +179,11 @@ export function TopicsSidebar() {
                 {/* Main Links */}
                 <div className="flex flex-col gap-1 px-4 mb-6">
                     <button 
-                        onClick={() => navigate("/home")}
+                        onClick={() => {
+                            clearChat();
+                            useSurfaceStore.getState().clearAll();
+                            navigate("/home");
+                        }}
                         className={`flex w-full cursor-pointer items-center gap-3 rounded-xl px-4 py-2.5 text-[14px] font-medium transition-colors ${
                             isHomeRoute
                                 ? "bg-[#d5fba8] text-[#212529]"
@@ -193,13 +201,14 @@ export function TopicsSidebar() {
                     </button>
                 </div>
 
-                {/* Topics Header */}
-                <div className="flex items-center justify-between px-6 pb-2">
+                {/* Topics Header — pr-6 aligns Plus with collapse icon column */}
+                <div className="relative z-60 flex items-center justify-between px-5.5 pb-2">
                     <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Conversation</h3>
                     <button
+                        type="button"
                         onClick={handleNewTopic}
-                        className="cursor-pointer rounded-lg p-1 text-gray-400 transition-colors hover:bg-[#d5fba8] hover:text-[#212529]"
-                        title="New Topic"
+                        className="cursor-pointer rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-[#d5fba8] hover:text-[#212529] shrink-0"
+                        title="New conversation"
                     >
                         <Plus size={16} />
                     </button>
@@ -226,15 +235,15 @@ export function TopicsSidebar() {
                                     key={topic.topic_id}
                                     onClick={() => handleSelectTopic(topic.topic_id)}
                                     className={`group flex w-full cursor-pointer items-center gap-3 rounded-xl px-4 py-2.5 text-left text-[14px] transition-colors ${
-                                        topic.topic_id === currentTopicId
+                                        topic.topic_id === currentTopicId && !isHomeRoute
                                         ? "bg-[#d5fba8] font-medium text-[#212529]"
                                         : "text-gray-600 hover:bg-[#d5fba8]/30 hover:text-[#212529]"
                                     }`}
                                 >
                                     {isPinned ? (
-                                        <Pin size={16} className={`shrink-0 ${topic.topic_id === currentTopicId ? "text-red-500" : "text-red-400 group-hover:text-red-500"}`} fill="currentColor" />
+                                        <Pin size={16} className={`shrink-0 ${topic.topic_id === currentTopicId && !isHomeRoute ? "text-red-500" : "text-red-400 group-hover:text-red-500"}`} fill="currentColor" />
                                     ) : (
-                                        <MessageSquare size={16} className={`shrink-0 ${topic.topic_id === currentTopicId ? "text-[#212529]" : "text-gray-400 group-hover:text-[#212529]"}`} />
+                                        <MessageSquare size={16} className={`shrink-0 ${topic.topic_id === currentTopicId && !isHomeRoute ? "text-[#212529]" : "text-gray-400 group-hover:text-[#212529]"}`} />
                                     )}
                                     <span className="truncate flex-1">{topic.title}</span>
                                 </button>
@@ -261,10 +270,10 @@ export function TopicsSidebar() {
                     </button>
                 </div>
 
-                {/* Resizer Handle */}
+                {/* Resizer Handle — full sidebar height */}
                 {!isMobile && !isCollapsed && (
                     <div 
-                        className="absolute -right-1.5 top-0 z-50 h-full w-3 cursor-col-resize hover:bg-[#d1fb9f]/50 transition-colors"
+                        className="absolute -right-1.5 top-0 h-full z-50 w-3 cursor-col-resize hover:bg-[#d1fb9f]/50 transition-colors"
                         onMouseDown={startResizing}
                     />
                 )}
