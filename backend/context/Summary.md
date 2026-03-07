@@ -44,3 +44,19 @@ This document summarizes the current state, progress made, and remaining issues 
 - **Tooling Updates**: Updated the `edit_ui` function in `tools.py` to accept an optional `header_name: str` argument.
 - **Agent Focus**: The `UIAgent` now dynamically splices the targeted section out of the document, provides only that fragment to the LLM (with specific prompt rules ensuring it only edits and returns that fragment), and automatically performs string replacement to stitch the modified code back into the full `.mg` document before saving to the database.
 - **Bug Fixes**: Handled Python's duck-typing quirks during AST traversal by checking attributes (`hasattr`, `getattr`) instead of strict `isinstance` checks, which bypassed import context issues when running tests. Resolved an issue where indented python strings in tests threw off the markdown parser expecting `#` at the start of a line. Let's remember to strictly dedent multi-line markdown strings!
+
+## 9. Backend Stability & Authentication Refactor
+- **Phantom Rollback Bug**: Discovered and resolved a concurrency issue with the in-memory SQLite database (`sqlite+aiosqlite:///:memory:`). When multiple async requests hit the shared static pool simultaneously, it caused ghost rollbacks. Fixed by changing the DB URL to `sqlite+aiosqlite:///file:memdb?mode=memory&cache=shared&uri=true` which enables safe transaction isolation with a shared memory cache.
+- **Silent Self-Healing Auth**: To mitigate data loss on backend dev server reboots (which wiped the in-memory DB while the frontend still held the user ID), we implemented a self-healing dependency strategy. 
+- **Header-Based Dependency**: Created `get_current_user` in `srcs/dependencies.py` which extracts the `X-User-Id` from HTTP headers. If the user doesn't exist in the DB, it transparently creates a new user record.
+- **Route and Frontend Refactor**: Updated `topics.py` and `recommendations.py` to use the `get_current_user` dependency instead of query or body parameters. Updated all major frontend API requests (`useChat.ts`, `useTopicList.ts`, and `MenuPage.tsx`) to pass the `X-User-Id` header smoothly.
+
+## 10. Agent UI Prompt Refinement
+- **UI Generation Prompts**: Updated `ui_agent.py` and `main_chatbot.py` to strongly emphasize MarkGraph's core design philosophies:
+  - **Graph-Centricity**: AI is heavily encouraged to prioritize graphs for representing fundamental knowledge or data structures.
+  - **Scene and Flow Interaction**: The UI should utilize `# scenes` thoroughly. A successful UI flow involves an Overview scene (graph linking to detailed scenes), Flow scenes for detailed explanations, and a Revision scene (e.g., quizzes) at the end.
+  - **Bot Role Separation**: Standardized the main chatbot to understand that it only needs to provide factual content and intent to the UI Agent, completely avoiding attempting to generate UI layout primitives or Markdown syntax natively.
+
+## 11. Next Steps
+- **Validation**: Verify that the self-healing auth and SQLite shared memory string changes remain deeply stable under aggressive concurrent request flows.
+- **Agent Evaluation**: Evaluate the impact of the prompt adjustments on AI payload completions. Ensure the output engine natively and actively leverages scene switching and graph-level interactions without crashing the MarkGraph parser.
