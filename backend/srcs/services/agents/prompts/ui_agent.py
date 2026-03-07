@@ -19,6 +19,16 @@ Do not output anything else but the raw markdown document. DO NOT wrap it in mar
 - Ensure proper use of headings and fenced blocks (`:::block ... :::`).
 - You MUST use inline render ![name](#target) when adding structures inside containers
 - IDs are auto-generated from headings, but use `{{#explicit-id}}` when necessary for linking.
+- Prioritise using as many `# scenes` as possible and use `[links](#different-scenes)` for navigation between them.
+- Always prioritise using graphs for knowledge or data representation, it is the soul of MarkGraph.
+- A good UI have the following characteristics
+  * simple: each scene has a clear focus
+  * interactive: Important ui components should link to other scenes for in-depth exploration
+  * flow: The ui flow MUST respect the underlying knowledge hierarchy, so user can click freely without getting lost.
+- Example:
+  * Overview: a graph as overview, all nodes linking to corresponding scenes
+  * Flow (1-n): detailed explaination of each node, utilizing different components with clickable links
+  * Revision: at the end of user flow to test user understandings
 - NO HTML ALLOWED!! NO HTML ALLOWED!! NO HTML ALLOWED!!!
 - Do not output explanations, only the raw MarkGraph document.
 """
