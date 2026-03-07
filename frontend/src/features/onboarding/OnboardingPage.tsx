@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles } from "lucide-react";
 import { useAuthStore } from "../auth/hooks/useAuthStore";
 
 export function OnboardingPage() {
@@ -10,7 +9,7 @@ export function OnboardingPage() {
   const userId = useAuthStore((s) => s.userId);
   const setEducationLevelInStore = useAuthStore((s) => s.setEducationLevel);
 
-  const handleGetStarted = async () => {
+  const handleNext = async () => {
     if (!userId) return;
 
     setIsLoading(true);
@@ -36,65 +35,67 @@ export function OnboardingPage() {
   };
 
   return (
-    <div className="flex h-full min-h-dvh flex-col items-center justify-center bg-(--color-bg) p-6 text-center">
-      <div className="flex w-full max-w-lg flex-col items-center gap-6 rounded-3xl border border-border bg-surface p-12 shadow-(--shadow-level2)">
-        <div className="flex items-center justify-center">
-          <img src="/logo.png" alt="Logo" className="h-35 w-auto object-contain" />
-        </div>
+    <div className="relative flex min-h-dvh w-full flex-col bg-white font-sans text-[#212529]">
+      {/* Top Left Logo */}
+      <div className="absolute left-6 top-6 flex items-center gap-3 sm:left-12 sm:top-10 sm:gap-4">
+         <img src="/logo.png" alt="Logo" className="h-10 sm:h-22 w-auto object-contain" />
+         <div className="flex items-baseline">
+           <span className="text-2xl sm:text-4xl font-semibold tracking-tight text-[#212529]">undefined</span>
+           <span className="ml-1 sm:ml-2 text-2xl sm:text-4xl font-medium tracking-tight text-[#868e96]">ai</span>
+         </div>
+      </div>
 
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl leading-[1.2] text-text-primary">
-            Welcome to{" "}
-            <span className="font-bold tracking-tight text-[#212529]">undefined</span>
-            <span className="ml-1 font-medium tracking-normal text-[#868e96]">ai</span>
-          </h1>
-          <p className="text-[14px] leading-relaxed text-text-muted">
-            Your AI-powered learning platform. Start exploring any topic — the
-            UI adapts to your needs and creates custom interfaces on the fly.
-          </p>
-        </div>
+      <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-6 pb-32 pt-28 sm:px-16 sm:pb-40 sm:pt-24">
+        <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
+          {/* Header Typography */}
+          <div className="flex flex-col gap-3 sm:gap-5">
+            <h1 className="text-4xl font-semibold tracking-tight text-[#212529] sm:text-5xl lg:text-6xl">
+              Welcome
+            </h1>
+            <h2 className="text-lg font-medium text-gray-500 sm:text-xl lg:text-2xl">
+              Select your current education level to get started.
+            </h2>
+          </div>
 
-        <div className="flex w-full flex-col items-center gap-4 pt-2">
-          <p className="text-[14px] font-medium text-text-secondary">
-            Select your current education level to get started.
-          </p>
-          <div className="grid w-full grid-cols-2 gap-3">
+          {/* Options Grid - 2 Rows max */}
+          <div className="mt-6 sm:mt-8 flex flex-wrap gap-2 sm:gap-3 max-w-[850px] leading-relaxed">
             {[
               "Kindergarten",
               "Primary School",
               "Secondary School",
               "Undergraduate",
               "Graduate",
-              "PhD / Research",
-            ].map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setEducationLevel(option)}
-                className={`flex items-center justify-center rounded-xl px-4 py-2.5 text-[14px] font-medium transition-colors cursor-pointer ${educationLevel === option
-                    ? "bg-[#212529] text-white"
-                    : "bg-[#f1f3f5] text-[#212529] hover:bg-[#e9ecef]"
-                  }`}
-              >
-                {option}
-              </button>
-            ))}
+              "PhD / Research"
+            ].map((option) => {
+              const isSelected = educationLevel === option;
+              return (
+                <div key={option} className="p-1 sm:p-1.5">
+                  <button
+                    onClick={() => setEducationLevel(option)}
+                    className={`block cursor-pointer rounded-full px-5 py-3 sm:px-7 sm:py-3.5 text-base sm:text-lg font-medium transition-[all,transform] duration-300 ease-out ${
+                      isSelected 
+                        ? "bg-[#d1fb9f] text-[#212529] shadow-sm ring-2 ring-[#d1fb9f] ring-offset-2 ring-offset-white scale-[1.05]" 
+                        : "bg-[#f8f9fa] text-[#495057] hover:bg-[#e9ecef] hover:text-[#212529] hover:scale-[1.03] active:scale-[0.97]"
+                    }`}
+                  >
+                    {option}
+                  </button>
+                </div>
+              );
+            })}
           </div>
-          <button
-            onClick={handleGetStarted}
-            disabled={isLoading || !educationLevel}
-            className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-8 py-3.5 text-[14px] font-medium text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isLoading ? (
-              "Saving..."
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4" />
-                Get Started
-              </>
-            )}
-          </button>
         </div>
+      </div>
+
+      {/* Sticky Bottom Actions */}
+      <div className="fixed bottom-0 left-0 right-0 flex w-full items-center justify-end gap-4 border-t border-gray-100 bg-white/90 p-6 px-6 backdrop-blur-md sm:gap-6 sm:px-20 sm:p-8">
+        <button
+          onClick={handleNext}
+          disabled={isLoading || !educationLevel}
+          className="cursor-pointer rounded-2xl bg-[#d1fb9f] px-10 py-4 sm:px-16 sm:py-5 text-lg sm:text-xl font-semibold text-[#212529] shadow-sm transition-all hover:opacity-90 hover:shadow-md hover:scale-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+        >
+          {isLoading ? "Saving..." : "Next"}
+        </button>
       </div>
     </div>
   );

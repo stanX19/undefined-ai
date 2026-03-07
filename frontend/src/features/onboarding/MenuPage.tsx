@@ -81,59 +81,93 @@ export function MenuPage() {
 
     if (isLoadingTopics) {
         return (
-            <div className="flex h-full min-h-dvh items-center justify-center bg-(--color-bg)">
-                <span className="text-text-muted">Loading your workspace...</span>
+            <div className="flex h-dvh w-full items-center justify-center bg-white font-sans">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#d1fb9f] border-t-transparent"></div>
+                  <span className="text-lg font-medium text-gray-500">Loading your workspace...</span>
+                </div>
             </div>
         );
     }
 
+    const bgColors = ["bg-[#d5fba8]", "bg-[#f7f4f4]", "bg-[#e0f4f1]"];
+
     return (
-        <div className="flex h-full min-h-dvh flex-col items-center justify-center bg-(--color-bg) p-6 text-center">
-            <div className="flex w-full max-w-lg flex-col items-center gap-6 rounded-3xl border border-border bg-surface p-8 shadow-(--shadow-level2)">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <Compass className="h-8 w-8" />
+        <div className="flex min-h-dvh lg:h-dvh w-full flex-col lg:flex-row bg-white font-sans text-[#212529]">
+            {/* Left Column */}
+            <div className="relative flex w-full flex-col justify-center lg:w-1/2 px-6 py-28 sm:px-16 sm:py-32 lg:px-24 lg:py-16">
+                {/* Top Left Logo */}
+                <div className="absolute left-6 top-6 flex items-center gap-3 sm:left-12 sm:top-10 sm:gap-4">
+                    <img src="/logo.png" alt="Logo" className="h-10 sm:h-22 w-auto object-contain" />
+                    <div className="flex items-baseline">
+                        <span className="text-2xl sm:text-4xl font-semibold tracking-tight text-[#212529]">undefined</span>
+                        <span className="ml-1 sm:ml-2 text-2xl sm:text-4xl font-medium tracking-tight text-[#868e96]">ai</span>
+                    </div>
                 </div>
 
-                <div className="flex flex-col gap-2">
-                    <h1 className="text-2xl font-semibold leading-[1.2] text-text-primary">
-                        What would you like to explore?
+                <div className="mt-8 sm:mt-12 flex flex-col gap-4 sm:gap-6 w-full lg:max-w-none">
+                    <h1 className="text-4xl font-bold leading-[1.1] tracking-tight text-[#212529] sm:text-5xl lg:text-[5.5rem]">
+                        What would you like <br className="hidden lg:block" />to explore?
                     </h1>
-                    <p className="text-[14px] leading-relaxed text-text-muted">
-                        Choose a recommended topic or start a completely new exploration.
+                    <p className="text-base sm:text-lg font-medium leading-relaxed text-gray-500 sm:text-xl">
+                        Choose a recommended topic based on your level, or start a<br className="hidden lg:block" />completely new exploration.
                     </p>
                 </div>
+            </div>
 
-                <div className="grid w-full grid-cols-2 gap-4">
-                    {isLoadingRecs ? (
-                        <div className="col-span-2 py-8 text-sm text-text-muted">
-                            Generating recommendations for you...
-                        </div>
-                    ) : (
-                        <>
-                            {recommendations.slice(0, 3).map((rec, idx) => (
+            {/* Right Column: Cards */}
+            <div className="flex w-full flex-1 items-center justify-center p-6 lg:w-1/2 lg:p-10">
+                <div className="flex h-full w-full lg:max-h-[850px] flex-col items-center justify-center rounded-[2.5rem] bg-[#f8f9fa] p-6 sm:p-10 lg:p-16">
+                    <div className="grid w-full max-w-[600px] grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                        {isLoadingRecs ? (
+                            <div className="col-span-1 sm:col-span-2 py-20 text-center flex flex-col items-center justify-center gap-4">
+                                <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-[#212529]"></div>
+                                <span className="text-lg font-medium text-gray-500">
+                                    Generating recommendations for you...
+                                </span>
+                            </div>
+                        ) : (
+                            <>
+                                {recommendations.slice(0, 3).map((rec, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => handleSelectRecommendation(rec)}
+                                        className={`group relative flex h-48 sm:h-56 cursor-pointer flex-col justify-between overflow-hidden rounded-[2rem] p-6 sm:p-8 text-left transition-[all,transform] duration-300 ease-out hover:scale-[1.05] hover:shadow-xl hover:z-10 active:scale-[0.98] ${bgColors[idx % bgColors.length]}`}
+                                    >
+                                        <div className="relative z-10 flex flex-col gap-2">
+                                            <span className="text-xl sm:text-2xl font-bold leading-tight text-[#212529] line-clamp-3">
+                                                {rec.title}
+                                            </span>
+                                        </div>
+                                        <div className="relative z-10 mt-auto flex w-full items-end justify-between">
+                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/60 text-[#212529] backdrop-blur-sm transition-transform duration-300 group-hover:translate-x-3 group-hover:bg-white">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M5 12h14"></path>
+                                                    <path d="m12 5 7 7-7 7"></path>
+                                                </svg>
+                                            </div>
+                                            <span className="text-4xl sm:text-5xl font-black text-[#212529] opacity-10">
+                                                0{idx + 1}
+                                            </span>
+                                        </div>
+                                    </button>
+                                ))}
+
+                                {/* New Topic Card */}
                                 <button
-                                    key={idx}
-                                    onClick={() => handleSelectRecommendation(rec)}
-                                    className="flex h-32 cursor-pointer flex-col items-center justify-center rounded-2xl border border-border bg-surface-alt p-4 text-center transition-all hover:border-primary/50 hover:bg-primary/5 hover:shadow-sm"
+                                    onClick={handleNewTopic}
+                                    className="group relative flex h-48 sm:h-56 cursor-pointer flex-col items-center justify-center gap-4 rounded-[2rem] border-2 border-dashed border-gray-300 bg-white p-6 sm:p-8 transition-[all,transform] duration-300 ease-out hover:scale-[1.05] hover:z-10 hover:border-[#d1fb9f] hover:bg-[#f8fdf1] hover:shadow-xl active:scale-[0.98]"
                                 >
-                                    <span className="line-clamp-2 text-sm font-medium text-text-primary">
-                                        {rec.title}
+                                    <div className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-gray-50 text-gray-400 transition-colors duration-300 group-hover:bg-[#d1fb9f] group-hover:text-[#212529]">
+                                        <Plus className="h-6 w-6 sm:h-8 sm:w-8" strokeWidth={2.5} />
+                                    </div>
+                                    <span className="text-lg sm:text-xl font-bold text-gray-500 transition-colors duration-300 group-hover:text-[#212529]">
+                                        New Topic
                                     </span>
                                 </button>
-                            ))}
-
-                            {/* The 4th button is always the + "New Topic" button */}
-                            <button
-                                onClick={handleNewTopic}
-                                className="flex h-32 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-transparent p-4 transition-all hover:border-primary hover:bg-primary/5 hover:text-primary"
-                            >
-                                <Plus className="h-8 w-8 text-text-muted group-hover:text-primary transition-colors" />
-                                <span className="text-sm font-medium text-text-muted group-hover:text-primary">
-                                    New Topic
-                                </span>
-                            </button>
-                        </>
-                    )}
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
