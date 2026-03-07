@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Compass } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useTopicListStore, fetchTopics } from "../workspace/hooks/useTopicList";
 import { useAuthStore } from "../auth/hooks/useAuthStore";
 import { useChatStore } from "../chat/hooks/useChat";
@@ -14,10 +14,8 @@ interface Recommendation {
 export function MenuPage() {
     const navigate = useNavigate();
     const userId = useAuthStore((s) => s.userId);
-    const topics = useTopicListStore((s) => s.topics);
     const isLoadingTopics = useTopicListStore((s) => s.isLoading);
     const clearChat = useChatStore((s) => s.clear);
-    const setTopicId = useChatStore((s) => s.setTopicId);
 
     const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
     const [isLoadingRecs, setIsLoadingRecs] = useState(false);
@@ -109,7 +107,7 @@ export function MenuPage() {
                     <h1 className="text-4xl font-bold leading-[1.1] tracking-tight text-[#212529] sm:text-5xl lg:text-[5.5rem]">
                         What would you like <br className="hidden lg:block" />to explore?
                     </h1>
-                    <p className="text-base sm:text-lg font-medium leading-relaxed text-gray-500 sm:text-xl">
+                    <p className="text-base font-medium leading-relaxed text-gray-500 sm:text-xl">
                         Choose a recommended topic based on your level, or start a<br className="hidden lg:block" />completely new exploration.
                     </p>
                 </div>
@@ -132,7 +130,7 @@ export function MenuPage() {
                                     <button
                                         key={idx}
                                         onClick={() => handleSelectRecommendation(rec)}
-                                        className={`group relative flex h-48 sm:h-56 cursor-pointer flex-col justify-between overflow-hidden rounded-[2rem] p-6 sm:p-8 text-left transition-[all,transform] duration-300 ease-out hover:scale-[1.05] hover:shadow-xl hover:z-10 active:scale-[0.98] ${bgColors[idx % bgColors.length]}`}
+                                        className={`group relative flex h-48 sm:h-56 cursor-pointer flex-col justify-between overflow-hidden rounded-4xl p-6 sm:p-8 text-left transition-[all,transform] duration-300 ease-out hover:scale-[1.05] hover:shadow-xl hover:z-10 active:scale-[0.98] ${bgColors[idx % bgColors.length]}`}
                                     >
                                         <div className="relative z-10 flex flex-col gap-2">
                                             <span className="text-xl sm:text-2xl font-bold leading-tight text-[#212529] line-clamp-3">
@@ -156,7 +154,7 @@ export function MenuPage() {
                                 {/* New Topic Card */}
                                 <button
                                     onClick={handleNewTopic}
-                                    className="group relative flex h-48 sm:h-56 cursor-pointer flex-col items-center justify-center gap-4 rounded-[2rem] border-2 border-dashed border-gray-300 bg-white p-6 sm:p-8 transition-[all,transform] duration-300 ease-out hover:scale-[1.05] hover:z-10 hover:border-[#d1fb9f] hover:bg-[#f8fdf1] hover:shadow-xl active:scale-[0.98]"
+                                    className="group relative flex h-48 sm:h-56 cursor-pointer flex-col items-center justify-center gap-4 rounded-4xl border-2 border-dashed border-gray-300 bg-white p-6 sm:p-8 transition-[all,transform] duration-300 ease-out hover:scale-[1.05] hover:z-10 hover:border-[#d1fb9f] hover:bg-[#f8fdf1] hover:shadow-xl active:scale-[0.98]"
                                 >
                                     <div className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-gray-50 text-gray-400 transition-colors duration-300 group-hover:bg-[#d1fb9f] group-hover:text-[#212529]">
                                         <Plus className="h-6 w-6 sm:h-8 sm:w-8" strokeWidth={2.5} />
