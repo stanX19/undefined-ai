@@ -8,7 +8,7 @@ from srcs.config import get_settings
 settings = get_settings()
 
 if settings.USE_IN_MEMORY_DB:
-    SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+    SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///file:memdb?mode=memory&cache=shared&uri=true"
 else:
     SQLALCHEMY_DATABASE_URL = f"sqlite+aiosqlite:///./{settings.DB_NAME}"
 

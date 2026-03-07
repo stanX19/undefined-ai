@@ -8,6 +8,8 @@ from srcs.schemas.topic_dto import TopicCreateRequest, TopicResponse, TopicDetai
 from srcs.services.topic_service import TopicService
 from srcs.services.document_service import DocumentService
 from srcs.services.ingestion_service import IngestionService
+from srcs.dependencies import get_current_user
+from srcs.models.user import User
 
 router: APIRouter = APIRouter(prefix="/api/v1/topics", tags=["topics"])
 
@@ -15,20 +17,21 @@ router: APIRouter = APIRouter(prefix="/api/v1/topics", tags=["topics"])
 @router.post("/", response_model=TopicResponse)
 async def create_topic(
     body: TopicCreateRequest,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> TopicResponse:
     """Create a new topic for a user."""
-    topic = await TopicService.create_topic(db, body.user_id, body.title)
+    topic = await TopicService.create_topic(db, current_user.user_id, body.title)
     return TopicResponse.model_validate(topic)
 
 
 @router.get("/", response_model=list[TopicResponse])
 async def list_topics(
-    user_id: str,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> list[TopicResponse]:
     """List all topics for a user."""
-    topics = await TopicService.get_user_topics(db, user_id)
+    topics = await TopicService.get_user_topics(db, current_user.user_id)
     return [TopicResponse.model_validate(t) for t in topics]
 
 

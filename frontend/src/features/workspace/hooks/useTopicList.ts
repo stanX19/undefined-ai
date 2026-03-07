@@ -33,7 +33,9 @@ export async function fetchTopics(): Promise<void> {
 
     store.setLoading(true);
     try {
-        const res = await fetch(`/api/v1/topics/?user_id=${encodeURIComponent(userId)}`);
+        const res = await fetch(`/api/v1/topics/`, {
+            headers: { "X-User-Id": userId }
+        });
         if (!res.ok) throw new Error("Failed to fetch topics");
         const data: Topic[] = await res.json();
         store.setTopics(data);

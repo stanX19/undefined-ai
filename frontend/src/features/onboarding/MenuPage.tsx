@@ -42,7 +42,9 @@ export function MenuPage() {
             setIsLoadingRecs(true);
             try {
                 if (currentTopics.length > 0) {
-                    const res = await fetch(`/api/v1/recommendations/latest?user_id=${userId}`);
+                    const res = await fetch(`/api/v1/recommendations/latest`, {
+                        headers: { "X-User-Id": userId! }
+                    });
                     if (res.ok) {
                         const data = await res.json();
                         setRecommendations(data.recommendations || []);

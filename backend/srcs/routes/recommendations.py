@@ -11,6 +11,8 @@ from srcs.schemas.recommendation_dto import (
 )
 from srcs.services.recommendation_service import RecommendationService
 from srcs.services.topic_service import TopicService
+from srcs.dependencies import get_current_user
+from srcs.models.user import User
 
 router: APIRouter = APIRouter(
     prefix="/api/v1/recommendations", tags=["recommendations"],
@@ -33,16 +35,16 @@ async def get_default_recommendations(
 
 @router.get("/latest", response_model=RecommendationsResponse)
 async def get_latest_recommendations(
-    user_id: str = Query(..., description="The user requesting recommendations"),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> RecommendationsResponse:
     """Return 3 suggested topics based on the user's most recent topic."""
-    topics = await TopicService.get_user_topics(db, user_id)
+    topics = await TopicService.get_user_topics(db, current_user.user_id)
     if not topics:
         raise HTTPException(status_code=404, detail="User has no topics")
         
     latest_topic = topics[0]
-    results = await RecommendationService.get_recommendations(db, user_id, latest_topic.topic_id)
+    results = await RecommendationService.get_recommendations(db, current_user.user_id, latest_topic.topic_id)
 
     return RecommendationsResponse(
         topic_id=latest_topic.topic_id,
@@ -54,7 +56,7 @@ async def get_latest_recommendations(
 @router.get("/{topic_id}", response_model=RecommendationsResponse)
 async def get_recommendations(
     topic_id: str,
-    user_id: str = Query(..., description="The user requesting recommendations"),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> RecommendationsResponse:
     """Return 3 suggested topics: same level, +1, +2 harder."""
@@ -62,7 +64,7 @@ async def get_recommendations(
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
 
-    results = await RecommendationService.get_recommendations(db, user_id, topic_id)
+    results = await RecommendationService.get_recommendations(db, current_user.user_id, topic_id)
 
     return RecommendationsResponse(
         topic_id=topic_id,

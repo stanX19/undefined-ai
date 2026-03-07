@@ -7,7 +7,6 @@ from pydantic import BaseModel
 class TopicCreateRequest(BaseModel):
     """Request body for creating a new topic."""
     title: str
-    user_id: str
 
 
 class TopicResponse(BaseModel):

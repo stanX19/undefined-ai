@@ -399,8 +399,11 @@ export async function sendChatMessage(
       const title = content.slice(0, 50) || "New Topic";
       const topicRes = await fetch("/api/v1/topics/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, title }),
+        headers: {
+          "Content-Type": "application/json",
+          "X-User-Id": userId,
+        },
+        body: JSON.stringify({ title }),
       });
       if (!topicRes.ok) throw new Error("Failed to create topic");
       const topicData = await topicRes.json();
