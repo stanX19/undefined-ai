@@ -97,11 +97,11 @@ export function MenuPage() {
             {/* Left Column */}
             <div className="relative flex w-full flex-col justify-center lg:w-1/2 px-6 py-28 sm:px-16 sm:py-32 lg:px-24 lg:py-16">
                 {/* Top Left Logo */}
-                <div className="absolute left-6 top-6 flex items-center gap-3 sm:left-12 sm:top-10 sm:gap-4">
-                    <img src="/logo.png" alt="Logo" className="h-10 sm:h-22 w-auto object-contain" />
-                    <div className="flex items-baseline">
-                        <span className="text-2xl sm:text-4xl font-semibold tracking-tight text-[#212529]">undefined</span>
-                        <span className="ml-1 sm:ml-2 text-2xl sm:text-4xl font-medium tracking-tight text-[#868e96]">ai</span>
+                <div className="absolute left-6 top-6 z-20 flex max-w-[calc(100vw-3rem)] items-center gap-2.5 sm:left-16 sm:top-10 sm:gap-4 lg:left-22">
+                    <img src="/logo.png" alt="Logo" className="h-8 w-auto shrink-0 object-contain sm:h-14" />
+                    <div className="flex min-w-0 items-baseline">
+                        <span className="truncate text-xl font-semibold tracking-tight text-[#212529] sm:text-4xl">undefined</span>
+                        <span className="ml-1 shrink-0 text-xl font-medium tracking-tight text-[#868e96] sm:ml-2 sm:text-4xl">ai</span>
                     </div>
                 </div>
 
