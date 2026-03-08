@@ -72,4 +72,6 @@ This document summarizes the current state, progress made, and remaining issues 
 ## 13. SSE Real-Time Sync & UI Updates
 - **Automatic Renaming**: The frontend sidebar now listens for the `UpdateTitle` SSE event; topic names will refresh instantly in the sidebar once the backend generates a summary.
 - **Ingestion Tracking**: Added an `IngestionProgress` listener in `useChat.ts` to surface background file processing stages (Parsing, Indexing, etc.) in the chat logs.
-- **Future Considerations**: Note that the `/stream` endpoint currently skips `X-User-Id` header-based authentication as `EventSource` lacks native header support. Migrating to a fetch-based stream reader remains a potential security hardening task.
+75: 
+76: ## 14. Sidebar UI Polish
+77: - **Dynamic Identity**: Replaced the hardcoded "Marcus" and "M" avatar in `TopicsSidebar.tsx` with dynamic user data. The sidebar now correctly reflects the `userId` from the `useAuthStore`, displaying the user's name and primary initial in the footer.

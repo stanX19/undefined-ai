@@ -18,6 +18,7 @@ export function TopicsSidebar() {
     const isLoading = useTopicListStore((s) => s.isLoading);
     const currentTopicId = useChatStore((s) => s.topicId);
     const clearChat = useChatStore((s) => s.clear);
+    const userId = useAuthStore((s) => s.userId);
     const logout = useAuthStore((s) => s.logout);
     const navigate = useNavigate();
     const location = useLocation();
@@ -260,10 +261,10 @@ export function TopicsSidebar() {
                     >
                         <div className="flex items-center gap-3">
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-sm font-bold text-[#212529]">
-                                M
+                                {userId?.[0]?.toUpperCase() || "U"}
                             </div>
                             <div className="flex flex-col items-start">
-                                <span className="text-[13px] font-medium text-[#212529] leading-none">Marcus</span>
+                                <span className="text-[13px] font-medium text-[#212529] leading-none">{userId || "User"}</span>
                             </div>
                         </div>
                         <LogOut size={16} className="text-gray-400 hover:text-red-500 transition-colors" />
