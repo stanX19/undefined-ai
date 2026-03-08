@@ -39,11 +39,12 @@ export function useForceLayout(initialNodes: NodeData[], initialEdges: EdgeData[
     // Create the simulation
     const simulation = d3.forceSimulation<NodeData>(nodesCopy)
       .force("charge", d3.forceManyBody().strength(chargeStrength)) // Moderated repel
-      .force("center", d3.forceCenter(width / 2, height / 2).strength(0.1)) // Soft gravity to center
+      .force("x", d3.forceX(width / 2).strength(0.05)) // Soft gravity to center X
+      .force("y", d3.forceY(height / 2).strength(0.05)) // Soft gravity to center Y
       .force("collide", d3.forceCollide<NodeData>().radius(d => Math.max(d.width, d.height) / 2 + 10).iterations(2)) // Avoid overlap using bounding boxes
       .force("link", d3.forceLink<NodeData, EdgeData>(edgesCopy)
         .id(d => d.id)
-        .distance(100) // Desired resting distance of links
+        .distance(200) // Desired resting distance of links
         .strength(0.5)
       )
       .alphaDecay(0.02) // Cool down slower for smoother settling
@@ -92,9 +93,9 @@ export function useForceLayout(initialNodes: NodeData[], initialEdges: EdgeData[
     if (!simulationRef.current) return;
     const d3Node = simulationRef.current.nodes().find(n => n.id === node.id);
     if (d3Node) {
-       // Release the node back to the physics engine
-       d3Node.fx = null;
-       d3Node.fy = null;
+       // Keep the node pinned to its new position so the user can adjust the layout
+       d3Node.fx = node.position.x;
+       d3Node.fy = node.position.y;
     }
     // Let the simulation cool down naturally
     simulationRef.current.alphaTarget(0);

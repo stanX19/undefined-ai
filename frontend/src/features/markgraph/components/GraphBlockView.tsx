@@ -9,7 +9,9 @@ import {
   MarkerType,
   ReactFlowProvider,
   useReactFlow,
-  Panel
+  Panel,
+  Background,
+  BackgroundVariant
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import type { GraphBlock } from "../types.ts";
@@ -23,8 +25,8 @@ function NeoNode({ data, id }: any) {
   const displayLabel = data.label === id ? id : `(${id}) ${data.label}`;
   
   return (
-    <div title={displayLabel} className="flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 rounded-full border-4 border-blue-500/20 shadow-lg cursor-pointer hover:ring-2 hover:ring-blue-500/50 transition-all font-bold text-[9px] text-center px-1 leading-tight overflow-hidden break-all">
-      <span className="line-clamp-3">{displayLabel}</span>
+    <div title={displayLabel} className="flex items-center justify-center min-w-[120px] max-w-[200px] min-h-[60px] p-3 bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 rounded-2xl border-4 border-blue-500/20 shadow-lg cursor-pointer hover:ring-2 hover:ring-blue-500/50 transition-all font-bold text-xs text-center leading-snug">
+      <span>{displayLabel}</span>
       <Handle type="source" position={Position.Bottom} style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} className="opacity-0 w-0 h-0" />
       <Handle type="target" position={Position.Top} style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} className="opacity-0 w-0 h-0" />
     </div>
@@ -98,6 +100,7 @@ function GraphInner({
       }}
     >
       <Controls showInteractive={false} />
+      <Background variant={BackgroundVariant.Dots} />
       <Panel position="bottom-right">
         <button 
           onClick={() => fitView({ duration: 400, padding: 0.2 })}
@@ -116,8 +119,8 @@ export function GraphBlockView({ block }: { block: GraphBlock }) {
     type: "neo",
     x: 0,
     y: 0,
-    width: 64, // width matching w-16
-    height: 64, // height matching h-16
+    width: 150, // width approximate to min-w-[120px] and max-w-[200px]
+    height: 80, // height approximate to min-h-[60px] + padding
     data: { label: v.display, nav_target: v.nav_target },
   })), [block.vertices]);
 

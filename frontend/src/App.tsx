@@ -6,14 +6,19 @@ import { WorkspacePage } from "./features/workspace/WorkspacePage.tsx";
 import { AuthGuard } from "./features/auth/components/AuthGuard.tsx";
 import { useAuthStore } from "./features/auth/hooks/useAuthStore.ts";
 
-/**
- * Root-level redirect: sends unauthenticated users to /login,
- * authenticated users to /onboarding (or /workspace if they already have a topic).
- */
 function RootRedirect() {
   const userId = useAuthStore((s) => s.userId);
+  const educationLevel = useAuthStore((s) => s.educationLevel);
   if (!userId) return <Navigate to="/login" replace />;
+  if (!educationLevel) return <Navigate to="/onboarding" replace />;
   return <Navigate to="/menu" replace />;
+}
+
+/** Ensures user has completed onboarding (education level) before accessing menu/workspace/home. */
+function RequireEducation({ children }: { children: React.ReactNode }) {
+  const educationLevel = useAuthStore((s) => s.educationLevel);
+  if (!educationLevel) return <Navigate to="/onboarding" replace />;
+  return <>{children}</>;
 }
 
 export function App() {
@@ -26,8 +31,9 @@ export function App() {
         {/* Protected routes */}
         <Route element={<AuthGuard />}>
           <Route path="/onboarding" element={<OnboardingPage />} />
-          <Route path="/menu" element={<MenuPage />} />
-          <Route path="/workspace" element={<WorkspacePage />} />
+          <Route path="/menu" element={<RequireEducation><MenuPage /></RequireEducation>} />
+          <Route path="/home" element={<RequireEducation><WorkspacePage /></RequireEducation>} />
+          <Route path="/workspace" element={<RequireEducation><WorkspacePage /></RequireEducation>} />
         </Route>
 
         {/* Catch-all redirect */}

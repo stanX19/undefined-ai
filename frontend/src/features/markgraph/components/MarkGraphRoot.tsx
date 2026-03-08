@@ -46,7 +46,14 @@ function ElementRenderer({ element }: { element: MarkGraphElement }) {
                     remarkPlugins={[remarkGfm, remarkMath]}
                     rehypePlugins={[rehypeKatex]}
                     components={{
-                      p: ({ node, ...props }) => <span {...props} />, // Prevent block-level paragraphs inside fragments
+                      p: ({ children }) => <>{children}</>, // Prevent block-level paragraphs inside fragments to keep inline flow
+                      table: ({ node: _node, ...props }) => (
+                        <div className="overflow-x-auto my-4 w-full rounded-lg border border-border/50">
+                          <table className="w-full text-left border-collapse my-0!" {...props} />
+                        </div>
+                      ),
+                      th: ({ node: _node, ...props }) => <th className="bg-surface/50 border-b border-border/50 p-3 font-semibold text-sm" {...props} />,
+                      td: ({ node: _node, ...props }) => <td className="border-b border-border/50 p-3 text-sm" {...props} />,
                     }}
                   >
                     {frag}
@@ -102,7 +109,14 @@ function ElementRenderer({ element }: { element: MarkGraphElement }) {
           remarkPlugins={[remarkGfm, remarkMath]}
           rehypePlugins={[rehypeKatex]}
           components={{
-            a: ({ node, href, children, ...props }) => {
+            table: ({ node: _node, ...props }) => (
+              <div className="overflow-x-auto my-4 w-full rounded-lg border border-border/50">
+                <table className="w-full text-left border-collapse my-0!" {...props} />
+              </div>
+            ),
+            th: ({ node: _node, ...props }) => <th className="bg-surface/50 border-b border-border/50 p-3 font-semibold text-sm" {...props} />,
+            td: ({ node: _node, ...props }) => <td className="border-b border-border/50 p-3 text-sm" {...props} />,
+            a: ({ node: _node, href, children, ...props }) => {
               if (href?.startsWith("#")) {
                 return (
                   <a

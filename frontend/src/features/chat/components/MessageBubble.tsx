@@ -56,16 +56,16 @@ export function MessageBubble({ message }: Props) {
           {message.attachments.map((file, i) => (
             <div
               key={i}
-              className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 pr-6 shadow-sm"
+              className="flex items-center gap-2.5 rounded-2xl border border-border bg-surface p-1.5 pr-4 shadow-sm"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500 text-white">
-                <FileText size={20} strokeWidth={2.5} />
+              <div className="flex h-8 w-8 items-center justify-center rounded-[0.6rem] bg-[#d1fb9f] text-gray-600">
+                <FileText size={16} strokeWidth={2.5} />
               </div>
               <div className="flex flex-col text-left">
-                <span className="max-w-[150px] truncate text-sm font-semibold text-[var(--color-text-primary)]">
+                <span className="max-w-[140px] truncate text-xs font-semibold text-text-primary">
                   {file.name}
                 </span>
-                <span className="text-xs font-medium text-[var(--color-text-muted)]">
+                <span className="text-[10px] font-medium leading-none text-text-muted mt-1">
                   {file.type}
                 </span>
               </div>
@@ -77,10 +77,10 @@ export function MessageBubble({ message }: Props) {
       {message.content && (
         <div
           className={`text-[15px] leading-relaxed ${isUser
-            ? "max-w-[85%] bg-[var(--ds-ghost-hover,#F3F4F6)] text-[var(--color-text-primary)] rounded-2xl px-5 py-2.5 whitespace-pre-wrap"
+            ? "max-w-[85%] bg-(--ds-ghost-hover,#F3F4F6) text-text-primary rounded-2xl px-5 py-2.5 whitespace-pre-wrap"
             : isSystem
               ? "max-w-[90%] border border-amber-300 bg-amber-50 text-amber-800 px-4 py-2.5 rounded-2xl whitespace-pre-wrap"
-              : "w-full bg-transparent text-[var(--color-text-body)] pr-2 overflow-x-hidden"
+              : "w-full bg-transparent text-text-body pr-2 overflow-x-hidden"
             }`}
         >
           {isAssistant ? <MarkdownRenderer content={displayedText} /> : message.content}
@@ -88,14 +88,14 @@ export function MessageBubble({ message }: Props) {
       )}
 
       {isAssistant && !isTyping && (
-        <div className="flex items-center gap-3 text-[var(--color-text-muted)] mt-4">
-          <button className="cursor-pointer hover:text-[var(--color-text-primary)] transition-colors" title="Helpful">
+        <div className="flex items-center gap-3 text-text-muted mt-4">
+          <button className="cursor-pointer hover:text-text-primary transition-colors" title="Helpful">
             <ThumbsUp size={16} />
           </button>
-          <button className="cursor-pointer hover:text-[var(--color-text-primary)] transition-colors" title="Not helpful">
+          <button className="cursor-pointer hover:text-text-primary transition-colors" title="Not helpful">
             <ThumbsDown size={16} />
           </button>
-          <button onClick={handleCopy} className="cursor-pointer hover:text-[var(--color-text-primary)] transition-colors" title="Copy text">
+          <button onClick={handleCopy} className="cursor-pointer hover:text-text-primary transition-colors" title="Copy text">
             {copied ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
           </button>
         </div>

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Sparkles, Trash2, ChevronDown, Search, Loader2 } from "lucide-react";
+import { Sparkles, Trash2, ChevronDown, Search, Loader2 } from "lucide-react";
 import { useChatStore, sendChatMessage, deleteChatHistory, type StreamingLog } from "../hooks/useChat.ts";
+import { useWorkspaceLayoutStore } from "../../workspace/layoutStore.ts";
 import { MessageBubble } from "./MessageBubble.tsx";
 import { ChatInput } from "./ChatInput.tsx";
 import { ShiningText } from "../../../components/ui/ShiningText.tsx";
@@ -51,6 +52,8 @@ export function ChatPanel({ inline = false }: { inline?: boolean }) {
   const streamingLogs = useChatStore((s) => s.streamingLogs);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const setChatCollapsed = useWorkspaceLayoutStore((s) => s.setChatCollapsed);
+
   // Auto-scroll to bottom via MutationObserver
   useEffect(() => {
     const scrollEl = scrollRef.current;
@@ -94,37 +97,47 @@ export function ChatPanel({ inline = false }: { inline?: boolean }) {
   }
 
   const containerClass = inline
-    ? "flex h-full w-full flex-col bg-[var(--color-surface)]"
-    : "fixed right-0 top-0 z-50 flex h-dvh w-full max-w-md flex-col border-l border-[var(--color-border)] bg-[var(--color-surface)] sm:right-4 sm:top-4 sm:h-[calc(100dvh-2rem)] sm:rounded-2xl sm:border";
+    ? "flex h-full w-full flex-col bg-surface"
+    : "fixed right-0 top-0 z-50 flex h-dvh w-full max-w-md flex-col border-l border-border bg-surface sm:right-4 sm:top-4 sm:h-[calc(100dvh-2rem)] sm:rounded-2xl sm:border";
 
   return (
     <div className={containerClass}>
       <div className="flex items-center justify-between px-4 py-4">
         <div className="flex items-center gap-2">
-          <Sparkles size={20} className="text-[var(--color-text-muted)]" />
-          <h2 className="text-base font-medium text-[var(--color-text-primary)]">Assistant</h2>
+          <Sparkles size={20} className="text-text-muted" />
+          <h2 className="text-base font-medium text-text-primary">Assistant</h2>
         </div>
         <div className="flex items-center gap-4">
           <button
             onClick={() => deleteChatHistory()}
-            className="cursor-pointer text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-primary)]"
+            className="cursor-pointer text-text-muted transition-colors hover:text-text-primary"
             title="Clear Chat"
           >
             <Trash2 size={16} />
           </button>
           <button
-            onClick={() => setIsOpen(false)}
-            className="cursor-pointer text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text-primary)]"
+            onClick={() => {
+              if (inline) {
+                setChatCollapsed(true);
+              } else {
+                setIsOpen(false);
+              }
+            }}
+            className="cursor-pointer text-text-muted transition-colors hover:text-text-primary"
             title="Collapse"
           >
-            <X size={18} />
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 12H3"/>
+              <path d="m11 18 6-6-6-6"/>
+              <path d="M21 5v14"/>
+            </svg>
           </button>
         </div>
       </div>
 
       {
         messages.length === 0 && (
-          <div className="px-8 pb-4 pt-10 text-center text-xs text-[var(--color-text-muted)]">
+          <div className="px-8 pb-4 pt-10 text-center text-xs text-text-muted">
             Responses are generated using AI and may contain mistakes.
           </div>
         )
