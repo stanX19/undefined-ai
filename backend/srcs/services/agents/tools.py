@@ -2,7 +2,7 @@
 from langchain_core.tools import tool
 
 from srcs.services.retrieval_service import RetrievalService
-from srcs.services.web_search_service import WebSearchService
+from srcs.services.web_search_service import WebSearchService, WebSearchNotAvailableException
 from srcs.services.agents.id_mapper import current_mapper
 
 
@@ -103,7 +103,10 @@ async def search_web(query: str) -> str:
     Returns:
         A concise list of search results the user (or you) can act on.
     """
-    results = await WebSearchService.search(query, num_results=5)
+    try:
+        results = await WebSearchService.search(query, num_results=5)
+    except WebSearchNotAvailableException as e:
+        return str(e)
 
     if not results:
         return "No web results found for this query."

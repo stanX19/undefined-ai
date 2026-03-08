@@ -34,12 +34,14 @@ def run_interactive_chat():
 
     try:
         # Setup: login + create topic
-        client.post("/api/v1/auth/login", description="Login", json={"user_id": "interactive_user_001"})
+        USER_ID = "interactive_user_001"
+        client.post("/api/v1/auth/login", description="Login", json={"user_id": USER_ID})
+        client.headers["X-User-Id"] = USER_ID
 
         res = client.post(
             "/api/v1/topics/",
             description="Create topic",
-            json={"user_id": "interactive_user_001", "title": "Interactive Chat Session"},
+            json={"title": "Interactive Chat Session"},
         )
         topic_id = res["topic_id"]
 
@@ -103,7 +105,7 @@ def run_interactive_chat():
             while time.time() < deadline:
                 new_events = socket.events_received[seen:]
                 reply_event = next((e for e in new_events if e["event"] == "Replies"), None)
-                tts_event = next((e for e in new_events if e["event"] == "TTSResult"), None)
+                ending_event = next((e for e in new_events if e["event"] == "UpdateTitle"), None)
                 if reply_event:
                     data = reply_event["data"]
                     if isinstance(data, str):
@@ -114,8 +116,8 @@ def run_interactive_chat():
                     reply_text = data.get("text", data) if isinstance(data, dict) else data
                     # Mark all events up to (and including) this one as seen
                     seen = socket.events_received.index(reply_event) + 1
-                if tts_event:
-                    seen = socket.events_received.index(tts_event) + 1
+                if ending_event:
+                    seen = socket.events_received.index(ending_event) + 1
                     break
                 time.sleep(0.3)
 

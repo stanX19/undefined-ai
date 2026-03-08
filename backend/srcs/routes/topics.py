@@ -38,6 +38,7 @@ async def list_topics(
 @router.get("/{topic_id}", response_model=TopicDetailResponse)
 async def get_topic(
     topic_id: str,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> TopicDetailResponse:
     """Get a single topic with its document text."""
@@ -51,6 +52,7 @@ async def get_topic(
 async def upload_document(
     topic_id: str,
     file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> TopicDetailResponse:
     """Upload a PDF, extract its text, and store it on the topic.

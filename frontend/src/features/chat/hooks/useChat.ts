@@ -280,8 +280,13 @@ function openSseStream(sessionId: string): Promise<void> {
  */
 export async function loadChatHistory(topicId: string): Promise<void> {
   const store = useChatStore.getState();
+  const userId = useAuthStore.getState().userId;
+  if (!userId) return;
+
   try {
-    const res = await fetch(`/api/v1/chat/history?topic_id=${topicId}`);
+    const res = await fetch(`/api/v1/chat/history?topic_id=${topicId}`, {
+      headers: { "X-User-Id": userId }
+    });
     if (!res.ok) return;
     const messages: Array<{
       message_id: string;
@@ -309,9 +314,13 @@ export async function deleteChatHistory(): Promise<void> {
   const currentTopicId = store.topicId;
 
   if (currentTopicId) {
+    const userId = useAuthStore.getState().userId;
+    if (!userId) return;
+
     try {
       const res = await fetch(`/api/v1/chat/history?topic_id=${currentTopicId}`, {
         method: "DELETE",
+        headers: { "X-User-Id": userId }
       });
       if (res.ok) {
         // Find next topic to select
@@ -421,6 +430,7 @@ export async function sendChatMessage(
 
       const uploadRes = await fetch(`/api/v1/topics/${currentTopicId}/upload`, {
         method: "POST",
+        headers: { "X-User-Id": userId },
         body: uploadData,
       });
       if (!uploadRes.ok) {
@@ -434,7 +444,10 @@ export async function sendChatMessage(
     // 4. Send Chat Message to backend (only after SSE is open)
     const chatRes = await fetch("/api/v1/chat/", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "X-User-Id": userId 
+      },
       body: JSON.stringify({ topic_id: currentTopicId, message: content }),
     });
 

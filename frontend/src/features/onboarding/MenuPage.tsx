@@ -50,7 +50,9 @@ export function MenuPage() {
                         setRecommendations(data.recommendations || []);
                     }
                 } else {
-                    const res = await fetch(`/api/v1/recommendations/default?education_level=${encodeURIComponent(eduLevel!)}`);
+                    const res = await fetch(`/api/v1/recommendations/default?education_level=${encodeURIComponent(eduLevel!)}`, {
+                        headers: { "X-User-Id": userId! }
+                    });
                     if (res.ok) {
                         const data = await res.json();
                         setRecommendations(data.recommendations || []);

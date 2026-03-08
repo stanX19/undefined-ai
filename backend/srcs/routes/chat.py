@@ -10,6 +10,8 @@ from srcs.schemas.chat_dto import ChatRequest, ChatMessageResponse, ChatAccepted
 from srcs.services.chat_service import ChatService
 from srcs.services.topic_service import TopicService
 from srcs.services.sse_service import SseService
+from srcs.dependencies import get_current_user
+from srcs.models.user import User
 
 router: APIRouter = APIRouter(prefix="/api/v1/chat", tags=["chat"])
 
@@ -52,6 +54,7 @@ async def sse_stream(session_id: str):
 @router.post("/", response_model=ChatAcceptedResponse)
 async def send_message(
     body: ChatRequest,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> ChatAcceptedResponse:
     """Accept a user message and kick off the agent in the background.
@@ -75,6 +78,7 @@ async def send_message(
 @router.get("/history", response_model=list[ChatMessageResponse])
 async def get_history(
     topic_id: str,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> list[ChatMessageResponse]:
     """Return chat history for a topic."""
@@ -85,6 +89,7 @@ async def get_history(
 @router.delete("/history")
 async def clear_history(
     topic_id: str,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, str]:
     """Delete all chat messages for a topic."""

@@ -63,6 +63,7 @@ class TestClient:
     def __init__(self, base_url: str, actor_name: str = "Main"):
         self.base_url = base_url.rstrip('/')
         self.actor_name = actor_name
+        self.headers = {}
         ThreadFilter.redirect_all_other()
 
     @staticmethod
@@ -121,6 +122,13 @@ class TestClient:
     def request(self, method: str, path: str, description: str = "", **kwargs) -> dict:
         url = f"{self.base_url}{path}"
         
+        # Merge default headers
+        if self.headers:
+            headers = self.headers.copy()
+            if "headers" in kwargs:
+                headers.update(kwargs["headers"])
+            kwargs["headers"] = headers
+
         # Log SEND
         TestClient.log(self.actor_name, method, "SEND", f"{description} ({path})", "PENDING", kwargs.get('json') or kwargs.get('params'))
 

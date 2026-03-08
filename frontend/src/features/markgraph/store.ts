@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { MarkGraphAST } from "./types.ts";
+import { useAuthStore } from "../auth/hooks/useAuthStore.ts";
 
 interface MarkGraphState {
     sceneId: string | null;
@@ -122,7 +123,10 @@ export async function fetchMarkGraphUI(topicId: string) {
     const store = useMarkGraphStore.getState();
     useMarkGraphStore.setState({ isLoading: true, error: null });
     try {
-        const res = await fetch(`/api/v1/ui/${topicId}`);
+        const userId = useAuthStore.getState().userId;
+        const res = await fetch(`/api/v1/ui/${topicId}`, {
+            headers: { "X-User-Id": userId || "" }
+        });
         if (!res.ok) {
             throw new Error(`Failed to fetch UI: ${res.statusText}`);
         }

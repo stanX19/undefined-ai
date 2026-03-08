@@ -7,11 +7,15 @@ from srcs.config import get_settings
 
 _client: Exa | None = None
 
+class WebSearchNotAvailableException(RuntimeError):
+    pass
 
 def _get_client() -> Exa:
     global _client
     if _client is None:
         settings = get_settings()
+        if not settings.EXA_API_KEY:
+            raise WebSearchNotAvailableException("EXA_API_KEY is not configured")
         _client = Exa(api_key=settings.EXA_API_KEY)
     return _client
 

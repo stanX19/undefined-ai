@@ -22,6 +22,7 @@ router: APIRouter = APIRouter(
 @router.get("/default", response_model=RecommendationsResponse)
 async def get_default_recommendations(
     education_level: str = Query(..., description="The user's selected education level"),
+    current_user: User = Depends(get_current_user),
 ) -> RecommendationsResponse:
     """Return 3 introductory suggested topics based on education level."""
     results = await RecommendationService.get_default_recommendations(education_level)
@@ -77,6 +78,7 @@ async def get_recommendations(
 async def update_progress(
     topic_id: str,
     body: ProgressUpdateRequest,
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> TopicProgressResponse:
     """Record the user's latest progress on a topic."""
@@ -85,6 +87,6 @@ async def update_progress(
         raise HTTPException(status_code=404, detail="Topic not found")
 
     progress = await RecommendationService.update_progress(
-        db, body.user_id, topic_id, body.last_fact_id,
+        db, current_user.user_id, topic_id, body.last_fact_id,
     )
     return TopicProgressResponse.model_validate(progress)

@@ -129,9 +129,11 @@ Create a new topic for a user.
 **Request Body** — `TopicCreateRequest`
 ```json
 {
-  "title": "Linear Algebra",
-  "user_id": "abc123"
+  "title": "Linear Algebra"
 }
+
+**Headers**
+- `X-User-Id: string` (Required)
 ```
 
 **Response** `200 OK` — `TopicResponse`
@@ -147,15 +149,12 @@ Create a new topic for a user.
 
 ---
 
-#### `GET /api/v1/topics/?user_id={user_id}`
+#### `GET /api/v1/topics/`
 
-List all topics for a user.
+List all topics for the current user.
 
-**Query Parameters**
-
-| Param     | Type   | Required |
-|-----------|--------|----------|
-| `user_id` | string | ✅       |
+**Headers**
+- `X-User-Id: string` (Required)
 
 **Response** `200 OK` — `TopicResponse[]`
 ```json
@@ -181,6 +180,9 @@ Get a single topic with its stored document text.
 | Param      | Type   |
 |------------|--------|
 | `topic_id` | string |
+ 
+ **Headers**
+ - `X-User-Id: string` (Required)
 
 **Response** `200 OK` — `TopicDetailResponse`
 ```json
@@ -208,6 +210,9 @@ Upload a PDF file, extract its text, and store it on the topic.
 | Param      | Type   |
 |------------|--------|
 | `topic_id` | string |
+ 
+ **Headers**
+ - `X-User-Id: string` (Required)
 
 **Request** — `multipart/form-data`
 
@@ -300,6 +305,9 @@ Return chat history for a topic (oldest-first, max 50 messages).
 |------------|--------|----------|
 | `topic_id` | string | ✅       |
 
+**Headers**
+- `X-User-Id: string` (Required)
+
 **Response** `200 OK` — `ChatMessageResponse[]`
 ```json
 [
@@ -330,6 +338,9 @@ Delete all chat messages for a topic.
 |------------|--------|----------|
 | `topic_id` | string | ✅       |
 
+**Headers**
+- `X-User-Id: string` (Required)
+
 **Response** `200 OK`
 ```json
 { "message": "Cleared 12 messages" }
@@ -348,6 +359,9 @@ Transcribe an uploaded audio file to text using ElevenLabs Scribe.
 | Field  | Type         | Required | Notes             |
 |--------|--------------|----------|--------------------|
 | `file` | `UploadFile` | ✅       | Must be an audio file |
+ 
+ **Headers**
+ - `X-User-Id: string` (Required)
 
 **Response** `200 OK`
 ```json
@@ -374,6 +388,9 @@ Return the current ingestion pipeline status for a topic.
 | Param      | Type   |
 |------------|--------|
 | `topic_id` | string |
+ 
+ **Headers**
+ - `X-User-Id: string` (Required)
 
 **Response** `200 OK` — `IngestionStatusResponse`
 ```json
@@ -395,6 +412,9 @@ List all facts for a topic at a specific compression level.
 | Param      | Type   |
 |------------|--------|
 | `topic_id` | string |
+ 
+ **Headers**
+ - `X-User-Id: string` (Required)
 
 **Query Parameters**
 
@@ -431,6 +451,9 @@ Get a single fact with its full parent chain and source chunk.
 |------------|--------|
 | `topic_id` | string |
 | `fact_id`  | string |
+ 
+ **Headers**
+ - `X-User-Id: string` (Required)
 
 **Response** `200 OK` — `FactWithParentsResponse`
 ```json
@@ -489,6 +512,9 @@ Get the current A2UI scene for a topic. If no scene exists yet, an empty default
 | Param      | Type   |
 |------------|--------|
 | `topic_id` | string |
+ 
+ **Headers**
+ - `X-User-Id: string` (Required)
 
 **Response** `200 OK` — `UIResponse`
 ```json

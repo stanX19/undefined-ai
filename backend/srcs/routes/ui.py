@@ -6,12 +6,18 @@ from srcs.database import get_db
 from srcs.schemas.ui_dto import UIResponse
 from srcs.services.ui_service import UIService
 from srcs.utils.markgraph.markgraph_parser import compile_markgraph, export_to_dict
+from srcs.dependencies import get_current_user
+from srcs.models.user import User
 
 router = APIRouter(prefix="/api/v1/ui", tags=["UI"])
 
 
 @router.get("/{topic_id}", response_model=UIResponse)
-async def get_ui(topic_id: str, db: AsyncSession = Depends(get_db)):
+async def get_ui(
+    topic_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """Return the current UI scene for a topic.
 
     If no scene exists yet, creates an empty default scene and returns it.

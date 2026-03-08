@@ -83,6 +83,7 @@ def run_tests():
         assert res["user_id"] == "test_user_001"
         assert "created_at" in res, "Missing created_at"
         user_id = res["user_id"]
+        client.headers["X-User-Id"] = user_id
 
         # -- 3. Login — idempotent ----------------------------------------
         print(f"\n{Colors.BOLD}--- 3. Auth: Login same user again ---{Colors.END}")
@@ -99,7 +100,7 @@ def run_tests():
         res = client.post(
             "/api/v1/topics/",
             description="Create topic",
-            json={"user_id": user_id, "title": "Test Topic"},
+            json={"title": "Test Topic"},
         )
         topic_id = res["topic_id"]
         assert topic_id, "topic_id should not be empty"
@@ -109,7 +110,7 @@ def run_tests():
         # -- 5. List topics -----------------------------------------------
         print(f"\n{Colors.BOLD}--- 5. Topics: List ---{Colors.END}")
         res = client.get(
-            f"/api/v1/topics/?user_id={user_id}",
+            "/api/v1/topics/",
             description="List topics for user",
         )
         assert isinstance(res, list) and len(res) > 0, "Should return non-empty list"

@@ -59,8 +59,10 @@ export function ChatInput({ onSend, isStreaming, embedded }: Props) {
       const formData = new FormData();
       formData.append("file", blob, "recording.wav");
 
+      const userId = (await import("../../auth/hooks/useAuthStore")).useAuthStore.getState().userId;
       const response = await fetch("/api/v1/speech/stt", {
         method: "POST",
+        headers: { "X-User-Id": userId || "" },
         body: formData,
       });
 
