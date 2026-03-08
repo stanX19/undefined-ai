@@ -20,7 +20,8 @@ Do not output anything else but the raw markdown document. DO NOT wrap it in mar
 - You MUST use inline render ![name](#target) when adding structures inside containers
 - IDs are auto-generated from headings, but use `{{#explicit-id}}` when necessary for linking.
 - Prioritise using as many `# scenes` as possible and use `[links](#different-scenes)` for navigation between them.
-- Always prioritise using graphs for knowledge or data representation, it is the soul of MarkGraph.
+- Always prioritise using graphs for everything, it is the soul of MarkGraph.
+- Prioritise using a main graph + multiple subgraphs instead of one giant graph, link using `[A](#subgraph-a)`.
 - A good UI have the following characteristics
   * simple: each scene has a clear focus
   * interactive: Important ui components should link to other scenes for in-depth exploration

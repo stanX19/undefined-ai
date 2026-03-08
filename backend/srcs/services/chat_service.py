@@ -55,16 +55,18 @@ class ChatService:
 
     @staticmethod
     async def get_history(
-        db: AsyncSession, topic_id: str, limit: int = 50
+        db: AsyncSession, topic_id: str, limit: int = 10
     ) -> list[ChatMessage]:
-        """Return chat history for a topic, oldest-first, capped by *limit*."""
+        """Return the latest chat history for a topic, oldest-first, capped by *limit*."""
         result = await db.execute(
             select(ChatMessage)
             .where(ChatMessage.topic_id == topic_id)
-            .order_by(ChatMessage.created_at.asc())
+            .order_by(ChatMessage.created_at.desc())
             .limit(limit)
         )
-        return list(result.scalars().all())
+        rows = list(result.scalars().all())
+        rows.reverse()
+        return rows
 
     @staticmethod
     async def clear_history(db: AsyncSession, topic_id: str) -> int:
@@ -185,7 +187,8 @@ class ChatService:
                 history = await ChatService.get_history(db, topic_id, limit=100)
             
             assistant_count: int = sum(1 for m in history if m.role == "assistant")
-            if assistant_count == 1 or (assistant_count > 0 and assistant_count % 5 == 0):
+            n: int = assistant_count
+            if (n & (n - 1)) == 0:  # is power of 2
                 SummaryService.enqueue_topic_summary(session_id, topic_id)
         except Exception as exc:
             import traceback

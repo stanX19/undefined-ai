@@ -291,6 +291,8 @@ class RotatingLLM:
         ordered = await self._rotate()
         ordered = ordered[:RotatingLLM.MAX_RETRIES + 1]  # +1 for main
         runnables = [config.create_runnable(temperature=temperature, model=model, **kwargs) for config in ordered]
+        if not runnables:
+            raise ValueError("no llm configured")
         primary, *fallbacks = runnables
         return RunnableWithFallbacks(runnable=primary, fallbacks=fallbacks)
 
@@ -306,6 +308,8 @@ class RotatingLLM:
         """
         ordered = await self._rotate()
         runnables = [config.create_runnable(temperature=temperature, model=model, **kwargs).bind_tools(tools) for config in ordered]
+        if not runnables:
+            raise ValueError("no llm configured")
         primary, *fallbacks = runnables
         return RunnableWithFallbacks(runnable=primary, fallbacks=fallbacks)
 

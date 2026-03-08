@@ -2,6 +2,7 @@
 import asyncio
 import traceback
 
+from sqlalchemy.ext.asyncio import AsyncSession
 from srcs.database import AsyncSessionLocal
 from srcs.models.topic import Topic
 from srcs.schemas.chat_dto import SseUpdateTitleData
@@ -11,6 +12,13 @@ from srcs.services.sse_service import SseService
 
 
 from langchain_core.messages import SystemMessage, HumanMessage
+
+_GENERAL_SUMMARY_PROMOT = """\
+You are a summarization AI.
+Create a summary for the following text.
+Your response MUST be {length} words or less.
+Return ONLY the exact summary text, without quotes, explanations, or any other formatting.\"""
+"""
 
 _GENERATE_TITLE_PROMPT = """\
 You are a summarization AI.
@@ -59,6 +67,21 @@ class SummaryService:
         )
 
     @staticmethod
+    async def fetch_highest_level_facts(db: AsyncSession, topic_id: str) -> str:
+        """Fetch the most abstract knowledge facts available for a topic."""
+        from srcs.services.retrieval_service import RetrievalService
+
+        max_level = await RetrievalService.get_max_level(db, topic_id)
+        if max_level is None:
+            return ""
+
+        facts = await RetrievalService.get_facts_by_level(db, topic_id, level=max_level)
+        if not facts:
+            return ""
+
+        return "\n".join(f"- {f.content}" for f in facts)
+
+    @staticmethod
     async def _process_topic_summary(
         session_id: str, topic_id: str, length: int
     ) -> None:
@@ -84,8 +107,11 @@ class SummaryService:
                 
                 context_str: str = "\n".join(chat_context_lines)
                 
+                top_facts = await SummaryService.fetch_highest_level_facts(db, topic_id)
+
                 full_text: str = (
                     f"Current Title: {topic.title}\n"
+                    f"Knowledge Facts (Highest level):\n{top_facts}\n"
                     f"Recent Chat History:\n{context_str}"
                 )
                 
