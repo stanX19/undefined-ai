@@ -105,7 +105,7 @@ def run_interactive_chat():
             while time.time() < deadline:
                 new_events = socket.events_received[seen:]
                 reply_event = next((e for e in new_events if e["event"] == "Replies"), None)
-                ending_event = next((e for e in new_events if e["event"] == "UpdateTitle"), None)
+                ending_event = next((e for e in new_events if e["event"] == "TTSResult"), None)  # "UpdateTitle"), None)
                 if reply_event:
                     data = reply_event["data"]
                     if isinstance(data, str):

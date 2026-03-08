@@ -47,9 +47,9 @@ This document summarizes the current state, progress made, and remaining issues 
 
 ## 9. Backend Stability & Authentication Refactor
 - **Phantom Rollback Bug**: Discovered and resolved a concurrency issue with the in-memory SQLite database (`sqlite+aiosqlite:///:memory:`). When multiple async requests hit the shared static pool simultaneously, it caused ghost rollbacks. Fixed by changing the DB URL to `sqlite+aiosqlite:///file:memdb?mode=memory&cache=shared&uri=true` which enables safe transaction isolation with a shared memory cache.
-- **Silent Self-Healing Auth**: To mitigate data loss on backend dev server reboots (which wiped the in-memory DB while the frontend still held the user ID), we implemented a self-healing dependency strategy. 
-- **Header-Based Dependency**: Created `get_current_user` in `srcs/dependencies.py` which extracts the `X-User-Id` from HTTP headers. If the user doesn't exist in the DB, it transparently creates a new user record.
-- **Route and Frontend Refactor**: Updated `topics.py` and `recommendations.py` to use the `get_current_user` dependency instead of query or body parameters. Updated all major frontend API requests (`useChat.ts`, `useTopicList.ts`, and `MenuPage.tsx`) to pass the `X-User-Id` header smoothly.
+- **Header-Based Dependency**: Created `get_current_user` in `srcs/dependencies.py` which extracts the `X-User-Id` from HTTP headers. 
+- **Mandatory X-User-Id**: Successfully retired all `user_id` query and body parameters. All authenticated routes (`topics`, `chat`, `speech`, `ui`, `recommendations`, `ingestion`) now strictly rely on the header-based dependency.
+- **Frontend Sync**: Updated all frontend `fetch` call sites (`useChat`, `useRecommendations`, `markgraph`, `ui_renderer`, and `actionHandler`) to inject the `X-User-Id` header from the central `authStore`.
 
 ## 10. Agent UI Prompt Refinement
 - **UI Generation Prompts**: Updated `ui_agent.py` and `main_chatbot.py` to strongly emphasize MarkGraph's core design philosophies:
@@ -58,14 +58,18 @@ This document summarizes the current state, progress made, and remaining issues 
   - **Bot Role Separation**: Standardized the main chatbot to understand that it only needs to provide factual content and intent to the UI Agent, completely avoiding attempting to generate UI layout primitives or Markdown syntax natively.
 
 ## 11. Topic Management & Auto-Summarization
-- **Topic Deletion**: Implemented a secure `DELETE /api/v1/topics/{topic_id}` endpoint.
-  - Added `delete_user_topic` to `TopicService` to verify ownership and perform deletion in a single transaction.
-  - Linked database cascades ensure that chat history and atomic facts are automatically purged upon topic deletion.
+- **Topic Deletion**: Implemented a secure `DELETE /api/v1/topics/{topic_id}` endpoint with owner verification and cascaded data purging.
 - **Auto-Summarization (Naming Service)**:
   - Created a dedicated `SummaryService` to dynamically generate 4-6 word titles for topics based on conversation context.
-  - **Dynamic Triggers**: Summarization logic is isolated and triggered at strategic intervals (1st, 5th, 10th, 15th... assistant response) within the `ChatService`.
-  - **Context-Aware**: The service retrieves the most recent 5 messages and uses a specialized LLM prompt (separating system instructions from user content) to distill the essence of the conversation into a title.
-  - **Real-Time Updates**: Status is emitted via a new `UpdateTitle` SSE event, allowing the frontend to update topic lists and headers instantly without a page refresh.
+  - **Dynamic Triggers**: Summarization logic triggers at intervals (1st, 5th, 10th... assistant response) to keep topic titles relevant as conversations evolve.
+  - **Real-Time Updates**: Status is emitted via a new `UpdateTitle` SSE event, allowing the frontend to reflect new names instantly.
 
-## 12. Next Steps
-- **UI Enhancement**: Update the frontend sidebar to listen for the `UpdateTitle` SSE event and reflect the new name in real-time.
+## 12. End-to-End Authentication & Safety Hardening
+- **Test Suite Alignment**: Resolved "Expected 404, got 401" test failures by authenticating direct `requests` calls in the backend unit tests. This ensures the suite correctly tests logic endpoints rather than being blocked by security layers.
+- **Search Resilience**: Implemented `WebSearchNotAvailableException` to handle missing API keys gracefully. The system now returns a user-friendly message to the agent instead of a raw server crash when search is unconfigured.
+- **UX Flow**: Updated `LoginPage.tsx` and `OnboardingPage.tsx` logic to ensure a smooth transition for both new and returning users, keeping the education level context in sync with the database.
+
+## 13. SSE Real-Time Sync & UI Updates
+- **Automatic Renaming**: The frontend sidebar now listens for the `UpdateTitle` SSE event; topic names will refresh instantly in the sidebar once the backend generates a summary.
+- **Ingestion Tracking**: Added an `IngestionProgress` listener in `useChat.ts` to surface background file processing stages (Parsing, Indexing, etc.) in the chat logs.
+- **Future Considerations**: Note that the `/stream` endpoint currently skips `X-User-Id` header-based authentication as `EventSource` lacks native header support. Migrating to a fetch-based stream reader remains a potential security hardening task.

@@ -249,6 +249,31 @@ function openSseStream(sessionId: string): Promise<void> {
       }
     });
 
+    // ── Topic Title Auto-Updates ──
+    eventSource.addEventListener("UpdateTitle", (e: MessageEvent) => {
+      try {
+        const { topic_id, title } = JSON.parse(e.data);
+        console.info(`[SSE] Topic ${topic_id} renamed to: ${title}`);
+        const topicStore = useTopicListStore.getState();
+        topicStore.setTopics(
+          topicStore.topics.map((t) => (t.topic_id === topic_id ? { ...t, title } : t))
+        );
+      } catch (err) {
+        console.warn("Failed to parse SSE UpdateTitle event", err);
+      }
+    });
+
+    // ── Ingestion Progress (File processing statuses) ──
+    eventSource.addEventListener("IngestionProgress", (e: MessageEvent) => {
+      try {
+        const data = JSON.parse(e.data);
+        store.addStreamingLog({
+          role: 'thought',
+          message: `${data.stage}: ${data.message}`
+        });
+      } catch { /* ignore */ }
+    });
+
     eventSource.addEventListener("Notif", (e: MessageEvent) => {
       try {
         const data = JSON.parse(e.data);

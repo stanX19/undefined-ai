@@ -26,11 +26,13 @@ async def _mock_ask(
     user_prompt: str,
     document_text: str | None = None,
     chat_history=None,
+    on_tool_call=None,
 ) -> str:
     _last_ask_kwargs.clear()
     _last_ask_kwargs["user_prompt"] = user_prompt
     _last_ask_kwargs["document_text"] = document_text
     _last_ask_kwargs["chat_history"] = chat_history
+    _last_ask_kwargs["on_tool_call"] = on_tool_call
     return f"Mock reply to: {user_prompt}"
 
 
@@ -127,7 +129,7 @@ def run_tests():
 
         # -- 7. Get topic — 404 -------------------------------------------
         print(f"\n{Colors.BOLD}--- 7. Topics: 404 for nonexistent ---{Colors.END}")
-        raw = requests.get(f"{base_url}/api/v1/topics/nonexistent_id_999")
+        raw = requests.get(f"{base_url}/api/v1/topics/nonexistent_id_999", headers=client.headers)
         assert raw.status_code == 404, f"Expected 404, got {raw.status_code}"
         print(f"{Colors.GREEN}Correctly returned 404{Colors.END}")
 
@@ -136,6 +138,7 @@ def run_tests():
         raw = requests.post(
             f"{base_url}/api/v1/topics/{topic_id}/upload",
             files={"file": ("notes.txt", b"hello world", "text/plain")},
+            headers=client.headers,
         )
         assert raw.status_code == 400, f"Expected 400 for .txt upload, got {raw.status_code}"
         print(f"{Colors.GREEN}Correctly rejected non-PDF upload{Colors.END}")
@@ -169,11 +172,12 @@ def run_tests():
         assert reply_data["text"] == "Mock reply to: Hello agent"
         print(f"{Colors.GREEN}SSE reply received: {reply_data['text']}{Colors.END}")
 
-        # -- 10. Verify document context is None --------------------------
-        print(f"\n{Colors.BOLD}--- 10. Chat: Verify document_text=None ---{Colors.END}")
-        assert _last_ask_kwargs.get("document_text") is None, \
-            "document_text should be None for topic without uploaded doc"
-        print(f"{Colors.GREEN}Chatbot.ask correctly received document_text=None{Colors.END}")
+        # -- 10. Verify document context is None fallback -----------------
+        print(f"\n{Colors.BOLD}--- 10. Chat: Verify document_text fallback ---{Colors.END}")
+        doc_text = _last_ask_kwargs.get("document_text", "")
+        assert "No document provided." in doc_text, \
+            f"document_text should contain 'No document provided.', got: {doc_text[:50]}..."
+        print(f"{Colors.GREEN}Chatbot.ask correctly received expected fallback for document_text{Colors.END}")
 
         # -- 11. Second message — chat_history passed (SSE) ---------------
         print(f"\n{Colors.BOLD}--- 11. Chat: Second message passes history (SSE) ---{Colors.END}")
@@ -234,6 +238,7 @@ def run_tests():
         raw = requests.post(
             f"{base_url}/api/v1/chat/",
             json={"topic_id": "nonexistent_topic_999", "message": "hi"},
+            headers=client.headers,
         )
         assert raw.status_code == 404, f"Expected 404, got {raw.status_code}"
         print(f"{Colors.GREEN}Correctly returned 404{Colors.END}")
@@ -243,6 +248,7 @@ def run_tests():
         raw = requests.post(
             f"{base_url}/api/v1/speech/stt",
             files={"file": ("test.mp3", b"dummy audio data", "audio/mpeg")},
+            headers=client.headers,
         )
         assert raw.status_code == 200, f"Expected 200, got {raw.status_code}"
         res_json = raw.json()

@@ -1,0 +1,6 @@
+{
+  "text": "Chat Start",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...w686xrvttI}",
+  "status": "ok",
+  "json_data": null
+}
