@@ -149,7 +149,7 @@ async def ingest_url(topic_id: str, url: str) -> str:
 
     return (
         f"Ingestion started for content from {url} ({len(content)} chars). "
-        f"The knowledge base will be updated shortly with a new knowledge tree."
+        f"The knowledge base will be updated shortly with a new knowledge tree. This takes some time"
     )
 
 

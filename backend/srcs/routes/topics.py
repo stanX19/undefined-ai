@@ -73,3 +73,15 @@ async def upload_document(
     IngestionService.trigger_ingestion(topic_id, extracted)
 
     return TopicDetailResponse.model_validate(topic)
+
+
+@router.delete("/{topic_id}", status_code=204)
+async def delete_topic(
+    topic_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    """Delete a specific topic if owned by the current user."""
+    success = await TopicService.delete_user_topic(db, topic_id, current_user.user_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Topic not found or unauthorized")

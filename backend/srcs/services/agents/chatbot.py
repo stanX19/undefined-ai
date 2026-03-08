@@ -116,12 +116,13 @@ class Chatbot:
         if isinstance(content, str):
             return content
         if isinstance(content, list):
-            parts = [
-                block.get("text", "")
-                for block in content
-                if isinstance(block, dict) and block.get("type") == "text"
-            ]
-            return "\n".join(parts) if parts else str(content)
+            parts = []
+            for block in content:
+                if isinstance(block, str):
+                    parts.append(block)
+                elif isinstance(block, dict) and block.get("type") == "text":
+                    parts.append(block.get("text", ""))
+            return "".join(parts) if parts else str(content)
         return str(content)
 
 
@@ -143,7 +144,11 @@ class Chatbot:
         if chat_history:
             messages.extend(chat_history)
 
-        messages.append(HumanMessage(content=user_prompt))
+        prompt = user_prompt.strip()
+        if not prompt:
+            prompt = "[empty message]"
+
+        messages.append(HumanMessage(content=prompt))
         return messages
 
 

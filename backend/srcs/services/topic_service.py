@@ -54,3 +54,18 @@ class TopicService:
         await db.commit()
         await db.refresh(topic)
         return topic
+
+    @staticmethod
+    async def delete_user_topic(db: AsyncSession, topic_id: str, user_id: str) -> bool:
+        """Delete a topic owned by a user. Returns True if deleted, False if not found or unauthorized."""
+        result = await db.execute(
+            select(Topic).where(Topic.topic_id == topic_id, Topic.user_id == user_id)
+        )
+        topic = result.scalar_one_or_none()
+
+        if not topic:
+            return False
+
+        await db.delete(topic)
+        await db.commit()
+        return True
