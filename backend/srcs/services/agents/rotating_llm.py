@@ -394,20 +394,22 @@ class RotatingLLM:
         msgs = self.format_messages(messages)
         runnable: Runnable = await self.get_runnable(temperature=temperature, model=model, **llm_kwargs)
 
-        print(f"\n[ROTATING_LLM] === SENDING REQUEST ===")
-        for idx, m in enumerate(msgs):
-            content_str: str = str(m.content)
-            if len(content_str) > 500:
-                content_str = content_str[:250] + "\n... [TRUNCATED] ...\n" + content_str[-250:]
+        settings = get_settings()
+        if settings.DEBUG:
+            print(f"\n[ROTATING_LLM] === SENDING REQUEST ===")
+            for idx, m in enumerate(msgs):
+                content_str: str = str(m.content)
+                if len(content_str) > 500:
+                    content_str = content_str[:250] + "\n... [TRUNCATED] ...\n" + content_str[-250:]
 
-            if type(m) == HumanMessage:
-                print(f"[ROTATING_LLM] Human [{idx}]: {content_str}")
-            elif type(m) == SystemMessage:
-                print(f"[ROTATING_LLM] System [{idx}]: {content_str}")
-            elif type(m) == AIMessage:
-                print(f"[ROTATING_LLM] AI [{idx}]: {content_str}")
-            else:
-                print(f"[ROTATING_LLM] {m.type} [{idx}]: {content_str}")
+                if type(m) == HumanMessage:
+                    print(f"[ROTATING_LLM] Human [{idx}]: {content_str}")
+                elif type(m) == SystemMessage:
+                    print(f"[ROTATING_LLM] System [{idx}]: {content_str}")
+                elif type(m) == AIMessage:
+                    print(f"[ROTATING_LLM] AI [{idx}]: {content_str}")
+                else:
+                    print(f"[ROTATING_LLM] {m.type} [{idx}]: {content_str}")
 
         for attempt in range(self.MAX_RETRIES):
             try:
@@ -421,12 +423,13 @@ class RotatingLLM:
                 else:
                     text = content
 
-                text_out: str = text
-                if len(text_out) > 500:
-                    text_out = text_out[:250] + "\n... [TRUNCATED] ...\n" + text_out[-250:]
+                if settings.DEBUG:
+                    text_out: str = text
+                    if len(text_out) > 500:
+                        text_out = text_out[:250] + "\n... [TRUNCATED] ...\n" + text_out[-250:]
 
-                print(f"\n[ROTATING_LLM] === RESPONSE ===")
-                print(f"[ROTATING_LLM] {text_out}\n")
+                    print(f"\n[ROTATING_LLM] === RESPONSE ===")
+                    print(f"[ROTATING_LLM] {text_out}\n")
 
                 return LLMResponse(
                     text=text,

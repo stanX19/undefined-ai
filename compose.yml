@@ -23,8 +23,6 @@ services:
     # Removed local bind mount because 'watch' handles sync
     # volumes:
     #   - ./frontend:/app
-    volumes:
-      - /app/node_modules
     environment:
       - VITE_API_URL=http://localhost:8001
     depends_on:
@@ -36,3 +34,5 @@ services:
           target: /app
           ignore:
             - node_modules/
+        - action: rebuild
+          path: ./frontend/package.json

@@ -1,0 +1,12 @@
+{
+  "text": "```json\n[\n  \"Artificial intelligence (AI) focuses on developing systems that mimic human intelligence, while machine learning (ML), a key subset of AI, enables computers to learn from data, identify patterns, and make intelligent decisions through evolving algorithms.\",\n  \"AI is broadly categorized into narrow AI for specific tasks and general AI, a theoretical future goal, with deep learning (neural networks) representing an advanced form that autonomously learns intricate data representations.\",\n  \"Machine learning encompasses primary types such as supervised, unsupervised, and reinforcement learning, alongside versatile techniques like decision tree analysis for classification and regression.\",\n  \"AI and ML applications are revolutionizing diverse industries, from healthcare diagnostics and financial fraud detection to e-commerce recommendations and autonomous vehicles, by enhancing problem-solving and real-time decision-making.\",\n  \"These technologies, including advances in natural language processing and IoT integration, are driving forces behind the digital transformation of industries, representing a paradigm shift that reshapes how we live, work, and interact.\"\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...w686xrvttI}",
+  "status": "ok",
+  "json_data": [
+    "Artificial intelligence (AI) focuses on developing systems that mimic human intelligence, while machine learning (ML), a key subset of AI, enables computers to learn from data, identify patterns, and make intelligent decisions through evolving algorithms.",
+    "AI is broadly categorized into narrow AI for specific tasks and general AI, a theoretical future goal, with deep learning (neural networks) representing an advanced form that autonomously learns intricate data representations.",
+    "Machine learning encompasses primary types such as supervised, unsupervised, and reinforcement learning, alongside versatile techniques like decision tree analysis for classification and regression.",
+    "AI and ML applications are revolutionizing diverse industries, from healthcare diagnostics and financial fraud detection to e-commerce recommendations and autonomous vehicles, by enhancing problem-solving and real-time decision-making.",
+    "These technologies, including advances in natural language processing and IoT integration, are driving forces behind the digital transformation of industries, representing a paradigm shift that reshapes how we live, work, and interact."
+  ]
+}

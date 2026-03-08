@@ -1,0 +1,32 @@
+{
+  "text": "```json\n[\n  \"Machine learning is a technology that allows machines and computers to learn by observation.\",\n  \"Machine learning concepts form the foundation of many modern data-driven technologies.\",\n  \"Machine learning empowers systems to learn from data and make predictions or decisions without explicit programming.\",\n  \"The process of machine learning is based on how humans learn new information and apply it.\",\n  \"Machine learning algorithms empower computers to classify data and make predictions based on past data.\",\n  \"Machine learning concepts can be broadly categorized into supervised learning, unsupervised learning, and reinforcement learning.\",\n  \"Supervised learning trains a model on labeled data.\",\n  \"Supervised learning algorithms learn to map inputs (data) to target outputs (the algorithm’s goal).\",\n  \"Common supervised learning algorithms include linear regression, neural networks, support vector machines, and decision tree/random forest.\",\n  \"Supervised learning applications include predictive analytics, sentiment analysis, and object or image recognition.\",\n  \"Unsupervised learning trains algorithms on unlabeled data.\",\n  \"Unsupervised learning algorithms independently identify patterns and structures, creating their own labels.\",\n  \"Common unsupervised learning algorithms include principal component analysis, K-means clustering, and probabilistic clustering.\",\n  \"Unsupervised learning applications include detecting anomalies, segmenting customer bases, and powering recommendation engines.\",\n  \"Semi-supervised learning combines supervised and unsupervised techniques.\",\n  \"Reinforcement learning is a type of unsupervised learning that enables a machine to learn through trial and error.\",\n  \"Reinforcement learning uses a gamified reward system to help a computer determine the best method.\",\n  \"Reinforcement learning applications include market personalization, optimization, and financial predictions.\",\n  \"Machine learning and deep learning are both types of AI.\",\n  \"Deep learning is a type of machine learning.\",\n  \"Deep learning is specifically a neural network that uses many layers of neural networks for complicated analyses.\",\n  \"Deep learning algorithms are sometimes called deep neural networks.\",\n  \"Machine learning has applications in all industries, from financial projections to resource planning and strategic decision-making.\",\n  \"The document was updated on Feb 18, 2025.\",\n  \"The document was written by Coursera Staff.\"\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...UcyXMAY5Vs}",
+  "status": "ok",
+  "json_data": [
+    "Machine learning is a technology that allows machines and computers to learn by observation.",
+    "Machine learning concepts form the foundation of many modern data-driven technologies.",
+    "Machine learning empowers systems to learn from data and make predictions or decisions without explicit programming.",
+    "The process of machine learning is based on how humans learn new information and apply it.",
+    "Machine learning algorithms empower computers to classify data and make predictions based on past data.",
+    "Machine learning concepts can be broadly categorized into supervised learning, unsupervised learning, and reinforcement learning.",
+    "Supervised learning trains a model on labeled data.",
+    "Supervised learning algorithms learn to map inputs (data) to target outputs (the algorithm’s goal).",
+    "Common supervised learning algorithms include linear regression, neural networks, support vector machines, and decision tree/random forest.",
+    "Supervised learning applications include predictive analytics, sentiment analysis, and object or image recognition.",
+    "Unsupervised learning trains algorithms on unlabeled data.",
+    "Unsupervised learning algorithms independently identify patterns and structures, creating their own labels.",
+    "Common unsupervised learning algorithms include principal component analysis, K-means clustering, and probabilistic clustering.",
+    "Unsupervised learning applications include detecting anomalies, segmenting customer bases, and powering recommendation engines.",
+    "Semi-supervised learning combines supervised and unsupervised techniques.",
+    "Reinforcement learning is a type of unsupervised learning that enables a machine to learn through trial and error.",
+    "Reinforcement learning uses a gamified reward system to help a computer determine the best method.",
+    "Reinforcement learning applications include market personalization, optimization, and financial predictions.",
+    "Machine learning and deep learning are both types of AI.",
+    "Deep learning is a type of machine learning.",
+    "Deep learning is specifically a neural network that uses many layers of neural networks for complicated analyses.",
+    "Deep learning algorithms are sometimes called deep neural networks.",
+    "Machine learning has applications in all industries, from financial projections to resource planning and strategic decision-making.",
+    "The document was updated on Feb 18, 2025.",
+    "The document was written by Coursera Staff."
+  ]
+}

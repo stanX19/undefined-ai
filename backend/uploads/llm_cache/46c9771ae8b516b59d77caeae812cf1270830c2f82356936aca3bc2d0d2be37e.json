@@ -1,0 +1,11 @@
+{
+  "text": "```json\n[\n  \"Machine learning is a foundational AI technology that enables systems to learn from data, make predictions, classify information, and make decisions without explicit programming, broadly categorized into supervised, unsupervised, and reinforcement learning, with semi-supervised learning combining aspects of the first two.\",\n  \"Supervised learning trains models on labeled data to map inputs to target outputs, utilizing algorithms such as linear regression, neural networks, and decision trees for applications like predictive analytics, sentiment analysis, and image recognition.\",\n  \"Unsupervised learning trains algorithms on unlabeled data to identify patterns and structures, employing methods like K-means clustering for customer segmentation and recommendation engines, while reinforcement learning enables machines to learn through trial and error via a gamified reward system for optimization and financial predictions.\",\n  \"Deep learning is a type of machine learning that specifically refers to neural networks utilizing many layers, often called deep neural networks.\"\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...yOZmLZZ1UQ}",
+  "status": "ok",
+  "json_data": [
+    "Machine learning is a foundational AI technology that enables systems to learn from data, make predictions, classify information, and make decisions without explicit programming, broadly categorized into supervised, unsupervised, and reinforcement learning, with semi-supervised learning combining aspects of the first two.",
+    "Supervised learning trains models on labeled data to map inputs to target outputs, utilizing algorithms such as linear regression, neural networks, and decision trees for applications like predictive analytics, sentiment analysis, and image recognition.",
+    "Unsupervised learning trains algorithms on unlabeled data to identify patterns and structures, employing methods like K-means clustering for customer segmentation and recommendation engines, while reinforcement learning enables machines to learn through trial and error via a gamified reward system for optimization and financial predictions.",
+    "Deep learning is a type of machine learning that specifically refers to neural networks utilizing many layers, often called deep neural networks."
+  ]
+}

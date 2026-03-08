@@ -1,0 +1,13 @@
+{
+  "text": "```json\n[\n  \"Machine learning (ML), a subset of AI, builds systems that learn and improve from data to discover patterns, make predictions, and generate actionable insights, driving efficient, data-driven decisions for businesses.\",\n  \"ML encompasses four main types—supervised, unsupervised, semi-supervised, and reinforcement learning—and utilizes algorithms like neural networks and decision trees that become trained models; a foundation in programming and statistics is essential for its evaluation.\",\n  \"ML projects involve a process of data gathering and preparation, algorithm selection, model training and fine-tuning, performance assessment, and deployment with ongoing audits.\",\n  \"Widely applied across finance, healthcare, marketing, and retail, ML powers diverse applications including recommendation engines, fraud detection, medical diagnosis, and personalized customer services.\",\n  \"Key challenges in ML involve ensuring high data quality, mitigating unintended bias, and maintaining sensitive data privacy and security.\",\n  \"Specialized tools like Oracle Database and HeatWave MySQL offer in-database ML capabilities, including built-in algorithms and automated ML, to simplify workflows and enhance security.\"\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...UcyXMAY5Vs}",
+  "status": "ok",
+  "json_data": [
+    "Machine learning (ML), a subset of AI, builds systems that learn and improve from data to discover patterns, make predictions, and generate actionable insights, driving efficient, data-driven decisions for businesses.",
+    "ML encompasses four main types—supervised, unsupervised, semi-supervised, and reinforcement learning—and utilizes algorithms like neural networks and decision trees that become trained models; a foundation in programming and statistics is essential for its evaluation.",
+    "ML projects involve a process of data gathering and preparation, algorithm selection, model training and fine-tuning, performance assessment, and deployment with ongoing audits.",
+    "Widely applied across finance, healthcare, marketing, and retail, ML powers diverse applications including recommendation engines, fraud detection, medical diagnosis, and personalized customer services.",
+    "Key challenges in ML involve ensuring high data quality, mitigating unintended bias, and maintaining sensitive data privacy and security.",
+    "Specialized tools like Oracle Database and HeatWave MySQL offer in-database ML capabilities, including built-in algorithms and automated ML, to simplify workflows and enhance security."
+  ]
+}

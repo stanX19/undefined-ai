@@ -1,0 +1,12 @@
+{
+  "text": "```json\n[\n  \"Machine learning (ML), a field of artificial intelligence, allows computers to learn from data and experience to identify patterns, improve task performance without explicit programming, and make accurate predictions on new data by adjusting models with training data.\",\n  \"ML technology powers applications such as personalized recommendations, voice recognition, and self-driving cars.\",\n  \"Supervised learning utilizes labeled data with known inputs and correct outputs, enabling algorithms to predict specific target outcomes for new data, exemplified by spam detection where models are objectively evaluated for accuracy.\",\n  \"Unsupervised learning algorithms process unlabeled data to find hidden patterns, inherent structures, or summarize data without explicit correct outputs or a specific prediction goal, with examples like grouping similar customers or detecting unusual transactions, though results are harder to evaluate automatically.\",\n  \"Reinforcement learning is an approach where an algorithm learns through trial-and-error, guided by rewards or penalties, and data scientists frequently utilize both supervised and unsupervised learning approaches.\"\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...w686xrvttI}",
+  "status": "ok",
+  "json_data": [
+    "Machine learning (ML), a field of artificial intelligence, allows computers to learn from data and experience to identify patterns, improve task performance without explicit programming, and make accurate predictions on new data by adjusting models with training data.",
+    "ML technology powers applications such as personalized recommendations, voice recognition, and self-driving cars.",
+    "Supervised learning utilizes labeled data with known inputs and correct outputs, enabling algorithms to predict specific target outcomes for new data, exemplified by spam detection where models are objectively evaluated for accuracy.",
+    "Unsupervised learning algorithms process unlabeled data to find hidden patterns, inherent structures, or summarize data without explicit correct outputs or a specific prediction goal, with examples like grouping similar customers or detecting unusual transactions, though results are harder to evaluate automatically.",
+    "Reinforcement learning is an approach where an algorithm learns through trial-and-error, guided by rewards or penalties, and data scientists frequently utilize both supervised and unsupervised learning approaches."
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "text": "```json\n[\n  \"Artificial intelligence (AI), broadly categorized into narrow and general forms, focuses on developing systems that mimic human intelligence; its key subset, machine learning (ML), enables computers to learn from data, identify patterns, and make intelligent decisions through evolving algorithms, encompassing primary types like supervised, unsupervised, and reinforcement learning, alongside advanced forms such as deep learning (neural networks) for intricate data representation.\",\n  \"These technologies, including advances in natural language processing and IoT integration, are revolutionizing diverse industries from healthcare diagnostics and financial fraud detection to e-commerce recommendations and autonomous vehicles, by enhancing problem-solving and real-time decision-making, thereby driving digital transformation and reshaping how we live, work, and interact.\"\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...UcyXMAY5Vs}",
+  "status": "ok",
+  "json_data": [
+    "Artificial intelligence (AI), broadly categorized into narrow and general forms, focuses on developing systems that mimic human intelligence; its key subset, machine learning (ML), enables computers to learn from data, identify patterns, and make intelligent decisions through evolving algorithms, encompassing primary types like supervised, unsupervised, and reinforcement learning, alongside advanced forms such as deep learning (neural networks) for intricate data representation.",
+    "These technologies, including advances in natural language processing and IoT integration, are revolutionizing diverse industries from healthcare diagnostics and financial fraud detection to e-commerce recommendations and autonomous vehicles, by enhancing problem-solving and real-time decision-making, thereby driving digital transformation and reshaping how we live, work, and interact."
+  ]
+}

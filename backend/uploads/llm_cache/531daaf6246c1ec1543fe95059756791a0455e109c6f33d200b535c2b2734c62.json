@@ -1,0 +1,11 @@
+{
+  "text": "```json\n[\n  \"Machine learning (ML), a subfield of Artificial Intelligence (AI), is a foundational technology enabling computers to learn, adapt, and improve from data without explicit programming, continuously discovering patterns to make predictions, decisions, and classify information.\",\n  \"This transformative and rapidly evolving field revolutionizes industries and solves complex problems, with its algorithms seamlessly integrated into daily life through key applications like predictive maintenance, fraud detection, natural language processing, image recognition, and recommender systems.\",\n  \"ML is broadly categorized into supervised learning, which uses labeled data for tasks such as classification and regression; unsupervised learning, which identifies patterns and structures in unlabeled data for clustering and anomaly detection; and reinforcement learning, where machines learn through trial and error using a reward system.\",\n  \"Deep learning is a specific type of machine learning that utilizes many layers of neural networks, often called deep neural networks, for complicated analyses.\"\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...nYOglprSRM}",
+  "status": "ok",
+  "json_data": [
+    "Machine learning (ML), a subfield of Artificial Intelligence (AI), is a foundational technology enabling computers to learn, adapt, and improve from data without explicit programming, continuously discovering patterns to make predictions, decisions, and classify information.",
+    "This transformative and rapidly evolving field revolutionizes industries and solves complex problems, with its algorithms seamlessly integrated into daily life through key applications like predictive maintenance, fraud detection, natural language processing, image recognition, and recommender systems.",
+    "ML is broadly categorized into supervised learning, which uses labeled data for tasks such as classification and regression; unsupervised learning, which identifies patterns and structures in unlabeled data for clustering and anomaly detection; and reinforcement learning, where machines learn through trial and error using a reward system.",
+    "Deep learning is a specific type of machine learning that utilizes many layers of neural networks, often called deep neural networks, for complicated analyses."
+  ]
+}

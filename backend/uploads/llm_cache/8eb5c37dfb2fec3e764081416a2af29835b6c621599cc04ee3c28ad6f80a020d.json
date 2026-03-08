@@ -1,0 +1,10 @@
+{
+  "text": "[\n  \"The document explains what Machine Learning is.\",\n  \"The document covers key concepts of Machine Learning.\",\n  \"The document discusses real-world uses of Machine Learning.\"\n]",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...nYOglprSRM}",
+  "status": "ok",
+  "json_data": [
+    "The document explains what Machine Learning is.",
+    "The document covers key concepts of Machine Learning.",
+    "The document discusses real-world uses of Machine Learning."
+  ]
+}

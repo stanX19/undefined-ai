@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.pool import AsyncAdaptedQueuePool
 from typing import AsyncGenerator
 
 # Use aiosqlite driver for async SQLite
@@ -16,7 +17,10 @@ else:
 engine = create_async_engine(
     SQLALCHEMY_DATABASE_URL,
     connect_args={"check_same_thread": False},  # Needed for SQLite
-    echo=settings.DEBUG
+    poolclass=AsyncAdaptedQueuePool,
+    pool_size=10,
+    max_overflow=20,
+    echo=False
 )
 
 AsyncSessionLocal = async_sessionmaker(

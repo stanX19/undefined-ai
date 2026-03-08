@@ -1,0 +1,10 @@
+{
+  "text": "```json\n[\n  \"Machine learning (ML), a foundational subfield of Artificial Intelligence, enables computers to learn, adapt, and improve from data without explicit programming by discovering patterns for predictions, decisions, and classification, thereby revolutionizing industries and solving complex problems; deep learning is a specific type of ML that utilizes many layers of neural networks for complex analyses.\",\n  \"ML is broadly categorized into supervised, unsupervised, reinforcement, and semi-supervised learning, utilizing various algorithms like linear regression, neural networks, and support vector machines, and is seamlessly integrated into daily life and industries through key applications such as predictive analytics, natural language processing, recommender systems, fraud detection, image recognition, customer segmentation, and optimization.\",\n  \"Resources for starting a machine learning journey include community forums, open-source libraries, hands-on tutorials, and online courses.\"\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...1wQ3ArUZtA}",
+  "status": "ok",
+  "json_data": [
+    "Machine learning (ML), a foundational subfield of Artificial Intelligence, enables computers to learn, adapt, and improve from data without explicit programming by discovering patterns for predictions, decisions, and classification, thereby revolutionizing industries and solving complex problems; deep learning is a specific type of ML that utilizes many layers of neural networks for complex analyses.",
+    "ML is broadly categorized into supervised, unsupervised, reinforcement, and semi-supervised learning, utilizing various algorithms like linear regression, neural networks, and support vector machines, and is seamlessly integrated into daily life and industries through key applications such as predictive analytics, natural language processing, recommender systems, fraud detection, image recognition, customer segmentation, and optimization.",
+    "Resources for starting a machine learning journey include community forums, open-source libraries, hands-on tutorials, and online courses."
+  ]
+}

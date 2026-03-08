@@ -1,0 +1,11 @@
+{
+  "text": "```json\n[\n  \"Machine learning (ML), a subfield of Artificial Intelligence (AI), enables computers to learn, adapt, and improve from data without explicit programming, continuously discovering patterns to make predictions and decisions; this transformative and rapidly evolving field revolutionizes industries and solves complex problems.\",\n  \"ML algorithms are broadly classified into supervised learning, which uses labeled data for tasks like classification and regression, and unsupervised learning, which analyzes unlabeled data to identify patterns, groupings, or anomalies such as clustering and anomaly detection.\",\n  \"ML algorithms are seamlessly integrated into daily life and various industries, transforming operations and interactions through key applications such as predictive maintenance, fraud detection, natural language processing, image recognition, and recommender systems.\",\n  \"Resources for starting a machine learning journey include community forums, open-source libraries, hands-on tutorials, and online courses.\"\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...UcyXMAY5Vs}",
+  "status": "ok",
+  "json_data": [
+    "Machine learning (ML), a subfield of Artificial Intelligence (AI), enables computers to learn, adapt, and improve from data without explicit programming, continuously discovering patterns to make predictions and decisions; this transformative and rapidly evolving field revolutionizes industries and solves complex problems.",
+    "ML algorithms are broadly classified into supervised learning, which uses labeled data for tasks like classification and regression, and unsupervised learning, which analyzes unlabeled data to identify patterns, groupings, or anomalies such as clustering and anomaly detection.",
+    "ML algorithms are seamlessly integrated into daily life and various industries, transforming operations and interactions through key applications such as predictive maintenance, fraud detection, natural language processing, image recognition, and recommender systems.",
+    "Resources for starting a machine learning journey include community forums, open-source libraries, hands-on tutorials, and online courses."
+  ]
+}

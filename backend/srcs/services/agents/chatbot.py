@@ -10,6 +10,7 @@ from typing import Awaitable, Callable
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, BaseMessage
 from langchain.agents import create_agent
 
+from srcs.config import get_settings
 from srcs.services.agents.rotating_llm import rotating_llm
 from srcs.services.agents.prompts.main_chatbot import SYSTEM_PROMPT
 from srcs.services.agents.tools import (
@@ -55,6 +56,10 @@ class Chatbot:
         """
         messages = self._build_messages(user_prompt, document_text, chat_history)
 
+        settings = get_settings()
+        if settings.DEBUG:
+            print(f"\n[CHATBOT] === USER PROMPT ===\n{user_prompt}\n")
+
         try:
             llm = await rotating_llm.get_runnable(temperature=0.4)
             agent = create_agent(model=llm, tools=self.tools)
@@ -67,11 +72,21 @@ class Chatbot:
                 kind = event.get("event", "")
 
                 # Capture tool-call events and forward via callback
-                if kind == "on_chat_model_end" and on_tool_call:
+                if kind == "on_chat_model_end":
                     output = event.get("data", {}).get("output")
-                    if isinstance(output, AIMessage) and output.tool_calls:
-                        for tc in output.tool_calls:
-                            await on_tool_call(tc["name"], tc.get("args", {}))
+                    if isinstance(output, AIMessage):
+                        if settings.DEBUG:
+                            if output.tool_calls:
+                                print(f"[CHATBOT] AI Tool Calls: {output.tool_calls}")
+                            else:
+                                print(f"[CHATBOT] AI Response: {output.content}")
+                        
+                        if output.tool_calls and on_tool_call:
+                            for tc in output.tool_calls:
+                                await on_tool_call(tc["name"], tc.get("args", {}))
+
+                if kind == "on_tool_end" and settings.DEBUG:
+                    print(f"[CHATBOT] Tool Result ({event['name']}): {event['data'].get('output')}")
 
                 # Track the final AI message from the agent
                 if kind == "on_chain_end" and event.get("name") == "LangGraph":

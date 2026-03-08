@@ -1,0 +1,10 @@
+{
+  "text": "```json\n[\n  \"Machine learning (ML), a field of artificial intelligence, enables computers to learn from data and experience to identify patterns, improve task performance without explicit programming, and make predictions, powering applications like personalized recommendations, voice recognition, and self-driving cars.\",\n  \"Supervised learning utilizes labeled data to predict specific outcomes and is objectively evaluated, while unsupervised learning processes unlabeled data to find hidden patterns or structures, though its results are harder to evaluate automatically.\",\n  \"Reinforcement learning involves algorithms learning through trial-and-error guided by rewards or penalties, and data scientists frequently utilize both supervised and unsupervised learning approaches.\"\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...DFtf6EGNIk}",
+  "status": "ok",
+  "json_data": [
+    "Machine learning (ML), a field of artificial intelligence, enables computers to learn from data and experience to identify patterns, improve task performance without explicit programming, and make predictions, powering applications like personalized recommendations, voice recognition, and self-driving cars.",
+    "Supervised learning utilizes labeled data to predict specific outcomes and is objectively evaluated, while unsupervised learning processes unlabeled data to find hidden patterns or structures, though its results are harder to evaluate automatically.",
+    "Reinforcement learning involves algorithms learning through trial-and-error guided by rewards or penalties, and data scientists frequently utilize both supervised and unsupervised learning approaches."
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "text": "```json\n[\n  \"The course is titled \\\"Introduction to Machine Learning\\\".\",\n  \"The course introduces machine learning (ML) concepts.\",\n  \"The course does not cover how to implement ML or work with data.\"\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...w686xrvttI}",
+  "status": "ok",
+  "json_data": [
+    "The course is titled \"Introduction to Machine Learning\".",
+    "The course introduces machine learning (ML) concepts.",
+    "The course does not cover how to implement ML or work with data."
+  ]
+}
