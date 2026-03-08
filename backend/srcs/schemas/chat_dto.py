@@ -21,6 +21,7 @@ class SseEvent(str, Enum):
     INGESTION_PROGRESS = "IngestionProgress"
     TOOL_CALL = "ToolCall"
     UI_UPDATE = "UIUpdate"
+    UPDATE_TITLE = "UpdateTitle"
 
 
 # -- SSE payload models -------------------------------------------------------
@@ -66,6 +67,12 @@ class SseToolCallData(BaseModel):
     """Tool invocation event — emitted when the agent calls a tool."""
     tool_name: str
     arguments: dict
+
+
+class SseUpdateTitleData(BaseModel):
+    """Notification that a topic's title was auto-generated/updated."""
+    topic_id: str
+    title: str
 
 
 # -- REST request / response models ------------------------------------------

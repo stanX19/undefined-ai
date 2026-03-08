@@ -57,6 +57,15 @@ This document summarizes the current state, progress made, and remaining issues 
   - **Scene and Flow Interaction**: The UI should utilize `# scenes` thoroughly. A successful UI flow involves an Overview scene (graph linking to detailed scenes), Flow scenes for detailed explanations, and a Revision scene (e.g., quizzes) at the end.
   - **Bot Role Separation**: Standardized the main chatbot to understand that it only needs to provide factual content and intent to the UI Agent, completely avoiding attempting to generate UI layout primitives or Markdown syntax natively.
 
-## 11. Next Steps
-- **Validation**: Verify that the self-healing auth and SQLite shared memory string changes remain deeply stable under aggressive concurrent request flows.
-- **Agent Evaluation**: Evaluate the impact of the prompt adjustments on AI payload completions. Ensure the output engine natively and actively leverages scene switching and graph-level interactions without crashing the MarkGraph parser.
+## 11. Topic Management & Auto-Summarization
+- **Topic Deletion**: Implemented a secure `DELETE /api/v1/topics/{topic_id}` endpoint.
+  - Added `delete_user_topic` to `TopicService` to verify ownership and perform deletion in a single transaction.
+  - Linked database cascades ensure that chat history and atomic facts are automatically purged upon topic deletion.
+- **Auto-Summarization (Naming Service)**:
+  - Created a dedicated `SummaryService` to dynamically generate 4-6 word titles for topics based on conversation context.
+  - **Dynamic Triggers**: Summarization logic is isolated and triggered at strategic intervals (1st, 5th, 10th, 15th... assistant response) within the `ChatService`.
+  - **Context-Aware**: The service retrieves the most recent 5 messages and uses a specialized LLM prompt (separating system instructions from user content) to distill the essence of the conversation into a title.
+  - **Real-Time Updates**: Status is emitted via a new `UpdateTitle` SSE event, allowing the frontend to update topic lists and headers instantly without a page refresh.
+
+## 12. Next Steps
+- **UI Enhancement**: Update the frontend sidebar to listen for the `UpdateTitle` SSE event and reflect the new name in real-time.

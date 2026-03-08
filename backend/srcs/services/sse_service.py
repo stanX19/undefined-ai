@@ -15,6 +15,7 @@ from srcs.schemas.chat_dto import (
     SseTTSResultData,
     SseIngestionProgressData,
     SseToolCallData,
+    SseUpdateTitleData,
 )
 from srcs.schemas.ui_dto import SseUIUpdateData
 
@@ -28,6 +29,7 @@ SsePayload = Union[
     SseIngestionProgressData,
     SseToolCallData,
     SseUIUpdateData,
+    SseUpdateTitleData,
 ]
 
 # Mapping from payload class → event name
@@ -40,6 +42,7 @@ _EVENT_MAP: dict[type, SseEvent] = {
     SseIngestionProgressData: SseEvent.INGESTION_PROGRESS,
     SseToolCallData: SseEvent.TOOL_CALL,
     SseUIUpdateData: SseEvent.UI_UPDATE,
+    SseUpdateTitleData: SseEvent.UPDATE_TITLE,
 }
 
 

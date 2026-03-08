@@ -534,6 +534,7 @@ data: <JSON payload>
 | `UpdateChecklist`  | `SseUpdateChecklistData`  | Checklist update _(future use)_    |
 | `EditDocument`     | `SseEditDocumentData`     | Document edit _(future use)_       |
 | `TTSResult`        | `SseTTSResultData`        | TTS audio result _(future use)_    |
+| `UpdateTitle`      | `SseUpdateTitleData`      | Topic title auto-update notification |
 
 ### Payload Schemas
 
@@ -548,6 +549,14 @@ data: <JSON payload>
   "message_id": "m2",
   "text": "An eigenvalue is…",
   "audio_url": null
+}
+```
+
+**`SseUpdateTitleData`**
+```json
+{
+  "topic_id": "t1",
+  "title": "Topic title summary"
 }
 ```
 

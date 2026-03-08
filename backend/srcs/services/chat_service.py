@@ -167,5 +167,26 @@ class ChatService:
             )
 
             SpeechService.enqueue_tts_and_emit(session_id, answer)
+            await ChatService._trigger_summary_if_needed(session_id, topic_id)
+
         except Exception as exc:
+            import traceback
+            traceback.print_exc()
             await SseService.emit(session_id, SseNotifData(message=f"Error: {exc}"))
+
+    @staticmethod
+    async def _trigger_summary_if_needed(session_id: str, topic_id: str) -> None:
+        """Isolated method to cautiously trigger a topic summary update if we hit N-th message interval."""
+        from srcs.database import AsyncSessionLocal
+        from srcs.services.summary_service import SummaryService
+
+        try:
+            async with AsyncSessionLocal() as db:
+                history = await ChatService.get_history(db, topic_id, limit=100)
+            
+            assistant_count: int = sum(1 for m in history if m.role == "assistant")
+            if assistant_count == 1 or (assistant_count > 0 and assistant_count % 5 == 0):
+                SummaryService.enqueue_topic_summary(session_id, topic_id)
+        except Exception as exc:
+            import traceback
+            traceback.print_exc()
