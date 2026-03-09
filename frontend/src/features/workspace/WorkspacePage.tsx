@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { PanelLeft, Home, FolderOpen, Pin, Star, MoreHorizontal, Sparkles } from "lucide-react";
+import { PanelLeft, Home, FolderOpen, Pin, MoreHorizontal, Bot } from "lucide-react";
 import { UIRoot } from "../ui_renderer/components/UIRoot.tsx";
 import { useUIStore } from "../ui_renderer/store.ts";
 import { useMarkGraphStore, fetchMarkGraphUI } from "../markgraph/store.ts";
@@ -110,9 +110,6 @@ export function WorkspacePage() {
                     <Pin size={18} fill={chatTopicId && pinnedTopicIds.includes(chatTopicId) ? "currentColor" : "none"} />
                   </button>
                   <button className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-[#212529] transition-colors cursor-pointer">
-                    <Star size={18} />
-                  </button>
-                  <button className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-[#212529] transition-colors cursor-pointer">
                     <MoreHorizontal size={18} />
                   </button>
                   {isChatCollapsed && (
@@ -120,10 +117,10 @@ export function WorkspacePage() {
                       <div className="h-4 w-px bg-gray-200 mx-1" />
                       <button 
                         onClick={() => setChatCollapsed(false)}
-                        className="rounded-lg p-1.5 text-[#212529] hover:bg-gray-100 transition-colors cursor-pointer"
+                        className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors cursor-pointer"
                         title="Expand AI Chat"
                       >
-                        <Sparkles size={18} />
+                        <Bot size={18} />
                       </button>
                     </>
                   )}

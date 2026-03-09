@@ -1,10 +1,25 @@
 import { useState, useEffect } from "react";
-import type { ChatMessage } from "../hooks/useChat.ts";
-import { ThumbsUp, ThumbsDown, Copy, FileText, Check } from "lucide-react";
+import { useChatStore, type ChatMessage } from "../hooks/useChat.ts";
+import { ThumbsUp, ThumbsDown, Copy, FileText, Check, Volume2, VolumeX } from "lucide-react";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 
 interface Props {
   message: ChatMessage;
+}
+
+function TtsMuteButton() {
+  const ttsMuted = useChatStore((s) => s.ttsMuted);
+  const toggleTtsMute = useChatStore((s) => s.toggleTtsMute);
+
+  return (
+    <button
+      onClick={toggleTtsMute}
+      className="cursor-pointer hover:text-text-primary transition-colors"
+      title={ttsMuted ? "Unmute TTS" : "Mute TTS"}
+    >
+      {ttsMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+    </button>
+  );
 }
 
 export function MessageBubble({ message }: Props) {
@@ -98,6 +113,7 @@ export function MessageBubble({ message }: Props) {
           <button onClick={handleCopy} className="cursor-pointer hover:text-text-primary transition-colors" title="Copy text">
             {copied ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
           </button>
+          <TtsMuteButton />
         </div>
       )}
     </div>

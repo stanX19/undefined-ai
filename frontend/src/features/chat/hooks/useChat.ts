@@ -27,12 +27,14 @@ interface ChatState {
   streamingLogs: StreamingLog[];
   topicId: string | null;
   currentAudio: HTMLAudioElement | null;
+  ttsMuted: boolean;
   addMessage: (message: Omit<ChatMessage, "id" | "timestamp">) => void;
   updateMessageAudio: (messageId: string, audioUrl: string) => void;
   setStreaming: (streaming: boolean) => void;
   addStreamingLog: (log: Omit<StreamingLog, "id">) => void;
   setTopicId: (topicId: string | null) => void;
   stopAudio: () => void;
+  toggleTtsMute: () => void;
   clear: () => void;
 }
 
@@ -46,6 +48,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   streamingLogs: [],
   topicId: null,
   currentAudio: null,
+  ttsMuted: false,
 
   stopAudio: () => {
     if (activeAudio) {
@@ -85,6 +88,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
     streamingLogs: [...state.streamingLogs, { ...log, id: crypto.randomUUID() }]
   })),
   setTopicId: (topicId) => set({ topicId }),
+  toggleTtsMute: () => {
+    const next = !get().ttsMuted;
+    set({ ttsMuted: next });
+    if (next) get().stopAudio();
+  },
   clear: () => {
     get().stopAudio();
     set({ messages: [], isStreaming: false, streamingLogs: [], topicId: null });
@@ -176,12 +184,14 @@ function openSseStream(sessionId: string): Promise<void> {
       }
     });
 
-    // ── TTS audio: auto-play when the backend finishes generating speech ──
+    // ── TTS audio: auto-play when the backend finishes generating speech (unless muted) ──
     eventSource.addEventListener("TTSResult", (e: MessageEvent) => {
       try {
         const data = JSON.parse(e.data);
         const rawUrl: string = data.audio_url ?? "";
         if (!rawUrl) return;
+
+        if (useChatStore.getState().ttsMuted) return;
 
         // Backend returns /media/tts/... but serves files at /uploads/tts/...
         const audioUrl = rawUrl.replace(/^\/media\//, "/uploads/");

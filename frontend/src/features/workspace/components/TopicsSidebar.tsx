@@ -198,7 +198,7 @@ export function TopicsSidebar() {
                         className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-4 py-2.5 text-[14px] font-medium text-gray-600 transition-colors hover:bg-[#d5fba8]/30 hover:text-[#212529]"
                     >
                         <Network size={18} />
-                        Knowledge graph
+                        Knowledge Graph
                     </button>
                 </div>
 

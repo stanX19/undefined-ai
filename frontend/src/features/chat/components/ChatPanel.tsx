@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Sparkles, Trash2, ChevronDown, Search, Loader2 } from "lucide-react";
+import { Bot, Sparkles, Trash2, ChevronDown, Search, Loader2 } from "lucide-react";
 import { useChatStore, sendChatMessage, deleteChatHistory, type StreamingLog } from "../hooks/useChat.ts";
 import { useWorkspaceLayoutStore } from "../../workspace/layoutStore.ts";
 import { MessageBubble } from "./MessageBubble.tsx";
@@ -104,7 +104,7 @@ export function ChatPanel({ inline = false }: { inline?: boolean }) {
     <div className={containerClass}>
       <div className="flex items-center justify-between px-4 py-4">
         <div className="flex items-center gap-2">
-          <Sparkles size={20} className="text-text-muted" />
+          <Bot size={20} className="text-text-muted" />
           <h2 className="text-base font-medium text-text-primary">Assistant</h2>
         </div>
         <div className="flex items-center gap-4">
