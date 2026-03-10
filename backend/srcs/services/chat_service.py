@@ -12,6 +12,7 @@ from srcs.services.sse_service import SseService
 from srcs.services.speech_service import SpeechService
 from srcs.services.agents.chatbot import chatbot
 from srcs.services.agents.id_mapper import ShortIdMapper, set_mapper
+from srcs.services.agents.tool_registry import ToolRegistry
 
 
 class ChatService:
@@ -142,10 +143,13 @@ class ChatService:
                 await ChatService.add_message(db, topic_id, "tool_call", json.dumps(payload))
                 
             elif isinstance(msg, ToolMessage):
+                # Check if the tool has logic to replace the log content (Option 6)
+                log_content = ToolRegistry.get_metadata(msg.name, "log_replacement") or msg.content
+
                 payload = {
                     "tool_call_id": msg.tool_call_id,
                     "name": msg.name,
-                    "content": ChatService._truncate_text(msg.content, max_length=1500)
+                    "content": ChatService._truncate_text(log_content, max_length=1500)
                 }
                 await ChatService.add_message(db, topic_id, "tool_result", json.dumps(payload))
 

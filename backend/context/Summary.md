@@ -68,3 +68,12 @@ This document summarizes the current state, progress made, and remaining issues 
   - Created `ChatService.get_chat_history()` to exclusively fetch standard `user` and `assistant` messages for the frontend API.
   - Created `ChatService.get_history_for_chatbot()` to fetch the full context, including JSON-persisted tool execution data, for the LLM.
 - **Truncation System**: Implemented rigorous recursive truncation (`_truncate_dict`, `_truncate_text` bounded to max lengths of ~500 chars) to cleanly shrink large inputs (like `edit_ui` descriptions) and returns before saving to the database. This significantly prevents context explosion while still providing sufficient recall to the agent.
+
+## 16. UI State Awareness & Registry-based Memory Cleaning
+- **Problem**: The main chatbot was "blind" to UI changes made mid-turn via `edit_ui`, and permanently storing large UI states in history led to context bloat.
+- **Solution (Option 6)**: Implemented a robust "Immediate Injection + Memory Cleaning" mechanism.
+  - **tool_registry.py**: Introduced a central metadata registry to track tool behaviors (e.g., replacement text for logs) without polluting LangChain's tool wrapping logic.
+  - **Immediate Awareness**: `edit_ui` now returns the full updated MarkGraph markdown to the LLM for immediate mid-turn grounding.
+  - **Memory Cleaning**: `ChatService._persist_agent_memory` intercepts tool results registered in `ToolRegistry` and replaces raw markdown with concise summaries (e.g., `[UI Updated Successfully]`) before DB persistence.
+  - **Across-turn Sync**: Initial state still "Pulls" the latest UI from the database at the start of every message turn, ensuring the agent always starts with the source of truth.
+- **Status**: Completed and verified.

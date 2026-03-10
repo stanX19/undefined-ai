@@ -4,6 +4,7 @@ from langchain_core.tools import tool
 from srcs.services.retrieval_service import RetrievalService
 from srcs.services.web_search_service import WebSearchService, WebSearchNotAvailableException
 from srcs.services.agents.id_mapper import current_mapper
+from srcs.services.agents.tool_registry import ToolRegistry
 
 
 @tool
@@ -157,6 +158,7 @@ async def ingest_url(topic_id: str, url: str) -> str:
 
 
 @tool
+@ToolRegistry.replace_log_memory("[UI Updated Successfully]")
 async def edit_ui(topic_id: str, description: str, header_name: str | None = None, fact_ids: list[str] | None = None) -> str:
     """Design or edit the UI surface for a topic.
 
@@ -230,7 +232,10 @@ async def edit_ui(topic_id: str, description: str, header_name: str | None = Non
     return (
         f"UI updated successfully. "
         f"The scene now has {scene_cnt} root container(s) "
-        f"and has been pushed to the frontend."
+        f"and has been pushed to the frontend.\n\n"
+        f"--- UPDATED MARKGRAPH UI STATE ---\n"
+        f"{result['ui_markdown']}\n"
+        f"--- END UI STATE ---"
     )
 
 
