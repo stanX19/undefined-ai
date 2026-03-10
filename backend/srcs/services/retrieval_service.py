@@ -30,6 +30,17 @@ class RetrievalService:
         return result.scalar_one_or_none()
 
     @staticmethod
+    async def get_facts_by_ids(db: AsyncSession, fact_ids: list[str]) -> list[AtomicFact]:
+        """Fetch multiple facts by their IDs."""
+        if not fact_ids:
+            return []
+        
+        result = await db.execute(
+            select(AtomicFact).where(AtomicFact.fact_id.in_(fact_ids))
+        )
+        return list(result.scalars().all())
+
+    @staticmethod
     async def get_children(db: AsyncSession, fact_id: str) -> list[AtomicFact]:
         """Return direct children of a fact."""
         result = await db.execute(

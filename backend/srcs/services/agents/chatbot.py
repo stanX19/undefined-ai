@@ -47,7 +47,7 @@ class Chatbot:
         document_text: str | None = None,
         chat_history: list[BaseMessage] | None = None,
         on_tool_call: Callable[[str, dict], Awaitable[None]] | None = None,
-    ) -> str:
+    ) -> tuple[str, list[BaseMessage]]:
         """Send a message through the agent and return the final text answer.
 
         Args:
@@ -55,6 +55,7 @@ class Chatbot:
                           each time the agent calls a tool.
         """
         messages = self._build_messages(user_prompt, document_text, chat_history)
+        initial_msg_count = len(messages)
 
         settings = get_settings()
         if settings.DEBUG:
@@ -66,6 +67,8 @@ class Chatbot:
 
             # Stream events so we can intercept tool calls in real time
             last_ai_message: BaseMessage | None = None
+            all_final_messages: list[BaseMessage] = []
+
             async for event in agent.astream_events(
                 {"messages": messages}, version="v2",
             ):
@@ -94,15 +97,17 @@ class Chatbot:
                     final_msgs = output.get("messages", [])
                     if final_msgs:
                         last_ai_message = final_msgs[-1]
+                        all_final_messages = final_msgs
 
             if last_ai_message is None:
-                return "I'm sorry, I couldn't generate a response."
+                return "I'm sorry, I couldn't generate a response.", []
 
-            return self._extract_text(last_ai_message.content)
+            new_msgs = all_final_messages[initial_msg_count:-1] if len(all_final_messages) > initial_msg_count else []
+            return self._extract_text(last_ai_message.content), new_msgs
 
         except Exception as exc:
             traceback.print_exc()
-            return f"An error occurred while processing your request: {exc}"
+            return f"An error occurred while processing your request: {exc}", []
 
     # -- internals --------------------------------------------------------
 

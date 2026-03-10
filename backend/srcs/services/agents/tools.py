@@ -157,18 +157,20 @@ async def ingest_url(topic_id: str, url: str) -> str:
 
 
 @tool
-async def edit_ui(topic_id: str, description: str, header_name: str | None = None) -> str:
+async def edit_ui(topic_id: str, description: str, header_name: str | None = None, fact_ids: list[str] | None = None) -> str:
     """Design or edit the UI surface for a topic.
 
     This delegates to a specialised UIAgent that reads the current MarkGraph UI state,
     and returns a newly generated MarkGraph UI document.
 
-    After editing, the updated UI is pushed to the frontend via SSE.
+    If you have any specific facts in mind, pass their IDs in the `fact_ids`
+    parameter instead of including them in the `description`.
 
     Args:
         topic_id: The topic whose UI to edit.
         description: Natural language description of the desired UI changes.
         header_name: Optional name or ID of the container/scene to edit. If provided, ONLY that specific container/scene section will be edited.
+        fact_ids: Optional list of fact IDs. The text of these facts will be automatically retrieved and provided to the UIAgent.
 
     Returns:
         Confirmation with a brief summary of changes.
@@ -176,8 +178,25 @@ async def edit_ui(topic_id: str, description: str, header_name: str | None = Non
     from srcs.services.agents.ui_agent import ui_agent
     from srcs.services.sse_service import SseService
     from srcs.schemas.ui_dto import SseUIUpdateData
+    from srcs.database import AsyncSessionLocal
 
-    topic_id = current_mapper().resolve(topic_id)
+    mapper = current_mapper()
+    topic_id = mapper.resolve(topic_id)
+    
+    # Append fact contents to description if fact_ids are provided
+    if fact_ids:
+        try:
+            resolved_fact_ids: list[str] = [mapper.resolve(fid) for fid in fact_ids]
+            async with AsyncSessionLocal() as db:
+                facts = await RetrievalService.get_facts_by_ids(db, resolved_fact_ids)
+            
+            if facts:
+                fact_texts = [f"- [{mapper.shorten(f.fact_id, prefix='F')}] {f.content}" for f in facts]
+                description += "\n\nFacts to include:\n" + "\n".join(fact_texts)
+        except Exception as exc:
+            import traceback
+            traceback.print_exc()
+            return f"UI editing failed during fact retrieval: {exc}"
 
     # ui_agent.edit returns {"ui_json": {...}, "ui_markdown": "..."} or {"error": "..."}
     result = await ui_agent.edit(topic_id, description, header_name)
