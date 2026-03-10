@@ -29,12 +29,16 @@ class ChatService:
         Returns the persisted user ``ChatMessage`` immediately.
         The agent reply is emitted via SSE once ready.
         """
-        user_msg = await ChatService.add_message(db, topic_id, "user", message)
+        prompt = message.strip() if message else ""
+        if not prompt:
+            prompt = "[EMPTY MESSAGE]"
+
+        user_msg = await ChatService.add_message(db, topic_id, "user", prompt)
 
         asyncio.create_task(
             ChatService._run_agent_and_stream(
                 topic_id=topic_id,
-                user_prompt=message,
+                user_prompt=prompt,
                 document_text=document_text,
                 exclude_message_id=user_msg.message_id,
             )
@@ -186,7 +190,40 @@ class ChatService:
                     ))
                 except json.JSONDecodeError:
                     pass
-        return history or None
+        
+        # --- [ROBUST SANITIZATION FOR GEMINI PROTOCOL] ---
+        sanitized: list[BaseMessage] = []
+        last_role = None
+        
+        for msg in history:
+            role = type(msg).__name__
+            
+            # 1. Skip messages with empty content (blocks SDK-side stripping errors)
+            if not msg.content and not (isinstance(msg, AIMessage) and msg.tool_calls):
+                continue
+                
+            # 2. Enforce alternating roles (Human/AI)
+            if role == last_role and role in ("HumanMessage", "AIMessage"):
+                continue
+                
+            # 3. Handle Tool sequence integrity
+            if isinstance(msg, ToolMessage):
+                if not sanitized or not (isinstance(sanitized[-1], AIMessage) and sanitized[-1].tool_calls):
+                    continue
+            
+            # 4. Success - add to sanitized history
+            sanitized.append(msg)
+            last_role = role
+
+        # Final check: History MUST start with a HumanMessage for Gemini after System
+        while sanitized and not isinstance(sanitized[0], HumanMessage):
+            sanitized.pop(0)
+            
+        # Final check: If last message is an AIMessage with tool_calls, it's 'orphaned' 
+        if sanitized and isinstance(sanitized[-1], AIMessage) and sanitized[-1].tool_calls:
+            sanitized.pop()
+
+        return sanitized or None
 
     @staticmethod
     async def _run_agent_and_stream(

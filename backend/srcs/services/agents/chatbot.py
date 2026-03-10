@@ -7,7 +7,7 @@ for the rest of the application.
 import traceback
 from typing import Awaitable, Callable
 
-from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, BaseMessage
+from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, BaseMessage, ToolMessage
 from langchain.agents import create_agent
 
 from srcs.config import get_settings
@@ -151,9 +151,10 @@ class Chatbot:
 
         prompt = user_prompt.strip()
         if not prompt:
-            prompt = "[empty message]"
+            prompt = "[EMPTY MESSAGE]"
 
         messages.append(HumanMessage(content=prompt))
+
         return messages
 
 
