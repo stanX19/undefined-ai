@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { PanelLeft, Home, FolderOpen, Pin, MoreHorizontal, Bot } from "lucide-react";
+import { PanelLeft, Home, FolderOpen, Pin, MoreHorizontal, Bot, FileDown } from "lucide-react";
 import { UIRoot } from "../ui_renderer/components/UIRoot.tsx";
 import { useUIStore } from "../ui_renderer/store.ts";
 import { useMarkGraphStore, fetchMarkGraphUI } from "../markgraph/store.ts";
@@ -15,7 +15,9 @@ import { useTopicListStore } from "./hooks/useTopicList.ts";
 export function WorkspacePage() {
   const { topicId: chatTopicId, clear: clearChat } = useChatStore();
   const { topicId: uiTopicId, uiJson: a2uiJson } = useUIStore();
-  const { ast: markGraphAst } = useMarkGraphStore();
+  const { ast: markGraphAst, markdown: storedMarkdown } = useMarkGraphStore();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const topics = useTopicListStore((s) => s.topics);
   const pinnedTopicIds = useTopicListStore((s) => s.pinnedTopicIds);
   const togglePin = useTopicListStore((s) => s.togglePin);
@@ -48,6 +50,30 @@ export function WorkspacePage() {
       sendChatMessage(`Search the web and tell me about: ${topic}`);
     }
   }, [location.state, navigate]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [menuOpen]);
+
+  const handleExportMarkdown = () => {
+    if (!storedMarkdown) return;
+    const filename = `${activeTopic?.title?.replace(/[^\w\s-]/g, "") || "export"}.md`;
+    const blob = new Blob([storedMarkdown], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    setMenuOpen(false);
+  };
 
   return (
     <div className="flex h-dvh w-full overflow-hidden bg-bg relative">
@@ -109,9 +135,27 @@ export function WorkspacePage() {
                   >
                     <Pin size={18} fill={chatTopicId && pinnedTopicIds.includes(chatTopicId) ? "currentColor" : "none"} />
                   </button>
-                  <button className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-[#212529] transition-colors cursor-pointer">
-                    <MoreHorizontal size={18} />
-                  </button>
+                  <div ref={menuRef} className="relative">
+                    <button
+                      onClick={() => setMenuOpen((o) => !o)}
+                      className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-[#212529] transition-colors cursor-pointer"
+                      title="More options"
+                    >
+                      <MoreHorizontal size={18} />
+                    </button>
+                    {menuOpen && (
+                      <div className="absolute right-0 top-full mt-1 py-0.5 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                        <button
+                          onClick={handleExportMarkdown}
+                          disabled={!storedMarkdown}
+                          className="flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-[13px] text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+                        >
+                          <FileDown size={14} />
+                          Export to markdown
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   {isChatCollapsed && (
                     <>
                       <div className="h-4 w-px bg-gray-200 mx-1" />

@@ -184,7 +184,7 @@ def parse_inline(text: str) -> list[Any]:
 # block sub-parsers
 RE_GRAPH_VERTEX_DEF  = re.compile(r'^\[([^\]]+)\]\(#([^)]+)\)\s*::\s*(.+)$')  # [id](#nav) :: text
 RE_GRAPH_VERTEX_BARE = re.compile(r'^([A-Za-z0-9_-]+)\s*::\s*(.+)$')           # id :: text
-RE_GRAPH_EDGE        = re.compile(r'^([A-Za-z0-9_-]+)\s*(->|<-|--|<->)\s*([A-Za-z0-9_-]+)$')
+RE_GRAPH_EDGE        = re.compile(r'^(.+?)\s*(->|<-|--|<->)\s*(.+)$')  # src and dst may contain spaces to match vertex ids
 
 RE_QUIZ_ANSWER       = re.compile(r'^-\s+(.+?)(\s+\*)?\s*$')
 RE_QUIZ_EXPL         = re.compile(r'^>\s+(.+)$')
@@ -331,7 +331,7 @@ def parse_graph_block(block_lines: list[str], lineno: int, diags: list[Diagnosti
 
         m = RE_GRAPH_EDGE.match(line)
         if m:
-            src, op, dst = m.group(1), m.group(2), m.group(3)
+            src, op, dst = m.group(1).strip(), m.group(2), m.group(3).strip()
             # auto-create implicit vertices
             if src not in vertices:
                 vertices[src] = GraphVertex(id=src, display=src)

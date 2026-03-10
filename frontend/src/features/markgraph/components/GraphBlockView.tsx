@@ -83,14 +83,15 @@ function GraphInner({
          const currentNodes = getNodes();
          if (currentNodes.length === 0) return;
 
-         const margin = 150; 
-         // container is 400px high, width is likely similar or more
+         const margin = 150;
+         const containerHeight = 560;
+         const containerWidth = 800;
          const isAnyNodeVisible = currentNodes.some(node => {
             const x = (node.position.x * viewport.zoom) + viewport.x;
             const y = (node.position.y * viewport.zoom) + viewport.y;
             return (
-              x > -margin && x < 800 + margin && 
-              y > -margin && y < 400 + margin
+              x > -margin && x < containerWidth + margin &&
+              y > -margin && y < containerHeight + margin
             );
          });
 
@@ -101,7 +102,7 @@ function GraphInner({
     >
       <Controls showInteractive={false} />
       <Background variant={BackgroundVariant.Dots} />
-      <Panel position="bottom-right">
+      <Panel position="top-right">
         <button 
           onClick={() => fitView({ duration: 400, padding: 0.2 })}
           className="bg-background/80 hover:bg-background border border-border px-2 py-1 rounded shadow-sm text-[10px] font-bold transition-all active:scale-95"
@@ -145,23 +146,24 @@ export function GraphBlockView({ block }: { block: GraphBlock }) {
   })), [animatedNodes]);
 
   const initialReactEdges = useMemo(() => block.edges.map((e, i) => {
-    let style: any = { strokeWidth: 5 };
-    if (e.op === "--") style.strokeDasharray = "5 5";
+    const strokeColor = "#3b82f6";
+    let style: any = { strokeWidth: 2.5, stroke: strokeColor };
+    if (e.op === "--") style.strokeDasharray = "6 4";
     
     const edge: any = {
       id: `e-${e.src}-${e.dst}-${i}`,
       source: e.src,
       target: e.dst,
-      animated: e.op === "->",
-      type: "straight",
+      animated: e.op === "->" || e.op === "<-",
+      type: "smoothstep",
       style,
     };
 
     if (e.op === "->" || e.op === "<->") {
-      edge.markerEnd = { type: MarkerType.ArrowClosed, width: 10, height: 10, color: '#3b82f6' };
+      edge.markerEnd = { type: MarkerType.ArrowClosed, width: 12, height: 12, color: strokeColor };
     }
     if (e.op === "<-" || e.op === "<->") {
-      edge.markerStart = { type: MarkerType.ArrowClosed, width: 10, height: 10, color: '#3b82f6' };
+      edge.markerStart = { type: MarkerType.ArrowClosed, width: 12, height: 12, color: strokeColor };
     }
     
     return edge;
@@ -205,7 +207,7 @@ export function GraphBlockView({ block }: { block: GraphBlock }) {
   };
 
   return (
-    <div id={block.explicit_id || undefined} className="w-full h-[400px] border border-border rounded-lg overflow-hidden bg-surface relative">
+    <div id={block.explicit_id || undefined} className="w-full h-[560px] border border-border rounded-lg overflow-hidden bg-surface relative">
       <ReactFlowProvider>
         <GraphInner 
           block={block}

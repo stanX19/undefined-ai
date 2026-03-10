@@ -73,14 +73,9 @@ export function ProgressBlockView({ id, block }: { id?: string, block: ProgressB
         {percent}%
       </div>
 
-      {currentBodyNode && (
+      {currentBodyNode?.text && (
         <div className="mt-2 text-sm text-text-secondary bg-primary/10 p-2 rounded prose prose-sm dark:prose-invert">
-           {currentBodyNode.text && <ReactMarkdown>{currentBodyNode.text}</ReactMarkdown>}
-           {currentBodyNode.include && (
-             <span className="italic text-primary block mt-1">
-               Included content: {currentBodyNode.include.target}
-             </span>
-           )}
+           <ReactMarkdown>{currentBodyNode.text}</ReactMarkdown>
         </div>
       )}
     </div>

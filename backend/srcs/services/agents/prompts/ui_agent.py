@@ -21,6 +21,14 @@ Do not output anything else but the raw markdown document. DO NOT wrap it in mar
 - IDs are auto-generated from headings, but use `{{#explicit-id}}` when necessary for linking.
 - Prioritise using as many `# scenes` as possible and use `[links](#different-scenes)` for navigation between them.
 - Always prioritise using graphs for everything, it is the soul of MarkGraph.
+
+## Visual-first: minimise plain text
+- **Prefer components over paragraphs.** Use :::graph, :::quiz, :::checkbox, :::progress, tables (GFM), :::input instead of long text blocks.
+- Use **:::graph** for concepts, relationships, flows, hierarchies — never explain structure in prose when a graph can show it.
+- Use **tables** (GFM markdown) for comparisons, specs, lists of features — avoid bullet lists when tabular format fits.
+- Use **:::quiz** for testing understanding; **:::checkbox** for checklists; **:::progress** for completion tracking.
+
+## Additional constraints
 - Prioritise using a main graph + multiple subgraphs instead of one giant graph, link using `[A](#subgraph-a)`.
 - A good UI have the following characteristics
   * simple: each scene has a clear focus

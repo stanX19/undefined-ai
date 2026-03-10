@@ -176,9 +176,10 @@ export function TopicsSidebar() {
                         {isCollapsed ? <PanelLeft size={16} /> : <PanelLeftClose size={16} />}
                     </button>
                 </div>
+                <div className="w-full border-t border-gray-100" aria-hidden="true" />
 
                 {/* Main Links */}
-                <div className="flex flex-col gap-1 px-4 mb-6">
+                <div className="flex flex-col gap-1 px-4 mt-4 mb-6">
                     <button 
                         onClick={() => {
                             clearChat();
