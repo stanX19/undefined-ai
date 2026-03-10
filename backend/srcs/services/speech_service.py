@@ -41,13 +41,13 @@ class SpeechService:
         try:
             return await SpeechService._tts_elevenlabs(text, voice_id=voice_id, model_id=model_id)
         except Exception as exc:
-            traceback.print_exc()
+            # traceback.print_exc()
             print(f"ElevenLabs TTS Error: {exc}. Falling back to gTTS.")
 
         try:
             return await SpeechService._tts_gtts(text)
         except Exception as exc:
-            traceback.print_exc()
+            # traceback.print_exc()
             print(f"gTTS Fallback Error: {exc}")
 
         return None
@@ -63,13 +63,13 @@ class SpeechService:
         try:
             return await SpeechService._stt_elevenlabs(audio_data)
         except Exception as exc:
-            traceback.print_exc()
+            # traceback.print_exc()
             print(f"ElevenLabs STT Error: {exc}. Falling back to Gemini.")
 
         try:
             return await SpeechService._stt_gemini(audio_data)
         except Exception as exc:
-            traceback.print_exc()
+            # traceback.print_exc()
             print(f"Gemini STT Fallback Error: {exc}")
 
         return None
@@ -85,7 +85,7 @@ class SpeechService:
                 audio_data = f.read()
             return await SpeechService.transcribe_audio(audio_data, language_code)
         except Exception as exc:
-            traceback.print_exc()
+            # traceback.print_exc()
             print(f"STT File Error: {exc}")
             return None
 
