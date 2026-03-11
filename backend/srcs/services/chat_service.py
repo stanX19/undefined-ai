@@ -245,6 +245,12 @@ class ChatService:
         await SseService.emit(session_id, SseNotifData(message="Processing your message…"))
 
         try:
+            # -- [NEW] Wait for ingestion to reach at least Level 1 --
+            from srcs.services.ingestion_service import IngestionService
+            if not IngestionService.is_topic_ready(topic_id):
+                await SseService.emit(session_id, SseNotifData(message="Waiting for document analysis to complete..."))
+                await IngestionService.wait_for_level_one(topic_id)
+
             # Use a fresh session so we see all previously committed data
             async with AsyncSessionLocal() as db:
                 chat_history = await ChatService._build_lc_history(
@@ -265,6 +271,7 @@ class ChatService:
                     if top_facts:
                         concepts: list[str] = [f"- {f.content}" for f in top_facts]
                         context_text = (
+                            "[DOCUMENT HAS BEEN INGESTED TO KNOWLEDGE BASE]\n"
                             f"TOPIC KNOWLEDGE (max_level={max_level}, levels 0-{max_level} available).\n"
                             f"Use list_topic_facts with topic_id='{topic_alias}' and level=0..{max_level} to browse.\n"
                             f"Use retrieve_facts to drill into a specific fact_id.\n\n"
