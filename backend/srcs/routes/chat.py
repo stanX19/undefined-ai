@@ -82,7 +82,7 @@ async def get_history(
     db: AsyncSession = Depends(get_db),
 ) -> list[ChatMessageResponse]:
     """Return chat history for a topic."""
-    messages = await ChatService.get_history(db, topic_id)
+    messages = await ChatService.get_chat_history(db, topic_id)
     return [ChatMessageResponse.model_validate(m) for m in messages]
 
 
