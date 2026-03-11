@@ -76,53 +76,56 @@ export function WorkspacePage() {
   };
 
   return (
-    <div className="flex h-dvh w-full overflow-hidden bg-bg relative">
+    <div className="flex h-dvh w-full overflow-hidden bg-[#F7F5F3] relative font-sans">
       {/* Left — Topics sidebar */}
       <TopicsSidebar />
 
-      <div className="flex flex-1 flex-col md:flex-row overflow-hidden relative">
+      <div className="flex min-h-0 flex-1 flex-col md:flex-row overflow-hidden relative">
         {isHomeRoute ? (
-          /* Home — AI Chat View (full canvas) */
-          <HomeChatView />
-        ) : (
+          /* Home — AI Chat View (full canvas) — wrapper enforces height boundary for scroll */
+          <div className="flex min-h-0 w-full flex-1 overflow-hidden">
+            <HomeChatView />
+          </div>
+        ) : null}
+        {!isHomeRoute && (
           <>
             {/* Center — Main UI Panel */}
-            <div className="flex flex-1 flex-col overflow-hidden bg-[#fafafa]">
+            <div className="flex flex-1 flex-col overflow-hidden bg-[#FAF9F8]">
               {/* Top Bar */}
-              <div className="flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3 shrink-0">
+              <div className="flex h-14 shrink-0 items-center justify-between border-b border-[#E0DEDB] bg-[#FAF9F8] px-4">
                 <div className="flex items-center gap-2">
                   {isSidebarCollapsed && (
                     <>
                       <button
                         onClick={() => setSidebarCollapsed(false)}
-                        className="cursor-pointer rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-[#212529] transition-colors"
+                        className="cursor-pointer rounded-lg p-1.5 text-[#605A57] hover:bg-[rgba(55,50,47,0.08)] hover:text-[#37322F] transition-colors"
                         title="Expand Sidebar"
                       >
                         <PanelLeft size={18} />
                       </button>
-                      <div className="h-4 w-px bg-gray-200 mx-1" />
+                      <div className="h-4 w-px bg-[#E0DEDB] mx-1" />
                     </>
                   )}
-                  <div className="flex items-center gap-1.5 text-sm font-medium text-gray-500">
+                  <div className="flex items-center gap-1.5 text-sm font-medium text-[#605A57]">
                     <Home size={16} />
                     <button
                       onClick={() => { clearChat(); navigate("/home"); }}
-                      className="cursor-pointer hover:text-[#212529] transition-colors"
+                      className="cursor-pointer hover:text-[#37322F] transition-colors"
                     >
                       Workspace
                     </button>
                     {activeTopic && (
                       <>
-                        <span className="text-gray-300 mx-0.5">/</span>
-                        <FolderOpen size={16} className="text-[#212529]" />
-                        <span className="text-[#212529] truncate max-w-[200px] sm:max-w-[300px]">{activeTopic.title}</span>
+                        <span className="text-[#E0DEDB] mx-0.5">/</span>
+                        <FolderOpen size={16} className="text-[#37322F]" />
+                        <span className="text-[#49423D] truncate max-w-[200px] sm:max-w-[300px] font-sans">{activeTopic.title}</span>
                       </>
                     )}
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <button className="hidden sm:flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-[#212529] transition-colors cursor-pointer">
+                  <button className="hidden sm:flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-[#605A57] hover:bg-[rgba(55,50,47,0.08)] hover:text-[#37322F] transition-colors cursor-pointer">
                     Share
                   </button>
                   <button 
@@ -130,7 +133,7 @@ export function WorkspacePage() {
                     className={`rounded-lg p-1.5 transition-colors cursor-pointer ${
                       chatTopicId && pinnedTopicIds.includes(chatTopicId)
                         ? "text-red-500 hover:bg-red-50"
-                        : "text-gray-400 hover:bg-gray-100 hover:text-[#212529]"
+                        : "text-[#605A57] hover:bg-[rgba(55,50,47,0.08)] hover:text-[#37322F]"
                     }`}
                   >
                     <Pin size={18} fill={chatTopicId && pinnedTopicIds.includes(chatTopicId) ? "currentColor" : "none"} />
@@ -138,17 +141,17 @@ export function WorkspacePage() {
                   <div ref={menuRef} className="relative">
                     <button
                       onClick={() => setMenuOpen((o) => !o)}
-                      className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-[#212529] transition-colors cursor-pointer"
+                      className="rounded-lg p-1.5 text-[#605A57] hover:bg-[rgba(55,50,47,0.08)] hover:text-[#37322F] transition-colors cursor-pointer"
                       title="More options"
                     >
                       <MoreHorizontal size={18} />
                     </button>
                     {menuOpen && (
-                      <div className="absolute right-0 top-full mt-1 py-0.5 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                      <div className="absolute right-0 top-full mt-1 py-0.5 bg-[#FAF9F8] border border-[#E0DEDB] rounded-lg shadow-lg z-50">
                         <button
                           onClick={handleExportMarkdown}
                           disabled={!storedMarkdown}
-                          className="flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-[13px] text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+                          className="flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-[13px] text-[#49423D] hover:bg-[rgba(55,50,47,0.06)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap font-sans"
                         >
                           <FileDown size={14} />
                           Export to markdown
@@ -158,10 +161,10 @@ export function WorkspacePage() {
                   </div>
                   {isChatCollapsed && (
                     <>
-                      <div className="h-4 w-px bg-gray-200 mx-1" />
+                      <div className="h-4 w-px bg-[#E0DEDB] mx-1" />
                       <button 
                         onClick={() => setChatCollapsed(false)}
-                        className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors cursor-pointer"
+                        className="rounded-lg p-1.5 text-[#605A57] hover:bg-[rgba(55,50,47,0.08)] hover:text-[#37322F] transition-colors cursor-pointer"
                         title="Expand AI Chat"
                       >
                         <Bot size={18} />
@@ -174,10 +177,10 @@ export function WorkspacePage() {
               <main className="flex flex-1 flex-col overflow-y-auto workspace-scrollbar p-6">
                 {!chatTopicId ? (
                   <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-                    <h2 className="text-2xl font-semibold text-text-primary">
+                    <h2 className="text-2xl font-semibold text-[#49423D] font-sans">
                       Workspace
                     </h2>
-                    <p className="max-w-md text-text-muted">
+                    <p className="max-w-md text-[#605A57] font-sans">
                       Start a conversation in the chat panel to generate a custom UI.
                     </p>
                   </div>
@@ -191,10 +194,10 @@ export function WorkspacePage() {
 
             {/* Right — Chat Panel */}
             <div 
-              className={`shrink-0 bg-surface flex flex-col z-20 transition-[width,height,opacity] duration-300 ease-in-out overflow-hidden ${
+              className={`shrink-0 bg-[#FAF9F8] flex flex-col z-20 transition-[width,height,opacity] duration-300 ease-in-out overflow-hidden ${
                 isChatCollapsed 
                   ? "w-0 h-0 md:h-full opacity-0 border-none" 
-                  : "w-full md:w-[400px] h-[50vh] md:h-full opacity-100 border-t md:border-t-0 md:border-l border-border"
+                  : "w-full md:w-[400px] h-[50vh] md:h-full opacity-100 border-t md:border-t-0 md:border-l border-[#E0DEDB]"
               }`}
             >
               <div className="w-dvw md:w-[400px] h-[50vh] md:h-full flex flex-col">

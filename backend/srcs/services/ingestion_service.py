@@ -78,11 +78,17 @@ class IngestionService:
 
     @staticmethod
     def trigger_ingestion(topic_id: str, document_text: str) -> None:
-        """Kick off the pipeline as a background task. Returns immediately."""
+        """Kick off the pipeline as a background task. Returns immediately.
+        Delay start briefly so the upload request can commit and release its DB connection,
+        reducing SQLite "database table is locked" under concurrent load.
+        """
         _pipeline_status[topic_id] = "processing"
-        asyncio.create_task(
-            IngestionService._run_pipeline(topic_id, document_text)
-        )
+
+        async def _run_after_release() -> None:
+            await asyncio.sleep(1.0)
+            await IngestionService._run_pipeline(topic_id, document_text)
+
+        asyncio.create_task(_run_after_release())
 
     @staticmethod
     def get_status(topic_id: str) -> str:

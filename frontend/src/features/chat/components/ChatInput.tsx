@@ -122,8 +122,8 @@ export function ChatInput({ onSend, isStreaming, embedded }: Props) {
               key={i}
               className="relative flex items-center gap-2.5 rounded-2xl border border-border bg-surface p-1.5 pr-3 shadow-sm self-start"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-[0.6rem] bg-[#d1fb9f] text-gray-600">
-                <FileText size={16} strokeWidth={2.5} />
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-orange-400">
+                <FileText size={16} strokeWidth={2.5} className="text-white" />
               </div>
               <div className="flex flex-col">
                 <span className="max-w-[140px] truncate text-xs font-semibold text-text-primary">

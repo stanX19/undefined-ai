@@ -73,7 +73,7 @@ export function MessageBubble({ message }: Props) {
               key={i}
               className="flex items-center gap-2.5 rounded-2xl border border-border bg-surface p-1.5 pr-4 shadow-sm"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-[0.6rem] bg-[#d1fb9f] text-gray-600">
+              <div className="flex h-8 w-8 items-center justify-center rounded-[0.6rem] bg-orange-400 text-white">
                 <FileText size={16} strokeWidth={2.5} />
               </div>
               <div className="flex flex-col text-left">

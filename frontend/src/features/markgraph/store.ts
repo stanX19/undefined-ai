@@ -52,10 +52,23 @@ export const useMarkGraphStore = create<MarkGraphState>((set) => ({
                 return false;
             };
 
+            let matchedViaFallback = false;
             for (const scene of state.ast.scenes) {
                 if (scene.id === targetId || hasId(scene, targetId)) {
                     foundSceneId = scene.id;
                     break;
+                }
+            }
+            // Fallback: scene headings like "# what-is-an-os Scene" derive to "what-is-an-os-scene"
+            // but graph links often use #what-is-an-os. Try targetId + "-scene" if no match.
+            if (foundSceneId === state.sceneId) {
+                const withSceneSuffix = targetId.endsWith("-scene") ? targetId : `${targetId}-scene`;
+                for (const scene of state.ast.scenes) {
+                    if (scene.id === withSceneSuffix) {
+                        foundSceneId = scene.id;
+                        matchedViaFallback = true;
+                        break;
+                    }
                 }
             }
 
@@ -65,10 +78,13 @@ export const useMarkGraphStore = create<MarkGraphState>((set) => ({
                 newHistory.push(state.sceneId!);
             }
 
+            // Scene sections use id={scene.id}; when resolved via fallback, targetId won't match DOM—use foundSceneId
+            const scrollId: string = matchedViaFallback && foundSceneId ? foundSceneId : targetId;
+
             return { 
                 sceneId: foundSceneId,
                 history: newHistory,
-                scrollTarget: { id: targetId, ts: Date.now() }
+                scrollTarget: { id: scrollId, ts: Date.now() }
             };
         }),
 
