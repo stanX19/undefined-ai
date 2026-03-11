@@ -23,6 +23,7 @@ Return ONLY the exact summary text, without quotes, explanations, or any other f
 _GENERATE_TITLE_PROMPT = """\
 You are a summarization AI.
 Create a succinct title for the topic based on the following text.
+Focus on the topic instead of conversation logs.
 Your response MUST be {length} words or less.
 Return ONLY the exact title text, without quotes, explanations, or any other formatting.\
 """

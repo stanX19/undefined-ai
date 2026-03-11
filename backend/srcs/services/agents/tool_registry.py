@@ -23,6 +23,11 @@ class ToolRegistry:
         return cls._metadata.get(tool_name, {}).get(key, default)
 
     @staticmethod
+    def get_log_replacement(tool_name: str, default: str = "") -> str:
+        return ToolRegistry.get_metadata(tool_name, "log_replacement", default)
+
+class ToolDecorator:
+    @staticmethod
     def replace_log_memory(replacement_text: str):
         """Decorator that registers a replacement string for a tool's log output.
         
