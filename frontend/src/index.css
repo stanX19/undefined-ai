@@ -78,7 +78,9 @@
   --shadow-level3: var(--ds-shadow-level3);
 }
 
-
+/* Height-based responsive: short viewports (landscape mobile, split screen, small laptops) */
+@custom-variant short-height (@media (max-height: 700px));
+@custom-variant very-short-height (@media (max-height: 500px));
 
 * {
   box-sizing: border-box;

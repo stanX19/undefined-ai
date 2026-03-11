@@ -1,8 +1,14 @@
 """Topic service – CRUD + document text storage."""
+import asyncio
+
 from sqlalchemy import select
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from srcs.models.topic import Topic
+
+_MAX_DB_RETRIES = 3
+_RETRY_DELAY_SEC = 0.5
 
 
 class TopicService:
@@ -43,6 +49,9 @@ class TopicService:
     ) -> Topic:
         """Store extracted document text on a topic.
 
+        Retries on OperationalError (e.g. database locked) to handle SQLite
+        contention under concurrent load.
+
         Raises:
             ValueError: If the topic does not exist.
         """
@@ -50,9 +59,24 @@ class TopicService:
         if not topic:
             raise ValueError(f"Topic {topic_id} not found")
 
-        topic.document_text = text
-        await db.commit()
-        await db.refresh(topic)
+        for attempt in range(_MAX_DB_RETRIES):
+            try:
+                topic.document_text = text
+                await db.commit()
+                await db.refresh(topic)
+                return topic
+            except OperationalError as e:
+                err_str = str(e).lower()
+                if "locked" not in err_str and "busy" not in err_str:
+                    raise
+                if attempt == _MAX_DB_RETRIES - 1:
+                    raise
+                await db.rollback()
+                topic = await TopicService.get_topic(db, topic_id)
+                if not topic:
+                    raise ValueError(f"Topic {topic_id} not found")
+                await asyncio.sleep(_RETRY_DELAY_SEC * (attempt + 1))
+
         return topic
 
     @staticmethod

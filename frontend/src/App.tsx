@@ -25,7 +25,8 @@ export function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public route */}
+        {/* Public routes - / redirects via RootRedirect; landing/ (Next.js) links here on Login */}
+        <Route path="/" element={<RootRedirect />} />
         <Route path="/login" element={<LoginPage />} />
 
         {/* Protected routes */}

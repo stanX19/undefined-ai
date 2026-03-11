@@ -65,9 +65,9 @@ function ElementRenderer({ element }: { element: MarkGraphElement }) {
       p: ({ children }: { children?: React.ReactNode }) => <p className="text-[15px] leading-[1.7] text-[#374151] mb-4 last:mb-0">{children}</p>,
       strong: ({ children }: { children?: React.ReactNode }) => <strong className="font-semibold text-[#1a1a1a]">{children}</strong>,
       em: ({ children }: { children?: React.ReactNode }) => <em className="italic text-text-primary">{children}</em>,
-      ul: ({ children }: { children?: React.ReactNode }) => <ul className="mb-4 pl-6 space-y-3 list-disc marker:text-text-muted">{children}</ul>,
-      ol: ({ children }: { children?: React.ReactNode }) => <ol className="mb-4 pl-6 space-y-3 list-decimal marker:text-text-muted">{children}</ol>,
-      li: ({ children }: { children?: React.ReactNode }) => <li className="text-[#374151]">{children}</li>,
+      ul: ({ children }: { children?: React.ReactNode }) => <ul className="mb-4 pl-6 space-y-3 list-disc marker:text-text-muted [&_ul]:mt-3 [&_ol]:mt-3">{children}</ul>,
+      ol: ({ children }: { children?: React.ReactNode }) => <ol className="mb-4 pl-6 space-y-3 list-decimal marker:text-text-muted [&_ul]:mt-3 [&_ol]:mt-3">{children}</ol>,
+      li: ({ children }: { children?: React.ReactNode }) => <li className="text-[#374151] leading-relaxed [&>ul]:mt-3 [&>ol]:mt-3">{children}</li>,
       blockquote: ({ children }: { children?: React.ReactNode }) => (
         <blockquote className="border-l-4 border-border pl-4 italic text-text-muted my-4 bg-surface/50 py-2 rounded-r-lg">
           {children}
@@ -384,14 +384,13 @@ export function MarkGraphRoot() {
   return (
     <div className="flex flex-col gap-8 w-full animate-in fade-in duration-300 pb-20">
       {history.length > 0 && (
-        <div className="sticky top-0 z-10 pt-2 pb-4 bg-bg/60 backdrop-blur-md">
-          <button
-            onClick={() => goBack()}
-            className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-text-secondary bg-surface/80 border border-border rounded-full hover:bg-surface hover:text-primary hover:border-primary/30 transition-all shadow-sm active:scale-95 group"
-          >
-            <span className="group-hover:-translate-x-1 transition-transform">←</span> Back
-          </button>
-        </div>
+        <button
+          onClick={() => goBack()}
+          className="flex items-center gap-1.5 self-start px-2 py-1 text-xs font-semibold text-text-secondary hover:text-primary transition-colors cursor-pointer"
+          title="Go back"
+        >
+          <span>←</span> Back
+        </button>
       )}
       <SceneRenderer key={activeScene.id} scene={activeScene} />
     </div>

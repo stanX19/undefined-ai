@@ -51,62 +51,81 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-dvh lg:h-dvh w-full flex-col lg:flex-row bg-white font-sans text-[#212529]">
+    <div className="flex min-h-dvh lg:h-dvh w-full flex-col lg:flex-row bg-[#F7F5F3] font-sans">
       {/* Left Column: Form */}
       <div className="relative flex w-full flex-col lg:w-1/2 overflow-y-auto">
-        {/* Top Left Logo */}
-        <div className="absolute left-6 top-6 z-20 flex max-w-[calc(100vw-3rem)] items-center gap-2.5 sm:left-16 sm:top-10 sm:gap-4 lg:left-22">
-          <img src="/logo.png" alt="Logo" className="h-8 w-auto shrink-0 object-contain sm:h-14" />
+        {/* Top Left Logo - matches landing nav brand */}
+        <div className="absolute left-6 top-6 z-20 flex max-w-[calc(100vw-3rem)] items-center gap-2.5 sm:left-12 sm:top-8 sm:gap-4 lg:left-12">
+          <img src="/logo.png" alt="Logo" className="h-8 w-auto shrink-0 object-contain sm:h-10" />
           <div className="flex min-w-0 items-baseline">
-            <span className="truncate text-xl font-semibold tracking-tight text-[#212529] sm:text-4xl">undefined</span>
-            <span className="ml-1 shrink-0 text-xl font-medium tracking-tight text-[#868e96] sm:ml-2 sm:text-4xl">ai</span>
+            <span className="truncate text-lg font-semibold tracking-tight text-[#37322F] sm:text-xl">
+              Undefined
+            </span>
+            <span className="ml-1 shrink-0 text-lg font-medium tracking-tight text-[#605A57] sm:ml-2 sm:text-xl">
+              AI
+            </span>
           </div>
         </div>
 
-        <div className="mx-auto flex w-full max-w-[500px] flex-1 flex-col justify-center px-6 pt-28 pb-12 sm:px-12 sm:pt-40">
-          <div className="flex flex-col gap-2 items-center text-center">
-            <h1 className="text-3xl font-bold tracking-tight text-[#212529] sm:text-4xl lg:text-5xl">
-              Welcome back!
+        <div className="mx-auto flex w-full max-w-[460px] flex-1 flex-col justify-center px-6 pt-28 pb-12 sm:px-10 sm:pt-36">
+          <div className="flex flex-col gap-3 items-center text-center">
+            <h1 className="text-[#49423D] text-3xl font-semibold tracking-tight sm:text-4xl lg:text-[2.5rem] font-sans">
+              Welcome back
             </h1>
-            <p className="mt-2 sm:mt-3 text-sm sm:text-base font-normal text-gray-500">
-              Learning should feed interest,<br/>
+            <p className="text-[#605A57] text-base font-normal leading-7 font-sans">
+              Learning should feed interest,
+              <br />
               with every click, your curiosity gets fueled.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="mt-8 sm:mt-10 flex w-full flex-col gap-5 sm:gap-6">
+          <form onSubmit={handleSubmit} className="mt-10 flex w-full flex-col gap-5 sm:gap-6">
             <div className="flex flex-col gap-1">
               <input
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="User ID"
-                className="w-full rounded-full border border-gray-300 bg-white px-5 py-4 sm:px-6 sm:py-5 text-base transition-all focus:border-[#d1fb9f] focus:outline-none focus:ring-4 focus:ring-[#d1fb9f]/30"
+                className="w-full rounded-full border border-[#E0DEDB] bg-white px-5 py-4 sm:px-6 sm:py-5 text-base text-[#37322F] font-sans transition-all placeholder:text-[#605A57]/70 focus:border-[#37322F] focus:outline-none focus:ring-2 focus:ring-[rgba(55,50,47,0.15)] disabled:cursor-not-allowed disabled:opacity-60"
                 autoFocus
                 disabled={isLoading}
               />
-              {error && <p className="mt-1 text-sm font-medium text-red-500 px-4">{error}</p>}
+              {error && (
+                <p className="mt-1 text-sm font-medium text-red-600 px-4 font-sans">{error}</p>
+              )}
             </div>
-            
+
             <button
               type="submit"
               disabled={!inputValue.trim() || isLoading}
-              className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#d1fb9f] px-8 py-4 sm:py-5 text-base sm:text-lg font-semibold text-[#212529] shadow-sm transition-all hover:opacity-90 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+              className="relative flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#37322F] px-8 py-4 sm:py-5 text-[13px] font-medium text-white font-sans shadow-[0px_0px_0px_2.5px_rgba(255,255,255,0.08)_inset] transition-all hover:bg-[#2A2520] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-[#37322F]"
             >
               {isLoading ? "Signing in..." : "Login"}
             </button>
           </form>
 
-          <div className="mt-8 sm:mt-10 flex items-center justify-center gap-4">
-            <div className="h-px flex-1 bg-gray-200"></div>
-            <span className="text-xs sm:text-sm font-medium text-gray-400">or continue with</span>
-            <div className="h-px flex-1 bg-gray-200"></div>
+          <div className="mt-10 flex items-center justify-center gap-4">
+            <div className="h-px flex-1 bg-[rgba(55,50,47,0.12)]" />
+            <span className="text-[13px] font-medium text-[#605A57] font-sans">
+              or continue with
+            </span>
+            <div className="h-px flex-1 bg-[rgba(55,50,47,0.12)]" />
           </div>
 
-          <div className="mt-6 flex w-full">
-            {/* Social Buttons (Visual Only) */}
-            <button className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-full bg-[#212529] px-8 py-3.5 sm:py-4 text-sm sm:text-base font-medium text-white transition-all hover:bg-[#343a40] hover:scale-[1.02] active:scale-[0.98]">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor">
+          <div className="mt-6 flex w-full relative">
+            <span className="absolute -top-1.5 right-2 z-10 px-1.5 py-0.5 rounded-md bg-orange-500 text-white text-[10px] font-medium font-sans leading-tight">
+              Coming Soon
+            </span>
+            <button
+              type="button"
+              className="relative flex w-full cursor-pointer items-center justify-center gap-3 rounded-full border border-[#E0DEDB] bg-white px-8 py-4 sm:py-5 text-[13px] font-medium text-[#37322F] font-sans transition-all hover:bg-[#FAF9F8] hover:border-[rgba(55,50,47,0.12)]"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                className="h-4 w-4 sm:h-5 sm:w-5 text-[#605A57]"
+                fill="currentColor"
+              >
                 <path d="M22.56 12.25C22.56 11.47 22.49 10.72 22.36 10H12V14.26H17.92C17.66 15.63 16.92 16.8 15.75 17.58V20.34H19.32C21.41 18.42 22.56 15.6 22.56 12.25Z" />
                 <path d="M12 23C14.97 23 17.46 22.02 19.32 20.34L15.75 17.58C14.74 18.26 13.48 18.67 12 18.67C9.14 18.67 6.71 16.74 5.84 14.15H2.15V17.01C3.96 20.61 8.67 23 12 23Z" />
                 <path d="M5.84 14.15C5.62 13.48 5.49 12.76 5.49 12C5.49 11.24 5.62 10.52 5.84 9.85V6.99H2.15C1.41 8.46 1 10.17 1 12C1 13.83 1.41 15.54 2.15 17.01L5.84 14.15Z" />
@@ -116,14 +135,17 @@ export function LoginPage() {
             </button>
           </div>
 
-          <p className="mt-10 sm:mt-12 text-center text-xs sm:text-sm font-medium text-gray-500">
-            Not a member? <span className="text-[#212529] font-bold hover:underline cursor-pointer">Register now</span>
+          <p className="mt-10 text-center text-[13px] font-medium text-[#605A57] font-sans">
+            Don't have an account?{" "}
+            <span className="text-[#37322F] font-semibold hover:underline cursor-pointer">
+              Register now
+            </span>
           </p>
         </div>
       </div>
 
-      {/* Right Column: Graphic */}
-      <div className="hidden lg:flex w-1/2 relative h-full items-center justify-center bg-gray-100 overflow-hidden">
+      {/* Right Column: Graphic - matches landing soft tones */}
+      <div className="hidden lg:flex w-1/2 relative h-full items-center justify-center bg-[#FAF9F8] overflow-hidden border-l border-[rgba(55,50,47,0.12)]">
         {images.map((src, index) => (
           <img
             key={src}
