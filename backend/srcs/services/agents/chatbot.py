@@ -44,7 +44,6 @@ class Chatbot:
     async def ask(
         self,
         user_prompt: str,
-        document_text: str | None = None,
         chat_history: list[BaseMessage] | None = None,
         on_tool_call: Callable[[str, dict], Awaitable[None]] | None = None,
     ) -> tuple[str, list[BaseMessage]]:
@@ -54,7 +53,7 @@ class Chatbot:
             on_tool_call: Optional async callback invoked with ``(tool_name, arguments)``
                           each time the agent calls a tool.
         """
-        messages = self._build_messages(user_prompt, document_text, chat_history)
+        messages = self._build_messages(user_prompt, chat_history)
         initial_msg_count = len(messages)
 
         settings = get_settings()
@@ -134,16 +133,10 @@ class Chatbot:
     def _build_messages(
         self,
         user_prompt: str,
-        document_text: str | None,
         chat_history: list[BaseMessage] | None,
     ) -> list[BaseMessage]:
         """Assemble the full message list for the agent."""
         system_parts: list[str] = [self.system_prompt]
-        if document_text:
-            system_parts.append(
-                f"\n\n--- DOCUMENT CONTEXT ---\n{document_text}\n--- END CONTEXT ---"
-            )
-
         messages: list[BaseMessage] = [SystemMessage(content="\n".join(system_parts))]
 
         if chat_history:

@@ -47,7 +47,7 @@ class UIAgent:
         if header_name:
             section_range = get_section_range(current_ui, header_name)
             if not section_range:
-                return {"error": f"Section with header or ID '{header_name}' not found."}
+                raise ValueError(f"Section with header or ID '{header_name}' not found.")
 
             start, end = section_range
             lines = current_ui.splitlines()
@@ -76,7 +76,7 @@ class UIAgent:
                 if result.errors:
                     print(f"UIAgent syntax error on attempt {attempt + 1}. Retrying.")
                     error_lines = [f"Line {e.line}: {e.message}" for e in result.errors]
-                    messages.append(AIMessage(content=llm_response.text))
+                    messages.append(AIMessage(content=content))
                     messages.append(
                         HumanMessage(content=(
                             "The MarkGraph parser reported the following syntax errors:\n"

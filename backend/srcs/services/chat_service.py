@@ -22,7 +22,7 @@ class ChatService:
 
     @staticmethod
     async def send_message(
-        db: AsyncSession, topic_id: str, message: str, document_text: str | None,
+        db: AsyncSession, topic_id: str, message: str,
     ) -> ChatMessage:
         """Persist a user message and kick off the agent reply in the background.
 
@@ -39,7 +39,6 @@ class ChatService:
             ChatService._run_agent_and_stream(
                 topic_id=topic_id,
                 user_prompt=prompt,
-                document_text=document_text,
                 exclude_message_id=user_msg.message_id,
             )
         )
@@ -229,7 +228,6 @@ class ChatService:
     async def _run_agent_and_stream(
         topic_id: str,
         user_prompt: str,
-        document_text: str | None,
         exclude_message_id: str,
     ) -> None:
         """Background coroutine: build history, call agent, persist reply, emit SSE."""
@@ -260,8 +258,8 @@ class ChatService:
                 current_ui = await UIService.get_ui_markdown(db, topic_id)
                 ui_info = f"--- CURRENT MARKGRAPH UI STATE ---\n{current_ui}\n--- END UI STATE ---\n\n"
 
-                context_text: str | None = document_text or "No document provided."
                 max_level = await RetrievalService.get_max_level(db, topic_id)
+                context_text = ""
                 if max_level is not None and max_level >= 1:
                     top_facts = await RetrievalService.get_facts_by_level(db, topic_id, level=max_level)
                     if top_facts:
@@ -284,7 +282,6 @@ class ChatService:
 
             answer, new_msgs = await chatbot.ask(
                 user_prompt=user_prompt,
-                document_text=context_text,
                 chat_history=chat_history,
                 on_tool_call=_on_tool_call,
             )
