@@ -146,7 +146,7 @@ export function TopicsSidebar() {
                 {isCollapsed && isMobile && (
                     <button
                         onClick={() => setIsCollapsed(false)}
-                        className="fixed left-4 top-4 z-40 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md border border-gray-200 text-[#212529] hover:bg-gray-50"
+                        className="fixed left-4 top-4 z-40 flex h-10 w-10 items-center justify-center rounded-full bg-[#FAF9F8] shadow-md border border-[#E0DEDB] text-[#49423D] hover:bg-orange-50"
                     >
                         <Menu size={20} />
                     </button>
@@ -154,29 +154,28 @@ export function TopicsSidebar() {
 
                 {/* The actual sidebar */}
                 <div
-                    className={`absolute left-0 top-0 z-30 flex h-full flex-col border-r border-border bg-white font-sans ${!isResizing && "transition-transform duration-300"} ${
+                    className={`absolute left-0 top-0 z-30 flex h-full flex-col border-r border-[#E0DEDB] bg-[#FAF9F8] font-sans ${!isResizing && "transition-transform duration-300"} ${
                         isExpanded ? "translate-x-0" : "-translate-x-full"
                     } ${isCollapsed && isHovering && !isMobile ? "shadow-xl" : ""}`}
                     style={{ width: isMobile ? 280 : sidebarWidth }}
                 >
                     {/* Header (Logo) & Actions */}
-                <div className="flex items-center justify-between px-6 pt-8 pb-6">
+                <div className="flex h-14 shrink-0 items-center justify-between border-b border-[#E0DEDB] px-6">
                     <div className="flex items-center gap-3">
                         <img src="/logo.png" alt="Logo" className="h-6 w-auto object-contain" />
-                        <span className="text-[15px] font-medium text-[#212529]">My Workspace</span>
+                        <span className="text-[15px] font-medium text-[#49423D]">My Workspace</span>
                     </div>
                     <button
                         onClick={() => {
                             setIsCollapsed(!isCollapsed);
                             setIsHovering(false);
                         }}
-                        className="cursor-pointer rounded-lg p-1 text-gray-400 transition-colors hover:bg-[#d5fba8]/50 hover:text-[#212529]"
+                        className="cursor-pointer rounded-lg p-1 text-[#605A57] transition-colors hover:bg-orange-100 hover:text-[#37322F]"
                         title={isCollapsed ? "Pin Sidebar" : "Collapse Sidebar"}
                     >
                         {isCollapsed ? <PanelLeft size={16} /> : <PanelLeftClose size={16} />}
                     </button>
                 </div>
-                <div className="w-full border-t border-gray-100" aria-hidden="true" />
 
                 {/* Main Links */}
                 <div className="flex flex-col gap-1 px-4 mt-4 mb-6">
@@ -186,17 +185,17 @@ export function TopicsSidebar() {
                             useSurfaceStore.getState().clearAll();
                             navigate("/home");
                         }}
-                        className={`flex w-full cursor-pointer items-center gap-3 rounded-xl px-4 py-2.5 text-[14px] font-medium transition-colors ${
+                        className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-4 py-2.5 text-[14px] font-medium transition-colors ${
                             isHomeRoute
-                                ? "bg-[#d5fba8] text-[#212529]"
-                                : "text-gray-600 hover:bg-[#d5fba8]/30 hover:text-[#212529]"
+                                ? "bg-orange-100 ring-2 ring-orange-400/50 text-[#37322F]"
+                                : "text-[#605A57] hover:bg-orange-50 hover:text-[#37322F]"
                         }`}
                     >
                         <Home size={18} />
                         Home
                     </button>
                     <button 
-                        className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-4 py-2.5 text-[14px] font-medium text-gray-600 transition-colors hover:bg-[#d5fba8]/30 hover:text-[#212529]"
+                        className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-4 py-2.5 text-[14px] font-medium text-[#605A57] transition-colors hover:bg-orange-50 hover:text-[#37322F]"
                     >
                         <Network size={18} />
                         Knowledge Graph
@@ -205,11 +204,11 @@ export function TopicsSidebar() {
 
                 {/* Topics Header — pr-6 aligns Plus with collapse icon column */}
                 <div className="relative z-60 flex items-center justify-between px-5.5 pb-2">
-                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Conversation</h3>
+                    <h3 className="text-xs font-semibold text-[#605A57] uppercase tracking-wider">Conversation</h3>
                     <button
                         type="button"
                         onClick={handleNewTopic}
-                        className="cursor-pointer rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-[#d5fba8] hover:text-[#212529] shrink-0"
+                        className="cursor-pointer rounded-lg p-1.5 text-[#605A57] transition-colors hover:bg-orange-100 hover:text-[#37322F] shrink-0"
                         title="New conversation"
                     >
                         <Plus size={16} />
@@ -217,35 +216,35 @@ export function TopicsSidebar() {
                 </div>
 
                 {/* Topics list */}
-                <div className="flex-1 overflow-y-auto px-4 pb-4 hide-scrollbar">
+                <div className="flex-1 overflow-y-auto px-4 pt-3 pb-4 hide-scrollbar">
                     {isLoading && topics.length === 0 ? (
                         <div className="flex items-center justify-center py-8">
-                            <span className="text-xs text-gray-400">Loading…</span>
+                            <span className="text-xs text-[#605A57]">Loading…</span>
                         </div>
                     ) : topics.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-8 text-center">
-                            <p className="text-xs text-gray-400">
+                            <p className="text-xs text-[#605A57]">
                                 No topics yet. Start a chat!
                             </p>
                         </div>
                     ) : (
-                        <div className="flex flex-col gap-0.5">
+                        <div className="flex flex-col gap-2">
                             {sortedTopics.map((topic) => {
                                 const isPinned = pinnedTopicIds.includes(topic.topic_id);
                                 return (
                                 <button
                                     key={topic.topic_id}
                                     onClick={() => handleSelectTopic(topic.topic_id)}
-                                    className={`group flex w-full cursor-pointer items-center gap-3 rounded-xl px-4 py-2.5 text-left text-[14px] transition-colors ${
+                                    className={`group flex w-full cursor-pointer items-center gap-3 rounded-lg px-4 py-2.5 text-left text-[14px] transition-colors ${
                                         topic.topic_id === currentTopicId && !isHomeRoute
-                                        ? "bg-[#d5fba8] font-medium text-[#212529]"
-                                        : "text-gray-600 hover:bg-[#d5fba8]/30 hover:text-[#212529]"
+                                        ? "bg-orange-100 ring-2 ring-orange-400/50 font-medium text-[#37322F]"
+                                        : "text-[#605A57] hover:bg-orange-50 hover:text-[#37322F]"
                                     }`}
                                 >
                                     {isPinned ? (
                                         <Pin size={16} className={`shrink-0 ${topic.topic_id === currentTopicId && !isHomeRoute ? "text-red-500" : "text-red-400 group-hover:text-red-500"}`} fill="currentColor" />
                                     ) : (
-                                        <MessageSquare size={16} className={`shrink-0 ${topic.topic_id === currentTopicId && !isHomeRoute ? "text-[#212529]" : "text-gray-400 group-hover:text-[#212529]"}`} />
+                                        <MessageSquare size={16} className={`shrink-0 ${topic.topic_id === currentTopicId && !isHomeRoute ? "text-[#37322F]" : "text-[#605A57] group-hover:text-[#37322F]"}`} />
                                     )}
                                     <span className="truncate flex-1">{topic.title}</span>
                                 </button>
@@ -255,27 +254,27 @@ export function TopicsSidebar() {
                 </div>
 
                 {/* Footer — User Info / Logout */}
-                <div className="border-t border-gray-100 p-4">
+                <div className="border-t border-[#E0DEDB] p-4">
                     <button
                         onClick={handleLogout}
-                        className="flex w-full cursor-pointer items-center justify-between rounded-xl px-2 py-2 transition-colors hover:bg-gray-50"
+                        className="flex w-full cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[rgba(55,50,47,0.06)]"
                     >
                         <div className="flex items-center gap-3">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-sm font-bold text-[#212529]">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#E0DEDB] text-sm font-bold text-[#37322F]">
                                 {userId?.[0]?.toUpperCase() || "U"}
                             </div>
                             <div className="flex flex-col items-start">
-                                <span className="text-[13px] font-medium text-[#212529] leading-none">{userId || "User"}</span>
+                                <span className="text-[13px] font-medium text-[#49423D] leading-none">{userId || "User"}</span>
                             </div>
                         </div>
-                        <LogOut size={16} className="text-gray-400 hover:text-red-500 transition-colors" />
+                        <LogOut size={16} className="text-[#605A57] hover:text-red-500 transition-colors" />
                     </button>
                 </div>
 
                 {/* Resizer Handle — full sidebar height */}
                 {!isMobile && !isCollapsed && (
                     <div 
-                        className="absolute -right-1.5 top-0 h-full z-50 w-3 cursor-col-resize hover:bg-[#d1fb9f]/50 transition-colors"
+                        className="absolute -right-1.5 top-0 h-full z-50 w-3 cursor-col-resize hover:bg-orange-100/50 transition-colors"
                         onMouseDown={startResizing}
                     />
                 )}

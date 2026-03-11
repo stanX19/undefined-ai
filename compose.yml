@@ -1,6 +1,7 @@
 services:
   backend:
     build: ./backend
+    env_file: ./backend/.env
     ports:
       - "8001:8001"
     # Removed volumes because 'watch' handles sync
@@ -36,3 +37,18 @@ services:
             - node_modules/
         - action: rebuild
           path: ./frontend/package.json
+
+  landing:
+    build: ./landing
+    ports:
+      - "3000:3000"
+    develop:
+      watch:
+        - action: sync
+          path: ./landing
+          target: /app
+          ignore:
+            - node_modules/
+            - .next/
+        - action: rebuild
+          path: ./landing/package.json
