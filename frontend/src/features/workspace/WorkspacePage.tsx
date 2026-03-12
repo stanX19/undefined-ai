@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { PanelLeft, Home, FolderOpen, Pin, MoreHorizontal, Bot, FileDown } from "lucide-react";
 import { UIRoot } from "../ui_renderer/components/UIRoot.tsx";
 import { useUIStore } from "../ui_renderer/store.ts";
@@ -8,7 +8,7 @@ import { MarkGraphRoot } from "../markgraph/components/MarkGraphRoot.tsx";
 import { ChatPanel } from "../chat/components/ChatPanel.tsx";
 import { TopicsSidebar } from "./components/TopicsSidebar.tsx";
 import { HomeChatView } from "../home/components/HomeChatView.tsx";
-import { useChatStore, sendChatMessage } from "../chat/hooks/useChat.ts";
+import { useChatStore, sendChatMessage, loadChatHistory } from "../chat/hooks/useChat.ts";
 import { useWorkspaceLayoutStore } from "./layoutStore.ts";
 import { useTopicListStore } from "./hooks/useTopicList.ts";
 
@@ -26,11 +26,14 @@ export function WorkspacePage() {
   const isChatCollapsed = useWorkspaceLayoutStore((s) => s.isChatCollapsed);
   const setChatCollapsed = useWorkspaceLayoutStore((s) => s.setChatCollapsed);
   const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const isHomeRoute = location.pathname === "/home";
+  const isLoadingTopics = useTopicListStore((s) => s.isLoading);
 
   const activeTopic = topics.find((t) => t.topic_id === chatTopicId);
-  const navigate = useNavigate();
   const initialized = useRef(false);
+  const restoredFromUrl = useRef(false);
 
   // Load UI when topic changes
   useEffect(() => {
@@ -40,6 +43,43 @@ export function WorkspacePage() {
       fetchMarkGraphUI(chatTopicId);
     }
   }, [chatTopicId, uiTopicId]);
+
+  // Restore selected topic from URL on refresh (when ?topic=xxx is present)
+  useEffect(() => {
+    if (location.pathname !== "/workspace") return;
+
+    const topicIdFromUrl = searchParams.get("topic");
+    if (!topicIdFromUrl) return;
+
+    // Wait for topics to load before restore or clear — avoid clearing URL before fetch completes
+    if (isLoadingTopics) return;
+    if (topics.length === 0) {
+      // No topics yet: either still loading (initial) or user has none — don't clear on initial state
+      return;
+    }
+
+    const topicExists = topics.some((t) => t.topic_id === topicIdFromUrl);
+    if (!topicExists) {
+      // Topic deleted or invalid — clear param
+      setSearchParams({}, { replace: true });
+      return;
+    }
+
+    // Restore topic when store was reset (e.g. refresh)
+    if (restoredFromUrl.current || chatTopicId != null) return;
+
+    restoredFromUrl.current = true;
+    const chatStore = useChatStore.getState();
+    chatStore.setTopicId(topicIdFromUrl);
+    loadChatHistory(topicIdFromUrl);
+  }, [location.pathname, isLoadingTopics, chatTopicId, searchParams, topics, setSearchParams]);
+
+  // Sync URL when topic is set from other sources (e.g. first message creates topic)
+  useEffect(() => {
+    if (location.pathname !== "/workspace" || !chatTopicId) return;
+    if (searchParams.get("topic") === chatTopicId) return;
+    setSearchParams({ topic: chatTopicId }, { replace: true });
+  }, [location.pathname, chatTopicId, searchParams, setSearchParams]);
 
   // Handle initial topic from MenuPage (user selected a recommendation)
   useEffect(() => {

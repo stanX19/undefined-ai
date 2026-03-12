@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Cognitive Biases and Heuristics\",\n    \"difficulty\": 4,\n    \"reason\": \"This topic delves into the systematic errors in thinking that critical thinking aims to overcome, providing practical insights into human judgment.\"\n  },\n  {\n    \"title\": \"Decision Theory\",\n    \"difficulty\": 5,\n    \"reason\": \"It provides formal frameworks and quantitative methods for making optimal choices under uncertainty, building rigorously on the evaluation and problem-solving aspects of critical thinking.\"\n  },\n  {\n    \"title\": \"Research in Meta-Cognition and Self-Regulation\",\n    \"difficulty\": 6,\n    \"reason\": \"This advanced field investigates how individuals monitor and control their own cognitive processes, directly extending critical thinking into the domain of understanding and optimizing thinking itself.\"\n  }\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...KhTLlUNXso}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Cognitive Biases and Heuristics",
+      "difficulty": 4,
+      "reason": "This topic delves into the systematic errors in thinking that critical thinking aims to overcome, providing practical insights into human judgment."
+    },
+    {
+      "title": "Decision Theory",
+      "difficulty": 5,
+      "reason": "It provides formal frameworks and quantitative methods for making optimal choices under uncertainty, building rigorously on the evaluation and problem-solving aspects of critical thinking."
+    },
+    {
+      "title": "Research in Meta-Cognition and Self-Regulation",
+      "difficulty": 6,
+      "reason": "This advanced field investigates how individuals monitor and control their own cognitive processes, directly extending critical thinking into the domain of understanding and optimizing thinking itself."
+    }
+  ]
+}

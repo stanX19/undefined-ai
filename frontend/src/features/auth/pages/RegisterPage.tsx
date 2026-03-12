@@ -115,7 +115,7 @@ export function RegisterPage() {
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Password (min 8 chars, 1 letter, 1 number)"
+                                placeholder="Password"
                                 className="w-full rounded-full border border-[#E0DEDB] bg-white px-5 py-4 sm:px-6 sm:py-5 text-base text-[#37322F] font-sans transition-all placeholder:text-[#605A57]/70 focus:border-[#37322F] focus:outline-none focus:ring-2 focus:ring-[rgba(55,50,47,0.15)] disabled:cursor-not-allowed disabled:opacity-60"
                                 disabled={isLoading}
                             />

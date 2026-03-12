@@ -42,6 +42,25 @@ export const useTopicListStore = create<TopicListState>()(
 );
 
 /**
+ * Delete a topic via DELETE /api/v1/topics/{topic_id}. Updates local state on success.
+ */
+export async function deleteTopic(topicId: string): Promise<boolean> {
+    const store = useTopicListStore.getState();
+    const accessToken = useAuthStore.getState().accessToken;
+    if (!accessToken) return false;
+
+    try {
+        const res = await apiFetch(`/api/v1/topics/${topicId}`, { method: "DELETE" });
+        if (!res.ok) return false;
+        store.setTopics(store.topics.filter((t) => t.topic_id !== topicId));
+        return true;
+    } catch (err) {
+        console.error("Failed to delete topic:", err);
+        return false;
+    }
+}
+
+/**
  * Fetch all topics for the current user from GET /api/v1/topics/
  */
 export async function fetchTopics(): Promise<void> {
