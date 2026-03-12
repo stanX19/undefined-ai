@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Deep Learning Fundamentals\",\n    \"difficulty\": 4,\n    \"reason\": \"This topic naturally extends the introduction to neural networks from ML basics into more specialized architectures and training techniques.\"\n  },\n  {\n    \"title\": \"Reinforcement Learning\",\n    \"difficulty\": 5,\n    \"reason\": \"This explores a distinct paradigm of machine learning focused on agents learning optimal actions through interaction, building upon core ML concepts in a new problem setting.\"\n  },\n  {\n    \"title\": \"Causal Inference in Machine Learning\",\n    \"difficulty\": 6,\n    \"reason\": \"This advanced field moves beyond correlation to investigate cause-and-effect relationships using ML techniques, crucial for robust decision-making and scientific discovery.\"\n  }\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...2QpdOtfUUs}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Deep Learning Fundamentals",
+      "difficulty": 4,
+      "reason": "This topic naturally extends the introduction to neural networks from ML basics into more specialized architectures and training techniques."
+    },
+    {
+      "title": "Reinforcement Learning",
+      "difficulty": 5,
+      "reason": "This explores a distinct paradigm of machine learning focused on agents learning optimal actions through interaction, building upon core ML concepts in a new problem setting."
+    },
+    {
+      "title": "Causal Inference in Machine Learning",
+      "difficulty": 6,
+      "reason": "This advanced field moves beyond correlation to investigate cause-and-effect relationships using ML techniques, crucial for robust decision-making and scientific discovery."
+    }
+  ]
+}

@@ -356,36 +356,12 @@ export async function deleteChatHistory(): Promise<void> {
         method: "DELETE",
       });
       if (res.ok) {
-        // Find next topic to select
-        const topicStore = useTopicListStore.getState();
-        const topics = topicStore.topics;
-        const currentIndex = topics.findIndex(t => t.topic_id === currentTopicId);
-
-        let nextTopicId: string | null = null;
-        if (topics.length > 1 && currentIndex !== -1) {
-          // If the first topic is deleted, select the new first topic. Otherwise select the previous one.
-          const nextIndex = currentIndex === 0 ? 1 : currentIndex - 1;
-          nextTopicId = topics[nextIndex].topic_id;
-        }
-
-        // Locally remove the topic so it disappears from the sidebar without using the backend
-        const newTopics = topics.filter(t => t.topic_id !== currentTopicId);
-        topicStore.setTopics(newTopics);
-
-        // Clear existing states and connections
-        store.clear();
-        useSurfaceStore.getState().clearAll();
+        // Clear chat history only — keep UI canvas (surfaces, markgraph) intact
+        useChatStore.setState({ messages: [], isStreaming: false, streamingLogs: [] });
         if (activeEventSource) {
           activeEventSource.close();
           activeEventSource = null;
         }
-
-        // Switch to next topic if available
-        if (nextTopicId) {
-          store.setTopicId(nextTopicId);
-          loadChatHistory(nextTopicId);
-        }
-
         return;
       } else {
         console.error("Failed to delete chat history:", res.status);
@@ -395,13 +371,8 @@ export async function deleteChatHistory(): Promise<void> {
     }
   }
 
-  // Clear local stores unconditionally so user always gets a clean slate 
+  // Fallback when no topic — clear chat only, keep UI canvas
   store.clear();
-  useSurfaceStore.getState().clearAll();
-  useUIStore.getState().clear();
-  import("../../markgraph/store.ts")
-    .then(mod => mod.useMarkGraphStore.getState().clear())
-    .catch(() => { });
 
   if (activeEventSource) {
     activeEventSource.close();

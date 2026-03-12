@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { Plus, MessageSquare, LogOut, PanelLeft, PanelLeftClose, Home, Network, Menu, Pin } from "lucide-react";
+import { Plus, MessageSquare, LogOut, PanelLeft, PanelLeftClose, Home, Network, Menu, Pin, MoreVertical, Trash2 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
     useTopicListStore,
     fetchTopics,
+    deleteTopic,
 } from "../hooks/useTopicList";
 import { useChatStore, loadChatHistory } from "../../chat/hooks/useChat";
 import { useAuthStore } from "../../auth/hooks/useAuthStore";
@@ -32,7 +33,9 @@ export function TopicsSidebar() {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [sidebarWidth, setSidebarWidth] = useState(280);
     const [isResizing, setIsResizing] = useState(false);
+    const [openMenuTopicId, setOpenMenuTopicId] = useState<string | null>(null);
     const sidebarRef = useRef<HTMLDivElement>(null);
+    const menuRef = useRef<HTMLDivElement>(null);
 
     // Responsive mobile check
     useEffect(() => {
@@ -82,6 +85,17 @@ export function TopicsSidebar() {
         fetchTopics();
     }, []);
 
+    useEffect(() => {
+        if (!openMenuTopicId) return;
+        const handleClickOutside = (e: MouseEvent) => {
+            const el = e.target as HTMLElement;
+            if (menuRef.current?.contains(el) || el.closest("[data-topic-menu-trigger]")) return;
+            setOpenMenuTopicId(null);
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [openMenuTopicId]);
+
     const handleSelectTopic = useCallback(
         (topicId: string) => {
             if (topicId === currentTopicId && location.pathname === "/workspace") return;
@@ -91,7 +105,7 @@ export function TopicsSidebar() {
             useSurfaceStore.getState().clearAll();
             chatStore.setTopicId(topicId);
             loadChatHistory(topicId);
-            navigate("/workspace");
+            navigate(`/workspace?topic=${topicId}`, { replace: true });
         },
         [currentTopicId, location.pathname, navigate],
     );
@@ -109,6 +123,32 @@ export function TopicsSidebar() {
         logout();
         navigate("/login");
     }, [clearChat, logout, navigate]);
+
+    const handleDeleteTopic = useCallback(
+        async (topicId: string) => {
+            const topicStore = useTopicListStore.getState();
+            const chatStore = useChatStore.getState();
+            const ok = await deleteTopic(topicId);
+            setOpenMenuTopicId(null);
+            if (!ok) return;
+            if (topicId === currentTopicId) {
+                chatStore.clear();
+                useSurfaceStore.getState().clearAll();
+                useUIStore.getState().clear();
+                useMarkGraphStore.getState().clear();
+                const remaining = topicStore.topics.filter((t) => t.topic_id !== topicId);
+                const nextTopic = remaining[0];
+                if (nextTopic) {
+                    chatStore.setTopicId(nextTopic.topic_id);
+                    loadChatHistory(nextTopic.topic_id);
+                    navigate(`/workspace?topic=${nextTopic.topic_id}`, { replace: true });
+                } else {
+                    navigate("/home");
+                }
+            }
+        },
+        [currentTopicId, navigate]
+    );
 
     const isExpanded = !isCollapsed || isHovering;
 
@@ -231,23 +271,59 @@ export function TopicsSidebar() {
                             <div className="flex flex-col gap-2">
                                 {sortedTopics.map((topic) => {
                                     const isPinned = pinnedTopicIds.includes(topic.topic_id);
+                                    const isMenuOpen = openMenuTopicId === topic.topic_id;
                                     return (
-                                        <button
-                                            key={topic.topic_id}
-                                            onClick={() => handleSelectTopic(topic.topic_id)}
-                                            className={`group flex w-full cursor-pointer items-center gap-3 rounded-lg px-4 py-2.5 text-left text-[14px] transition-colors ${topic.topic_id === currentTopicId && !isHomeRoute
-                                                ? "bg-orange-100 ring-2 ring-orange-400/50 font-medium text-[#37322F]"
-                                                : "text-[#605A57] hover:bg-orange-50 hover:text-[#37322F]"
-                                                }`}
-                                        >
-                                            {isPinned ? (
-                                                <Pin size={16} className={`shrink-0 ${topic.topic_id === currentTopicId && !isHomeRoute ? "text-red-500" : "text-red-400 group-hover:text-red-500"}`} fill="currentColor" />
-                                            ) : (
-                                                <MessageSquare size={16} className={`shrink-0 ${topic.topic_id === currentTopicId && !isHomeRoute ? "text-[#37322F]" : "text-[#605A57] group-hover:text-[#37322F]"}`} />
+                                        <div key={topic.topic_id} className="relative">
+                                            <button
+                                                onClick={() => handleSelectTopic(topic.topic_id)}
+                                                className={`group flex w-full cursor-pointer items-center gap-2 rounded-lg px-4 py-2.5 text-left text-[14px] transition-colors ${topic.topic_id === currentTopicId && !isHomeRoute
+                                                    ? "bg-orange-100 ring-2 ring-orange-400/50 font-medium text-[#37322F]"
+                                                    : "text-[#605A57] hover:bg-orange-50 hover:text-[#37322F]"
+                                                    }`}
+                                            >
+                                                {isPinned ? (
+                                                    <Pin size={16} className={`shrink-0 ${topic.topic_id === currentTopicId && !isHomeRoute ? "text-red-500" : "text-red-400 group-hover:text-red-500"}`} fill="currentColor" />
+                                                ) : (
+                                                    <MessageSquare size={16} className={`shrink-0 ${topic.topic_id === currentTopicId && !isHomeRoute ? "text-[#37322F]" : "text-[#605A57] group-hover:text-[#37322F]"}`} />
+                                                )}
+                                                <span className="min-w-0 flex-1 truncate pr-1" title={topic.title}>{topic.title}</span>
+                                                <button
+                                                    type="button"
+                                                    data-topic-menu-trigger
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setOpenMenuTopicId(isMenuOpen ? null : topic.topic_id);
+                                                    }}
+                                                    className={`shrink-0 rounded-md p-1 text-[#605A57] transition-opacity hover:bg-orange-100 hover:text-[#37322F] ${isMenuOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+                                                    aria-label="Topic options"
+                                                >
+                                                    <MoreVertical size={16} />
+                                                </button>
+                                            </button>
+                                            {isMenuOpen && (
+                                                <div
+                                                    ref={menuRef}
+                                                    className="absolute right-2 top-full z-50 mt-1 min-w-[100px] rounded-lg border border-[#E0DEDB] bg-white py-1 shadow-lg"
+                                                    role="menu"
+                                                >
+                                                    <button
+                                                        type="button"
+                                                        role="menuitem"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if (window.confirm("Delete this topic? This cannot be undone.")) {
+                                                                handleDeleteTopic(topic.topic_id);
+                                                            }
+                                                        }}
+                                                        className="flex w-[calc(100%-10px)] items-center gap-1.5 rounded-md px-2.5 py-1.5 ml-1 mr-2 text-[12px] text-red-600 transition-colors hover:bg-red-50"
+                                                    >
+                                                        <Trash2 size={12} />
+                                                        Delete
+                                                    </button>
+                                                </div>
                                             )}
-                                            <span className="truncate flex-1">{topic.title}</span>
-                                        </button>
-                                    )
+                                        </div>
+                                    );
                                 })}
                             </div>
                         )}
