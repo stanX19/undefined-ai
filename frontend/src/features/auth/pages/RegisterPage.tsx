@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuthStore } from "../hooks/useAuthStore";
 
 export function RegisterPage() {
+    const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -24,7 +25,7 @@ export function RegisterPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!email.trim() || !password || !confirmPassword) return;
+        if (!username.trim() || !email.trim() || !password || !confirmPassword) return;
 
         if (password !== confirmPassword) {
             setError("Passwords do not match");
@@ -38,7 +39,7 @@ export function RegisterPage() {
             const response = await fetch("/api/v1/auth/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: email.trim(), password }),
+                body: JSON.stringify({ email: email.trim(), password, username: username.trim() }),
             });
 
             if (!response.ok) {
@@ -52,7 +53,7 @@ export function RegisterPage() {
             }
 
             const data = await response.json();
-            login(data.access_token, data.user_id, data.email, data.education_level);
+            login(data.access_token, data.user_id, data.email, data.username, data.education_level);
 
             navigate("/onboarding");
         } catch (err) {
@@ -94,12 +95,20 @@ export function RegisterPage() {
                     <form onSubmit={handleSubmit} className="mt-10 flex w-full flex-col gap-5 sm:gap-6">
                         <div className="flex flex-col gap-4">
                             <input
+                                type="text"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                placeholder="Display name"
+                                className="w-full rounded-full border border-[#E0DEDB] bg-white px-5 py-4 sm:px-6 sm:py-5 text-base text-[#37322F] font-sans transition-all placeholder:text-[#605A57]/70 focus:border-[#37322F] focus:outline-none focus:ring-2 focus:ring-[rgba(55,50,47,0.15)] disabled:cursor-not-allowed disabled:opacity-60"
+                                autoFocus
+                                disabled={isLoading}
+                            />
+                            <input
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="Email address"
                                 className="w-full rounded-full border border-[#E0DEDB] bg-white px-5 py-4 sm:px-6 sm:py-5 text-base text-[#37322F] font-sans transition-all placeholder:text-[#605A57]/70 focus:border-[#37322F] focus:outline-none focus:ring-2 focus:ring-[rgba(55,50,47,0.15)] disabled:cursor-not-allowed disabled:opacity-60"
-                                autoFocus
                                 disabled={isLoading}
                             />
                             <input
@@ -125,7 +134,7 @@ export function RegisterPage() {
 
                         <button
                             type="submit"
-                            disabled={!email.trim() || !password || !confirmPassword || isLoading}
+                            disabled={!username.trim() || !email.trim() || !password || !confirmPassword || isLoading}
                             className="relative flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[#37322F] px-8 py-4 sm:py-5 text-[13px] font-medium text-white font-sans shadow-[0px_0px_0px_2.5px_rgba(255,255,255,0.08)_inset] transition-all hover:bg-[#2A2520] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-[#37322F]"
                         >
                             {isLoading ? "Creating account..." : "Register"}

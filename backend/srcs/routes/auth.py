@@ -32,6 +32,7 @@ async def register(
         db,
         email=body.email,
         password=body.password,
+        username=body.username,
         education_level=body.education_level,
     )
 
@@ -41,6 +42,7 @@ async def register(
         access_token=access_token,
         user_id=user.user_id,
         email=user.email,
+        username=user.username,
         education_level=user.education_level,
     )
 
@@ -66,6 +68,7 @@ async def login(
         access_token=access_token,
         user_id=user.user_id,
         email=user.email,
+        username=user.username,
         education_level=user.education_level,
     )
 
@@ -86,5 +89,6 @@ async def update_profile(
     return ProfileResponse(
         user_id=user.user_id,
         email=user.email,
+        username=user.username,
         education_level=user.education_level,
     )

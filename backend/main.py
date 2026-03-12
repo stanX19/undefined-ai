@@ -25,11 +25,22 @@ from srcs.routes.speech import router as speech_router
 from srcs.routes.ui import router as ui_router
 
 
+from sqlalchemy import text
+
+def _add_missing_columns(sync_conn):
+    """Best-effort migration for new columns on an existing SQLite DB."""
+    cursor = sync_conn.execute(text("PRAGMA table_info(users)"))
+    existing = {row[1] for row in cursor.fetchall()}
+    if "username" not in existing:
+        sync_conn.execute(text("ALTER TABLE users ADD COLUMN username TEXT"))
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     """Create DB tables on startup (no Alembic for POC)."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(_add_missing_columns)
     yield
 
 

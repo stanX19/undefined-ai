@@ -18,8 +18,9 @@ export function TopicsSidebar() {
     const isLoading = useTopicListStore((s) => s.isLoading);
     const currentTopicId = useChatStore((s) => s.topicId);
     const clearChat = useChatStore((s) => s.clear);
-    const userId = useAuthStore((s) => s.userId);
+
     const email = useAuthStore((s) => s.email);
+    const username = useAuthStore((s) => s.username);
     const logout = useAuthStore((s) => s.logout);
     const navigate = useNavigate();
     const location = useLocation();
@@ -260,11 +261,11 @@ export function TopicsSidebar() {
                         >
                             <div className="flex items-center gap-3 min-w-0">
                                 <div className="flex shrink-0 h-8 w-8 items-center justify-center rounded-full bg-[#E0DEDB] text-sm font-bold text-[#37322F]">
-                                    {email?.[0]?.toUpperCase() || userId?.[0]?.toUpperCase() || "U"}
+                                    {username?.[0]?.toUpperCase() || email?.[0]?.toUpperCase() || "U"}
                                 </div>
-                                <div className="flex flex-col items-start min-w-0">
-                                    <span className="truncate text-[13px] font-medium text-[#49423D] leading-none max-w-[150px]" title={email || userId || "User"}>
-                                        {email || userId || "User"}
+                                <div className="flex flex-col items-start min-w-0 pb-0.5">
+                                    <span className="truncate text-[13px] font-medium text-[#49423D] leading-normal max-w-[150px]" title={username || email || "User"}>
+                                        {username || email || "User"}
                                     </span>
                                 </div>
                             </div>

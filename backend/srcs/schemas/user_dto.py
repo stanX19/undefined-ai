@@ -9,7 +9,18 @@ class RegisterRequest(BaseModel):
     """Registration request with password strength validation."""
     email: str
     password: str
+    username: str
     education_level: str | None = None
+
+    @field_validator("username")
+    @classmethod
+    def validate_username(cls, v: str) -> str:
+        v = v.strip()
+        if len(v) < 2:
+            raise ValueError("Username must be at least 2 characters")
+        if len(v) > 50:
+            raise ValueError("Username must be at most 50 characters")
+        return v
 
     @field_validator("email")
     @classmethod
@@ -43,6 +54,7 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
     user_id: str
     email: str
+    username: str | None = None
     education_level: str | None = None
 
 
@@ -55,6 +67,7 @@ class ProfileResponse(BaseModel):
     """Safe user profile response — never exposes password_hash."""
     user_id: str
     email: str
+    username: str | None = None
     education_level: str | None = None
 
     model_config = {"from_attributes": True}

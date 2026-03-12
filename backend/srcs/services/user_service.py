@@ -28,12 +28,14 @@ class UserService:
         db: AsyncSession,
         email: str,
         password: str,
+        username: str | None = None,
         education_level: str | None = None,
     ) -> User:
         """Create a new user with a hashed password."""
         user = User(
             email=email.strip().lower(),
             password_hash=hash_password(password),
+            username=username,
             education_level=education_level,
         )
         db.add(user)
