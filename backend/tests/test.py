@@ -74,28 +74,28 @@ def run_tests():
         res = client.get("/health", description="Health probe")
         assert res == {"status": "healthy"}, f"Expected healthy, got {res}"
 
-        # -- 2. Login — new user ------------------------------------------
-        print(f"\n{Colors.BOLD}--- 2. Auth: Login new user ---{Colors.END}")
+        # -- 2. Register — new user ----------------------------------------
+        print(f"\n{Colors.BOLD}--- 2. Auth: Register new user ---{Colors.END}")
         res = client.post(
-            "/api/v1/auth/login",
-            description="Login new user",
-            json={"user_id": "test_user_001"},
+            "/api/v1/auth/register",
+            description="Register new user",
+            json={"email": "testuser001@test.com", "password": "TestPass1"},
         )
-        assert "user_id" in res, "Missing user_id in login response"
-        assert res["user_id"] == "test_user_001"
-        assert "created_at" in res, "Missing created_at"
+        assert "access_token" in res, "Missing access_token in register response"
+        assert "user_id" in res, "Missing user_id in register response"
+        token = res["access_token"]
         user_id = res["user_id"]
-        client.headers["X-User-Id"] = user_id
+        client.headers["Authorization"] = f"Bearer {token}"
 
-        # -- 3. Login — idempotent ----------------------------------------
-        print(f"\n{Colors.BOLD}--- 3. Auth: Login same user again ---{Colors.END}")
+        # -- 3. Login — same user -------------------------------------------
+        print(f"\n{Colors.BOLD}--- 3. Auth: Login same user ---{Colors.END}")
         res2 = client.post(
             "/api/v1/auth/login",
-            description="Login same user (idempotent)",
-            json={"user_id": user_id},
+            description="Login same user",
+            json={"email": "testuser001@test.com", "password": "TestPass1"},
         )
         assert res2["user_id"] == user_id, "Login should return same user_id"
-        assert res2["created_at"] == res["created_at"], "created_at should stay the same"
+        assert "access_token" in res2, "Login should return access_token"
 
         # -- 4. Create topic ----------------------------------------------
         print(f"\n{Colors.BOLD}--- 4. Topics: Create ---{Colors.END}")

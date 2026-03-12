@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { LoginPage } from "./features/auth/pages/LoginPage.tsx";
+import { RegisterPage } from "./features/auth/pages/RegisterPage.tsx";
 import { OnboardingPage } from "./features/onboarding/OnboardingPage.tsx";
 import { MenuPage } from "./features/onboarding/MenuPage.tsx";
 import { WorkspacePage } from "./features/workspace/WorkspacePage.tsx";
@@ -7,9 +8,9 @@ import { AuthGuard } from "./features/auth/components/AuthGuard.tsx";
 import { useAuthStore } from "./features/auth/hooks/useAuthStore.ts";
 
 function RootRedirect() {
-  const userId = useAuthStore((s) => s.userId);
+  const accessToken = useAuthStore((s) => s.accessToken);
   const educationLevel = useAuthStore((s) => s.educationLevel);
-  if (!userId) return <Navigate to="/login" replace />;
+  if (!accessToken) return <Navigate to="/login" replace />;
   if (!educationLevel) return <Navigate to="/onboarding" replace />;
   return <Navigate to="/menu" replace />;
 }
@@ -28,6 +29,7 @@ export function App() {
         {/* Public routes - / redirects via RootRedirect; landing/ (Next.js) links here on Login */}
         <Route path="/" element={<RootRedirect />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
 
         {/* Protected routes */}
         <Route element={<AuthGuard />}>

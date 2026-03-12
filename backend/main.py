@@ -3,7 +3,10 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from srcs.config import get_settings
 from srcs.database import engine, Base
@@ -13,7 +16,7 @@ import srcs.models  # noqa: F401
 
 # Route modules
 from srcs.routes.health import router as health_router
-from srcs.routes.auth import router as auth_router
+from srcs.routes.auth import router as auth_router, limiter
 from srcs.routes.topics import router as topics_router
 from srcs.routes.chat import router as chat_router
 from srcs.routes.ingestion import router as ingestion_router
@@ -22,11 +25,22 @@ from srcs.routes.speech import router as speech_router
 from srcs.routes.ui import router as ui_router
 
 
+from sqlalchemy import text
+
+def _add_missing_columns(sync_conn):
+    """Best-effort migration for new columns on an existing SQLite DB."""
+    cursor = sync_conn.execute(text("PRAGMA table_info(users)"))
+    existing = {row[1] for row in cursor.fetchall()}
+    if "username" not in existing:
+        sync_conn.execute(text("ALTER TABLE users ADD COLUMN username TEXT"))
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     """Create DB tables on startup (no Alembic for POC)."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(_add_missing_columns)
     yield
 
 
@@ -38,6 +52,19 @@ app: FastAPI = FastAPI(
     lifespan=lifespan,
     debug=settings.DEBUG,
 )
+
+# -- CORS ---------------------------------------------------------------------
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# -- Rate Limiter (slowapi) ---------------------------------------------------
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # -- Routers ------------------------------------------------------------------
 app.include_router(health_router)

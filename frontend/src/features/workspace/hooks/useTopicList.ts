@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useAuthStore } from "../../auth/hooks/useAuthStore";
+import { apiFetch } from "../../../constants/api";
 
 export interface Topic {
     topic_id: string;
@@ -41,18 +42,16 @@ export const useTopicListStore = create<TopicListState>()(
 );
 
 /**
- * Fetch all topics for the current user from GET /api/v1/topics/?user_id=
+ * Fetch all topics for the current user from GET /api/v1/topics/
  */
 export async function fetchTopics(): Promise<void> {
     const store = useTopicListStore.getState();
-    const userId = useAuthStore.getState().userId;
-    if (!userId) return;
+    const accessToken = useAuthStore.getState().accessToken;
+    if (!accessToken) return;
 
     store.setLoading(true);
     try {
-        const res = await fetch(`/api/v1/topics/`, {
-            headers: { "X-User-Id": userId }
-        });
+        const res = await apiFetch(`/api/v1/topics/`);
         if (!res.ok) throw new Error("Failed to fetch topics");
         const data: Topic[] = await res.json();
         store.setTopics(data);

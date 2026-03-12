@@ -62,7 +62,7 @@ async def send_message(
     Returns ``{ status: "success", user_message }`` immediately.
     The agent reply is delivered over the SSE stream.
     """
-    topic = await TopicService.get_topic(db, body.topic_id)
+    topic = await TopicService.get_user_topic(db, body.topic_id, current_user.user_id)
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
 
@@ -82,6 +82,10 @@ async def get_history(
     db: AsyncSession = Depends(get_db),
 ) -> list[ChatMessageResponse]:
     """Return chat history for a topic."""
+    # Verify the topic belongs to the current user
+    topic = await TopicService.get_user_topic(db, topic_id, current_user.user_id)
+    if not topic:
+        raise HTTPException(status_code=404, detail="Topic not found")
     messages = await ChatService.get_chat_history(db, topic_id)
     return [ChatMessageResponse.model_validate(m) for m in messages]
 
@@ -93,5 +97,9 @@ async def clear_history(
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, str]:
     """Delete all chat messages for a topic."""
+    # Verify the topic belongs to the current user
+    topic = await TopicService.get_user_topic(db, topic_id, current_user.user_id)
+    if not topic:
+        raise HTTPException(status_code=404, detail="Topic not found")
     deleted: int = await ChatService.clear_history(db, topic_id)
     return {"message": f"Cleared {deleted} messages"}

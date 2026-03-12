@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { useTopicListStore, fetchTopics } from "../workspace/hooks/useTopicList";
 import { useAuthStore } from "../auth/hooks/useAuthStore";
 import { useChatStore } from "../chat/hooks/useChat";
+import { apiFetch } from "../../constants/api";
 
 interface Recommendation {
   title: string;
@@ -38,17 +39,14 @@ export function MenuPage() {
       setIsLoadingRecs(true);
       try {
         if (currentTopics.length > 0) {
-          const res = await fetch(`/api/v1/recommendations/latest`, {
-            headers: { "X-User-Id": userId! },
-          });
+          const res = await apiFetch(`/api/v1/recommendations/latest`);
           if (res.ok) {
             const data = await res.json();
             setRecommendations(data.recommendations || []);
           }
         } else {
-          const res = await fetch(
-            `/api/v1/recommendations/default?education_level=${encodeURIComponent(eduLevel!)}`,
-            { headers: { "X-User-Id": userId! } }
+          const res = await apiFetch(
+            `/api/v1/recommendations/default?education_level=${encodeURIComponent(eduLevel!)}`
           );
           if (res.ok) {
             const data = await res.json();

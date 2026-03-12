@@ -9,9 +9,10 @@ import { useRecommendations, type Recommendation } from "../hooks/useRecommendat
 import { AiMotionLogo } from "./AiMotionLogo";
 import { BgGradient } from "./BgGradient";
 
-function formatUserName(userId: string | null): string {
-  if (!userId) return "there";
-  const name = userId.includes("@") ? userId.split("@")[0] : userId;
+function formatUserName(username: string | null, email: string | null): string {
+  if (username) return username;
+  if (!email) return "there";
+  const name = email.includes("@") ? email.split("@")[0] : email;
   return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
@@ -59,7 +60,8 @@ function RecommendationCard({
 
 export function HomeChatView() {
   const navigate = useNavigate();
-  const userId = useAuthStore((s) => s.userId);
+  const username = useAuthStore((s) => s.username);
+  const email = useAuthStore((s) => s.email);
   const clearChat = useChatStore((s) => s.clear);
   const isStreaming = useChatStore((s) => s.isStreaming);
 
@@ -88,7 +90,7 @@ export function HomeChatView() {
     [clearChat, navigate]
   );
 
-  const userName = formatUserName(userId);
+  const userName = formatUserName(username, email);
 
   return (
     <div className="relative flex h-full min-h-0 w-full flex-col items-center overflow-y-auto overflow-x-hidden hide-scrollbar bg-[#F7F5F3]">
