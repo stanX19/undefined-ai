@@ -42,7 +42,7 @@ async def get_topic(
     db: AsyncSession = Depends(get_db),
 ) -> TopicDetailResponse:
     """Get a single topic with its document text."""
-    topic = await TopicService.get_topic(db, topic_id)
+    topic = await TopicService.get_user_topic(db, topic_id, current_user.user_id)
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
     return TopicDetailResponse.model_validate(topic)
@@ -64,6 +64,11 @@ async def upload_document(
         raise HTTPException(status_code=400, detail="Only PDF files are accepted")
 
     content: bytes = await file.read()
+
+    # Verify ownership
+    topic = await TopicService.get_user_topic(db, topic_id, current_user.user_id)
+    if not topic:
+        raise HTTPException(status_code=404, detail="Topic not found")
 
     settings = get_settings()
     file_path: str = DocumentService.save_pdf(content, file.filename, settings.UPLOAD_DIR)

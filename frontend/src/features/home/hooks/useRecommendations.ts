@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuthStore } from "../../auth/hooks/useAuthStore";
 import { useTopicListStore, fetchTopics } from "../../workspace/hooks/useTopicList";
+import { apiFetch } from "../../../constants/api";
 
 export interface Recommendation {
   title: string;
@@ -32,17 +33,14 @@ export function useRecommendations() {
     setIsLoading(true);
     try {
       if (currentTopics.length > 0) {
-        const res = await fetch("/api/v1/recommendations/latest", {
-          headers: { "X-User-Id": userId! },
-        });
+        const res = await apiFetch("/api/v1/recommendations/latest");
         if (res.ok) {
           const data = await res.json();
           setRecommendations(data.recommendations || []);
         }
       } else if (eduLevel) {
-        const res = await fetch(
-          `/api/v1/recommendations/default?education_level=${encodeURIComponent(eduLevel)}`,
-          { headers: { "X-User-Id": userId! } }
+        const res = await apiFetch(
+          `/api/v1/recommendations/default?education_level=${encodeURIComponent(eduLevel)}`
         );
         if (res.ok) {
           const data = await res.json();

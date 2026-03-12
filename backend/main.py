@@ -3,7 +3,10 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from srcs.config import get_settings
 from srcs.database import engine, Base
@@ -13,7 +16,7 @@ import srcs.models  # noqa: F401
 
 # Route modules
 from srcs.routes.health import router as health_router
-from srcs.routes.auth import router as auth_router
+from srcs.routes.auth import router as auth_router, limiter
 from srcs.routes.topics import router as topics_router
 from srcs.routes.chat import router as chat_router
 from srcs.routes.ingestion import router as ingestion_router
@@ -38,6 +41,19 @@ app: FastAPI = FastAPI(
     lifespan=lifespan,
     debug=settings.DEBUG,
 )
+
+# -- CORS ---------------------------------------------------------------------
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# -- Rate Limiter (slowapi) ---------------------------------------------------
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # -- Routers ------------------------------------------------------------------
 app.include_router(health_router)

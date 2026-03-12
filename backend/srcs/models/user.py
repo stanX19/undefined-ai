@@ -9,12 +9,18 @@ from srcs.database import Base
 
 
 class User(Base):
-    """Represents a registered user (POC: login by ID only)."""
+    """Registered user with email/password authentication."""
 
     __tablename__ = "users"
 
     user_id: Mapped[str] = mapped_column(
         String, primary_key=True, default=lambda: uuid.uuid4().hex
+    )
+    email: Mapped[str] = mapped_column(
+        String, unique=True, index=True, nullable=False
+    )
+    password_hash: Mapped[str] = mapped_column(
+        String, nullable=False
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)

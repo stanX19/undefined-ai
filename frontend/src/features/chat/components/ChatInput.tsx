@@ -59,10 +59,9 @@ export function ChatInput({ onSend, isStreaming, embedded }: Props) {
       const formData = new FormData();
       formData.append("file", blob, "recording.wav");
 
-      const userId = (await import("../../auth/hooks/useAuthStore")).useAuthStore.getState().userId;
-      const response = await fetch("/api/v1/speech/stt", {
+      const { apiFetch } = await import("../../../constants/api");
+      const response = await apiFetch("/api/v1/speech/stt", {
         method: "POST",
-        headers: { "X-User-Id": userId || "" },
         body: formData,
       });
 
@@ -161,9 +160,8 @@ export function ChatInput({ onSend, isStreaming, embedded }: Props) {
             onKeyDown={handleKeyDown}
             placeholder="Ask a question..."
             rows={embedded ? 4 : 1}
-            className={`flex-1 resize-none bg-transparent px-6 text-sm text-text-primary placeholder-text-muted focus:outline-none hide-scrollbar max-h-48 ${
-              embedded ? "min-h-[96px] py-4" : "min-h-[40px] py-2"
-            }`}
+            className={`flex-1 resize-none bg-transparent px-6 text-sm text-text-primary placeholder-text-muted focus:outline-none hide-scrollbar max-h-48 ${embedded ? "min-h-[96px] py-4" : "min-h-[40px] py-2"
+              }`}
           />
         </div>
 
@@ -179,20 +177,18 @@ export function ChatInput({ onSend, isStreaming, embedded }: Props) {
 
             <button
               onClick={() => setIsWebSearchEnabled(!isWebSearchEnabled)}
-              className={`flex h-8 cursor-pointer items-center overflow-hidden rounded-full transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] border ${
-                isWebSearchEnabled 
-                  ? "bg-[#e1f5fd] text-[#0288d1] border-[#81d4fa] w-[90px]" 
+              className={`flex h-8 cursor-pointer items-center overflow-hidden rounded-full transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] border ${isWebSearchEnabled
+                  ? "bg-[#e1f5fd] text-[#0288d1] border-[#81d4fa] w-[90px]"
                   : "bg-(--color-surface-alt) text-text-muted hover:bg-gray-200 hover:text-text-primary border-transparent w-8"
-              }`}
+                }`}
               title="Toggle Web Search"
             >
               <div className="flex h-full w-[30px] shrink-0 items-center justify-center">
                 <Globe size={18} className={`transition-transform duration-300 ${isWebSearchEnabled ? "rotate-360" : "rotate-0"}`} />
               </div>
-              <span 
-                className={`text-sm font-medium transition-all duration-300 whitespace-nowrap ${
-                  isWebSearchEnabled ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
-                }`}
+              <span
+                className={`text-sm font-medium transition-all duration-300 whitespace-nowrap ${isWebSearchEnabled ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
+                  }`}
               >
                 Search
               </span>
@@ -222,14 +218,13 @@ export function ChatInput({ onSend, isStreaming, embedded }: Props) {
               <button
                 onClick={handleSubmit}
                 disabled={isStreaming || (!text.trim() && files.length === 0)}
-                className={`flex items-center justify-center bg-primary text-surface transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] origin-center ${
-                  isStreaming
+                className={`flex items-center justify-center bg-primary text-surface transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] origin-center ${isStreaming
                     ? "h-4 w-4 rounded-[5px] animate-[spin_3s_linear_infinite]"
                     : "h-8 w-8 rounded-full " +
-                      ((!text.trim() && files.length === 0)
-                        ? "opacity-40 cursor-not-allowed"
-                        : "cursor-pointer hover:opacity-90 hover:scale-105 active:scale-95")
-                }`}
+                    ((!text.trim() && files.length === 0)
+                      ? "opacity-40 cursor-not-allowed"
+                      : "cursor-pointer hover:opacity-90 hover:scale-105 active:scale-95")
+                  }`}
                 title="Send"
               >
                 <svg

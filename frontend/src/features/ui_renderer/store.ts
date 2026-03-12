@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { UIJson, UIElement } from "./types.ts";
-import { useAuthStore } from "../auth/hooks/useAuthStore.ts";
+import { apiFetch } from "../../constants/api";
 
 interface UIState {
     sceneId: string | null;
@@ -68,10 +68,7 @@ export async function fetchUIForTopic(topicId: string) {
     const store = useUIStore.getState();
     useUIStore.setState({ isLoading: true, error: null });
     try {
-        const userId = useAuthStore.getState().userId;
-        const res = await fetch(`/api/v1/ui/${topicId}`, {
-            headers: { "X-User-Id": userId || "" }
-        });
+        const res = await apiFetch(`/api/v1/ui/${topicId}`);
         if (!res.ok) {
             throw new Error(`Failed to fetch UI: ${res.statusText}`);
         }

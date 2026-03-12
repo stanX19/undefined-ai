@@ -47,6 +47,14 @@ class Settings(BaseSettings):
     PORT: int = 8000
     FAKE_LOGIN_TOKEN: str | None = "fake_demo_token_123"
 
+    # JWT / Auth Settings
+    JWT_SECRET_KEY: str = "CHANGE_ME_BEFORE_PRODUCTION"
+    JWT_ALGORITHM: str = "HS256"
+    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+
+    # CORS Settings
+    CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000"]
+
     model_config = SettingsConfigDict(
         env_file=f"{ROOT}/.env",
         env_file_encoding="utf-8",

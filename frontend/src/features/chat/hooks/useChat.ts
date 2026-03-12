@@ -4,6 +4,7 @@ import { useSurfaceStore } from "../../a2ui/store.ts";
 import { fallbackParse } from "../../a2ui/fallbackParser.ts";
 import { useTopicListStore, fetchTopics } from "../../workspace/hooks/useTopicList.ts";
 import { useUIStore } from "../../ui_renderer/store.ts";
+import { apiFetch } from "../../../constants/api";
 
 export interface ChatMessage {
   id: string;
@@ -216,13 +217,13 @@ function openSseStream(sessionId: string): Promise<void> {
         const data = JSON.parse(e.data);
         console.log("[USE-CHAT] Received SSE UIUpdate Event:", data);
         const { topic_id, scene_id, ui_json, ui_markdown } = data;
-        
+
         // Push to legacy A2UI store
         useUIStore.getState().setUI(topic_id, scene_id, ui_json);
-        
+
         // Push to new MarkGraph store
         import("../../markgraph/store.ts").then(mod => {
-            mod.useMarkGraphStore.getState().setUI(topic_id, scene_id, ui_json, ui_markdown);
+          mod.useMarkGraphStore.getState().setUI(topic_id, scene_id, ui_json, ui_markdown);
         }).catch(err => console.warn("Could not import MarkGraph store", err));
       } catch (err) {
         console.warn("Failed to parse SSE UIUpdate event", e.data);
@@ -315,13 +316,11 @@ function openSseStream(sessionId: string): Promise<void> {
  */
 export async function loadChatHistory(topicId: string): Promise<void> {
   const store = useChatStore.getState();
-  const userId = useAuthStore.getState().userId;
-  if (!userId) return;
+  const token = useAuthStore.getState().accessToken;
+  if (!token) return;
 
   try {
-    const res = await fetch(`/api/v1/chat/history?topic_id=${topicId}`, {
-      headers: { "X-User-Id": userId }
-    });
+    const res = await apiFetch(`/api/v1/chat/history?topic_id=${topicId}`);
     if (!res.ok) return;
     const messages: Array<{
       message_id: string;
@@ -349,13 +348,12 @@ export async function deleteChatHistory(): Promise<void> {
   const currentTopicId = store.topicId;
 
   if (currentTopicId) {
-    const userId = useAuthStore.getState().userId;
-    if (!userId) return;
+    const token = useAuthStore.getState().accessToken;
+    if (!token) return;
 
     try {
-      const res = await fetch(`/api/v1/chat/history?topic_id=${currentTopicId}`, {
+      const res = await apiFetch(`/api/v1/chat/history?topic_id=${currentTopicId}`, {
         method: "DELETE",
-        headers: { "X-User-Id": userId }
       });
       if (res.ok) {
         // Find next topic to select
@@ -403,8 +401,8 @@ export async function deleteChatHistory(): Promise<void> {
   useUIStore.getState().clear();
   import("../../markgraph/store.ts")
     .then(mod => mod.useMarkGraphStore.getState().clear())
-    .catch(() => {});
-  
+    .catch(() => { });
+
   if (activeEventSource) {
     activeEventSource.close();
     activeEventSource = null;
@@ -431,9 +429,9 @@ export async function sendChatMessage(
   store.setStreaming(true);
 
   try {
-    const userId = useAuthStore.getState().userId;
-    if (!userId) {
-      throw new Error("User ID is not set. Please log in first.");
+    const token = useAuthStore.getState().accessToken;
+    if (!token) {
+      throw new Error("Not authenticated. Please log in first.");
     }
 
     let currentTopicId = store.topicId;
@@ -441,11 +439,10 @@ export async function sendChatMessage(
     // 1. Create Topic if it doesn't exist
     if (!currentTopicId) {
       const title = content.slice(0, 50) || "New Topic";
-      const topicRes = await fetch("/api/v1/topics/", {
+      const topicRes = await apiFetch("/api/v1/topics/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-User-Id": userId,
         },
         body: JSON.stringify({ title }),
       });
@@ -463,9 +460,8 @@ export async function sendChatMessage(
       const uploadData = new FormData();
       uploadData.append("file", file);
 
-      const uploadRes = await fetch(`/api/v1/topics/${currentTopicId}/upload`, {
+      const uploadRes = await apiFetch(`/api/v1/topics/${currentTopicId}/upload`, {
         method: "POST",
-        headers: { "X-User-Id": userId },
         body: uploadData,
       });
       if (!uploadRes.ok) {
@@ -477,11 +473,10 @@ export async function sendChatMessage(
     await openSseStream(currentTopicId!);
 
     // 4. Send Chat Message to backend (only after SSE is open)
-    const chatRes = await fetch("/api/v1/chat/", {
+    const chatRes = await apiFetch("/api/v1/chat/", {
       method: "POST",
-      headers: { 
+      headers: {
         "Content-Type": "application/json",
-        "X-User-Id": userId 
       },
       body: JSON.stringify({ topic_id: currentTopicId, message: content }),
     });
