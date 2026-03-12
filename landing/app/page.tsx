@@ -44,26 +44,7 @@ export default function LandingPage() {
     }
   }, [])
 
-  useEffect(() => {
-    const progressInterval = setInterval(() => {
-      if (!mountedRef.current) return
-
-      setProgress((prev) => {
-        if (prev >= 100) {
-          if (mountedRef.current) {
-            setActiveCard((current) => (current + 1) % 3)
-          }
-          return 0
-        }
-        return prev + 2 // 2% every 100ms = 5 seconds total
-      })
-    }, 100)
-
-    return () => {
-      clearInterval(progressInterval)
-      mountedRef.current = false
-    }
-  }, [])
+  // Auto-cycling disabled - demo mockup has no animation
 
   useEffect(() => {
     return () => {
@@ -224,8 +205,8 @@ export default function LandingPage() {
                       <div className="relative w-full h-full overflow-hidden">
                         {/* Product Image 1 - Plan your schedules */}
                         <div
-                          className={`absolute inset-0 transition-all duration-500 ease-in-out ${
-                            activeCard === 0 ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-95 blur-sm"
+                          className={`absolute inset-0 ${
+                            activeCard === 0 ? "opacity-100 z-10" : "opacity-0 pointer-events-none"
                           }`}
                         >
                           <img
@@ -237,8 +218,8 @@ export default function LandingPage() {
 
                         {/* Product Image 2 - Data to insights */}
                         <div
-                          className={`absolute inset-0 transition-all duration-500 ease-in-out ${
-                            activeCard === 1 ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-95 blur-sm"
+                          className={`absolute inset-0 ${
+                            activeCard === 1 ? "opacity-100 z-10" : "opacity-0 pointer-events-none"
                           }`}
                         >
                           <img
@@ -250,8 +231,8 @@ export default function LandingPage() {
 
                         {/* Product Image 3 - Data visualization */}
                         <div
-                          className={`absolute inset-0 transition-all duration-500 ease-in-out ${
-                            activeCard === 2 ? "opacity-100 scale-100 blur-0" : "opacity-0 scale-95 blur-sm"
+                          className={`absolute inset-0 ${
+                            activeCard === 2 ? "opacity-100 z-10" : "opacity-0 pointer-events-none"
                           }`}
                         >
                           <img
