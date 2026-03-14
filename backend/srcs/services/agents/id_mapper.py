@@ -78,6 +78,44 @@ class ShortIdMapper:
             lines.append(f"  {short} → {full}")
         return "\n".join(lines)
 
+    def rehydrate(self, history: list[Any]) -> None:
+        """Scan chat history to recover short-to-full mappings.
+        
+        This looks for '→' patterns in human-readable mapping descriptions 
+        that might have been injected into previous prompts or tool results.
+        """
+        import re
+        # Pattern: [Short ID] → [Full ID]
+        pattern = re.compile(r"([A-Z]+\d+)\s*→\s*([a-f0-9]{32}|[a-f0-9-]{36})", re.IGNORECASE)
+
+        for msg in history:
+            text = ""
+            if hasattr(msg, "content"):
+                text = str(msg.content)
+            elif isinstance(msg, dict):
+                text = str(msg.get("message", ""))
+            
+            if not text:
+                continue
+
+            for match in pattern.finditer(text):
+                short_id, full_id = match.groups()
+                # Clean up UUID (hex format)
+                full_id = full_id.replace("-", "").lower()
+                
+                if short_id not in self._to_full:
+                    self._to_full[short_id] = full_id
+                    self._to_short[full_id] = short_id
+                    
+                    # Ensure counters don't overlap with recovered IDs
+                    prefix = "".join(re.findall(r'[A-Z]+', short_id))
+                    idx_str = "".join(re.findall(r'\d+', short_id))
+                    if idx_str:
+                        idx = int(idx_str)
+                        current_idx = self._counters.get(prefix, 0)
+                        if idx >= current_idx:
+                            self._counters[prefix] = idx + 1
+
 
 # -- Context variable ------------------------------------------------------
 

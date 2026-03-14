@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Computer Hardware Components and Their Functions\",\n    \"difficulty\": 3,\n    \"reason\": \"This topic provides a deeper understanding of the physical components an OS manages and how they contribute to the computer's operation, directly complementing the historical evolution.\"\n  },\n  {\n    \"title\": \"Operating System Internals (Process & Memory Management)\",\n    \"difficulty\": 4,\n    \"reason\": \"This topic delves into the specific algorithms and techniques used by an operating system's Processor and Memory Managers, building directly on the foundational OS concepts.\"\n  },\n  {\n    \"title\": \"Distributed Systems\",\n    \"difficulty\": 5,\n    \"reason\": \"This topic extends OS concepts to managing resources across multiple interconnected computers, addressing the complexities of large-scale systems and cloud computing environments.\"\n  }\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...nYOglprSRM}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Computer Hardware Components and Their Functions",
+      "difficulty": 3,
+      "reason": "This topic provides a deeper understanding of the physical components an OS manages and how they contribute to the computer's operation, directly complementing the historical evolution."
+    },
+    {
+      "title": "Operating System Internals (Process & Memory Management)",
+      "difficulty": 4,
+      "reason": "This topic delves into the specific algorithms and techniques used by an operating system's Processor and Memory Managers, building directly on the foundational OS concepts."
+    },
+    {
+      "title": "Distributed Systems",
+      "difficulty": 5,
+      "reason": "This topic extends OS concepts to managing resources across multiple interconnected computers, addressing the complexities of large-scale systems and cloud computing environments."
+    }
+  ]
+}

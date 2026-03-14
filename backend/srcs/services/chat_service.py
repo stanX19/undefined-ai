@@ -284,7 +284,11 @@ class ChatService:
                             + "\n".join(concepts)
                         )
                 
-                context_text = base_info + ui_info + context_text
+                context_payload = base_info + ui_info + context_text
+                
+                # Rehydrate mapper from history to recover previous turns' IDs
+                if chat_history:
+                    mapper.rehydrate(chat_history)
 
             async def _on_tool_call(tool_name: str, arguments: dict) -> None:
                 await SseService.emit(
@@ -296,6 +300,7 @@ class ChatService:
                 user_prompt=user_prompt,
                 chat_history=chat_history,
                 on_tool_call=_on_tool_call,
+                context=context_payload,
             )
 
             async with AsyncSessionLocal() as db:
