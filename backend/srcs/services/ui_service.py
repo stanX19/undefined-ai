@@ -137,13 +137,19 @@ class UIService:
         """
         from srcs.models.share import Share
         
-        # 1. Check if share already exists
+        # 1. Ensure the referenced Scene exists to avoid FK integrity errors
+        scene_result = await db.execute(select(Scene).where(Scene.scene_id == scene_id))
+        scene = scene_result.scalar_one_or_none()
+        if scene is None:
+            raise ValueError(f"Scene {scene_id} not found")
+        
+        # 2. Check if share already exists
         result = await db.execute(select(Share).where(Share.scene_id == scene_id))
         existing_share = result.scalar_one_or_none()
         if existing_share:
             return existing_share.share_id
             
-        # 2. Create new Share record
+        # 3. Create new Share record
         new_share = Share(scene_id=scene_id)
         db.add(new_share)
         await db.commit()
