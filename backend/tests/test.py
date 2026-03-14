@@ -79,7 +79,7 @@ def run_tests():
         res = client.post(
             "/api/v1/auth/register",
             description="Register new user",
-            json={"email": "testuser001@test.com", "password": "TestPass1"},
+            json={"email": "testuser001@test.com", "password": "TestPass1", "username": "testuser001"},
         )
         assert "access_token" in res, "Missing access_token in register response"
         assert "user_id" in res, "Missing user_id in register response"

@@ -19,7 +19,11 @@ async def _ensure_user(user_id: str) -> None:
         existing = (await db.execute(select(User).where(User.user_id == user_id))).scalar_one_or_none()
         if existing:
             return
-        db.add(User(user_id=user_id))
+        db.add(User(
+            user_id=user_id,
+            email=f"{user_id}@test.com",
+            password_hash="mock_hash"
+        ))
         await db.commit()
 
 

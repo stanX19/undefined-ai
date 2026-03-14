@@ -102,9 +102,9 @@ class UIAgent:
                     # This shouldn't happen if the partial compile was fine, but just in case
                     return {"error": f"Full document became invalid after merge: {full_result.errors[0].message}"}
 
-                # Success — save the raw markdown to db
+                # Success — save the raw markdown to db as a NEW version
                 async with AsyncSessionLocal() as db:
-                    await UIService.replace_ui_markdown(db, topic_id, final_content)
+                    await UIService.push_ui_version(db, topic_id, final_content)
 
                 # Return the parsed AST as a dict, alongside the raw text for reference
                 ast_dict = export_to_dict(full_result.scenes)

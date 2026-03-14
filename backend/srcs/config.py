@@ -40,7 +40,7 @@ class Settings(BaseSettings):
 
     # Database Configuration
     USE_IN_MEMORY_DB: bool = False
-    DB_NAME: str = "database.db"
+    DB_NAME: str = "database_dev.db"
 
     # Application Settings
     DEBUG: bool = False

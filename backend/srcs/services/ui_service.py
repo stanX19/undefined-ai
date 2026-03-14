@@ -19,35 +19,116 @@ class UIService:
 
     @staticmethod
     async def get_scene(db: AsyncSession, topic_id: str) -> Scene | None:
-        """Return the latest scene for *topic_id*, or ``None``."""
+        """Return the scene pointed to by Topic.current_scene_id, or ``None``."""
+        from srcs.models.topic import Topic
+        
         result = await db.execute(
-            select(Scene)
-            .where(Scene.topic_id == topic_id)
-            .order_by(Scene.created_at.desc())
-            .limit(1)
+            select(Topic).where(Topic.topic_id == topic_id)
         )
-        return result.scalars().first()
+        topic = result.scalar_one_or_none()
+        if not topic or not topic.current_scene_id:
+            return None
+
+        result = await db.execute(
+            select(Scene).where(Scene.scene_id == topic.current_scene_id)
+        )
+        return result.scalar_one_or_none()
 
     @staticmethod
     async def get_or_create_scene(db: AsyncSession, topic_id: str) -> Scene:
-        """Return the latest scene, creating an empty one if none exists."""
+        """Return the current scene, creating a root one if it doesn't exist."""
         scene = await UIService.get_scene(db, topic_id)
         if scene is not None:
             return scene
 
+        # New Topic or missing pointer: create root Scene
         scene = Scene(topic_id=topic_id, ui_markdown=_EMPTY_MARKGRAPH)
         db.add(scene)
         await db.flush()
+
+        # Update Topic pointer
+        from srcs.models.topic import Topic
+        result = await db.execute(
+            select(Topic).where(Topic.topic_id == topic_id)
+        )
+        topic = result.scalar_one_or_none()
+        if topic:
+            topic.current_scene_id = scene.scene_id
+
         await db.commit()
         return scene
 
     @staticmethod
-    async def save_scene(db: AsyncSession, scene: Scene) -> Scene:
-        """Persist changes to a scene."""
-        db.add(scene)
+    async def push_ui_version(
+        db: AsyncSession, topic_id: str, ui_markdown: str
+    ) -> Scene:
+        """Push a NEW UI version. Points the topic's HEAD to it. Returns the new Scene."""
+        from srcs.models.topic import Topic
+        result = await db.execute(
+            select(Topic).where(Topic.topic_id == topic_id)
+        )
+        topic = result.scalar_one_or_none()
+        if not topic:
+            raise ValueError(f"Topic {topic_id} not found")
+
+        # Create new Scene branching from current
+        new_scene = Scene(
+            topic_id=topic_id,
+            ui_markdown=ui_markdown,
+            parent_scene_id=topic.current_scene_id
+        )
+        db.add(new_scene)
         await db.flush()
+
+        # Move HEAD
+        topic.current_scene_id = new_scene.scene_id
         await db.commit()
-        return scene
+        return new_scene
+
+    @staticmethod
+    async def set_current_ui_to_version(
+        db: AsyncSession, topic_id: str, scene_id: str
+    ) -> None:
+        """Set the Topic's current UI pointer to a specific historical scene_id."""
+        from srcs.models.topic import Topic
+        result = await db.execute(
+            select(Topic).where(Topic.topic_id == topic_id)
+        )
+        topic = result.scalar_one_or_none()
+        if not topic:
+            raise ValueError(f"Topic {topic_id} not found")
+
+        topic.current_scene_id = scene_id
+        await db.commit()
+
+    @staticmethod
+    async def get_history(db: AsyncSession, topic_id: str):
+        """Return a list of historical scene metadata for a topic."""
+        import re
+        from srcs.schemas.ui_dto import UIHistoryItem
+
+        result = await db.execute(
+            select(Scene)
+            .where(Scene.topic_id == topic_id)
+            .order_by(Scene.created_at.desc())
+        )
+        scenes = result.scalars().all()
+
+        history = []
+        for s in scenes:
+            # Extract first heading as description
+            description = "Untitled Scene"
+            match = re.search(r"^#\s+(.+)$", s.ui_markdown, re.MULTILINE)
+            if match:
+                description = match.group(1).strip()
+            
+            history.append(UIHistoryItem(
+                scene_id=s.scene_id,
+                created_at=s.created_at,
+                description=description
+            ))
+        
+        return history
 
     # -- Read helpers -------------------------------------------------------
 
@@ -65,10 +146,8 @@ class UIService:
     async def replace_ui_markdown(
         db: AsyncSession, topic_id: str, ui_markdown: str,
     ) -> str:
-        """Replace the entire UI document wholesale. Returns the new markdown."""
-        scene = await UIService.get_or_create_scene(db, topic_id)
-        scene.ui_markdown = ui_markdown
-        await UIService.save_scene(db, scene)
+        """DEPRECATED: Use push_ui_version instead. Legacy support for UIAgent compatibility."""
+        scene = await UIService.push_ui_version(db, topic_id, ui_markdown)
         return scene.ui_markdown
 
 

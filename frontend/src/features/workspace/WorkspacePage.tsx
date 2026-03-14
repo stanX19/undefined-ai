@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { PanelLeft, Home, FolderOpen, Pin, MoreHorizontal, Bot, FileDown } from "lucide-react";
+import { PanelLeft, Home, FolderOpen, Pin, MoreHorizontal, Bot, FileDown, History } from "lucide-react";
 import { UIRoot } from "../ui_renderer/components/UIRoot.tsx";
 import { useUIStore } from "../ui_renderer/store.ts";
 import { useMarkGraphStore, fetchMarkGraphUI } from "../markgraph/store.ts";
@@ -17,7 +17,9 @@ export function WorkspacePage() {
   const { topicId: uiTopicId, uiJson: a2uiJson } = useUIStore();
   const { ast: markGraphAst, markdown: storedMarkdown } = useMarkGraphStore();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const historyRef = useRef<HTMLDivElement>(null);
   const topics = useTopicListStore((s) => s.topics);
   const pinnedTopicIds = useTopicListStore((s) => s.pinnedTopicIds);
   const togglePin = useTopicListStore((s) => s.togglePin);
@@ -30,6 +32,10 @@ export function WorkspacePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const isHomeRoute = location.pathname === "/home";
   const isLoadingTopics = useTopicListStore((s) => s.isLoading);
+
+  const versionHistory = useMarkGraphStore((s) => s.versionHistory);
+  const fetchHistory = useMarkGraphStore((s) => s.fetchHistory);
+  const rollbackVersion = useMarkGraphStore((s) => s.rollbackVersion);
 
   const activeTopic = topics.find((t) => t.topic_id === chatTopicId);
   const initialized = useRef(false);
@@ -102,6 +108,23 @@ export function WorkspacePage() {
     return () => document.removeEventListener("click", handleClick);
   }, [menuOpen]);
 
+  useEffect(() => {
+    if (!historyOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (historyRef.current && !historyRef.current.contains(e.target as Node)) {
+        setHistoryOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [historyOpen]);
+
+  useEffect(() => {
+    if (historyOpen && chatTopicId) {
+      fetchHistory(chatTopicId);
+    }
+  }, [historyOpen, chatTopicId, fetchHistory]);
+
   const handleExportMarkdown = () => {
     if (!storedMarkdown) return;
     const filename = `${activeTopic?.title?.replace(/[^\w\s-]/g, "") || "export"}.md`;
@@ -168,6 +191,46 @@ export function WorkspacePage() {
                   <button className="hidden sm:flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-[#605A57] hover:bg-[rgba(55,50,47,0.08)] hover:text-[#37322F] transition-colors cursor-pointer">
                     Share
                   </button>
+
+                  <div ref={historyRef} className="relative">
+                    <button
+                      onClick={() => setHistoryOpen((o) => !o)}
+                      className="rounded-lg p-1.5 text-[#605A57] hover:bg-[rgba(55,50,47,0.08)] hover:text-[#37322F] transition-colors cursor-pointer"
+                      title="UI History"
+                    >
+                      <History size={18} />
+                    </button>
+                    {historyOpen && (
+                      <div className="absolute right-0 top-full mt-1 w-64 max-h-80 overflow-y-auto bg-[#FAF9F8] border border-[#E0DEDB] rounded-lg shadow-lg z-50 py-1">
+                        <div className="px-3 py-2 text-xs font-semibold text-[#605A57] border-b border-[#E0DEDB] mb-1">
+                          Version History
+                        </div>
+                        {versionHistory.length === 0 ? (
+                          <div className="px-3 py-4 text-center text-xs text-text-muted italic">
+                            No history found
+                          </div>
+                        ) : (
+                          versionHistory.map((v) => (
+                            <button
+                              key={v.scene_id}
+                              onClick={() => {
+                                if (chatTopicId) rollbackVersion(chatTopicId, v.scene_id);
+                                setHistoryOpen(false);
+                              }}
+                              className="w-full px-3 py-2 text-left hover:bg-[rgba(55,50,47,0.06)] transition-colors group"
+                            >
+                              <div className="text-[13px] font-medium text-[#49423D] group-hover:text-[#37322F] truncate">
+                                {v.description}
+                              </div>
+                              <div className="text-[11px] text-[#605A57]">
+                                {new Date(v.created_at).toLocaleString()}
+                              </div>
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
                   <button 
                     onClick={() => chatTopicId && togglePin(chatTopicId)}
                     className={`rounded-lg p-1.5 transition-colors cursor-pointer ${

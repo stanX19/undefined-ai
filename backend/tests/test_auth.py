@@ -46,7 +46,7 @@ def run_tests():
         res = client.post(
             "/api/v1/auth/register",
             description="Register new user",
-            json={"email": TEST_EMAIL, "password": TEST_PASSWORD},
+            json={"email": TEST_EMAIL, "password": TEST_PASSWORD, "username": "testuser001"},
         )
         assert "access_token" in res, f"Missing access_token: {res}"
         assert res["token_type"] == "bearer"
@@ -60,7 +60,7 @@ def run_tests():
         print(f"\n{Colors.BOLD}--- 3. Register: duplicate email → 400 ---{Colors.END}")
         raw = requests.post(
             f"{base_url}/api/v1/auth/register",
-            json={"email": TEST_EMAIL, "password": TEST_PASSWORD},
+            json={"email": TEST_EMAIL, "password": TEST_PASSWORD, "username": "testuser002"},
         )
         assert raw.status_code == 400, f"Expected 400, got {raw.status_code}"
         assert "already registered" in raw.json()["detail"].lower()
@@ -70,7 +70,7 @@ def run_tests():
         print(f"\n{Colors.BOLD}--- 4. Register: weak password → 422 ---{Colors.END}")
         raw = requests.post(
             f"{base_url}/api/v1/auth/register",
-            json={"email": "weak@example.com", "password": "short"},
+            json={"email": "weak@example.com", "password": "short", "username": "weakuser"},
         )
         assert raw.status_code == 422, f"Expected 422, got {raw.status_code}"
         print(f"{Colors.GREEN}Correctly rejected weak password{Colors.END}")
@@ -79,7 +79,7 @@ def run_tests():
         print(f"\n{Colors.BOLD}--- 5. Register: password without number → 422 ---{Colors.END}")
         raw = requests.post(
             f"{base_url}/api/v1/auth/register",
-            json={"email": "nonumber@example.com", "password": "NoNumberHere"},
+            json={"email": "nonumber@example.com", "password": "NoNumberHere", "username": "nonumberuser"},
         )
         assert raw.status_code == 422, f"Expected 422, got {raw.status_code}"
         print(f"{Colors.GREEN}Correctly rejected password without number{Colors.END}")
@@ -214,7 +214,7 @@ def run_tests():
         res_b = client.post(
             "/api/v1/auth/register",
             description="Register user B",
-            json={"email": "userB@example.com", "password": "UserBPass1"},
+            json={"email": "userB@example.com", "password": "UserBPass1", "username": "userB"},
         )
         token_b = res_b["access_token"]
 
