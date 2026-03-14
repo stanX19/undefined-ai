@@ -16,7 +16,6 @@ class UIService:
     """Static methods for MarkGraph scene CRUD."""
 
     # -- Scene-level --------------------------------------------------------
-
     @staticmethod
     async def get_scene(db: AsyncSession, topic_id: str) -> Scene | None:
         """Return the scene pointed to by Topic.current_scene_id, or ``None``."""

@@ -141,6 +141,29 @@ function ElementRenderer({ element }: { element: MarkGraphElement }) {
                       tr: markdownComponents.tr as React.ComponentType<any>,
                       th: markdownComponents.th as React.ComponentType<any>,
                       td: markdownComponents.td as React.ComponentType<any>,
+                      a: ({ node: _node, href, children, ...props }) => {
+                        if (href?.startsWith("#")) {
+                          return (
+                            <a
+                              href={href}
+                              {...props}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                const targetId = href.replace(/^#/, "");
+                                useMarkGraphStore.getState().navigateScene(targetId);
+                              }}
+                              className="text-primary hover:underline mx-1 cursor-pointer"
+                            >
+                              {children}
+                            </a>
+                          );
+                        }
+                        return (
+                          <a href={href} target="_blank" rel="noopener noreferrer" {...props} className="text-primary hover:underline mx-1">
+                            {children}
+                          </a>
+                        );
+                      },
                     }}
                   >
                     {frag}

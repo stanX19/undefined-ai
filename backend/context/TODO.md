@@ -1,6 +1,4 @@
-frontend confirmation dont use browser default yes no
 
-button in table is breaking it. when parsing and detecting button in table. change it into normal link instead. 
 
 Things to do before deploying:
 1. "Ways startup website gets hacked"
