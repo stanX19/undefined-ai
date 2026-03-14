@@ -145,7 +145,7 @@ RE_INCLUDE_ONLY = re.compile(r'^!\[([^\]]*)\]\(#([^)]+)\)\s*$')
 RE_FENCE_OPEN   = re.compile(r'^:::([a-z]+)\s*$')
 RE_FENCE_CLOSE  = re.compile(r'^:::\s*$')
 RE_HR           = re.compile(r'^[-=]{3,}\s*$')
-RE_TABLE_ROW    = re.compile(r'^\s*\|.*\||.*\|.*\|.*')
+RE_TABLE_ROW    = re.compile(r'^\s*\|.*\|\s*$')
 
 # inline patterns (used inside text / threshold bodies)
 RE_INLINE_INCLUDE = re.compile(r'!\[([^\]]*)\]\(#([^)]+)\)')
