@@ -73,6 +73,19 @@ async def login(
     )
 
 
+@router.get("/profile", response_model=ProfileResponse)
+async def get_profile(
+    current_user: User = Depends(get_current_user),
+) -> ProfileResponse:
+    """Get the authenticated user's profile data."""
+    return ProfileResponse(
+        user_id=current_user.user_id,
+        email=current_user.email,
+        username=current_user.username,
+        education_level=current_user.education_level,
+    )
+
+
 @router.patch("/profile", response_model=ProfileResponse)
 async def update_profile(
     body: ProfileUpdateRequest,
