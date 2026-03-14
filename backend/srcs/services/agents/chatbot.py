@@ -44,22 +44,22 @@ class Chatbot:
     async def ask(
         self,
         user_prompt: str,
-        document_text: str | None = None,
         chat_history: list[BaseMessage] | None = None,
         on_tool_call: Callable[[str, dict], Awaitable[None]] | None = None,
+        context: str | None = None,
     ) -> tuple[str, list[BaseMessage]]:
         """Send a message through the agent and return the final text answer.
 
         Args:
             on_tool_call: Optional async callback invoked with ``(tool_name, arguments)``
                           each time the agent calls a tool.
+            context: Optional string injected into the system prompt for extra grounding.
         """
-        messages = self._build_messages(user_prompt, document_text, chat_history)
+        messages = self._build_messages(user_prompt, chat_history, context)
         initial_msg_count = len(messages)
 
         settings = get_settings()
-        if settings.DEBUG:
-            print(f"\n[CHATBOT] === USER PROMPT ===\n{user_prompt}\n")
+        print(f"\n[CHATBOT] === USER PROMPT ===\n{user_prompt}\n")
 
         try:
             llm = await rotating_llm.get_runnable(temperature=0.4)
@@ -78,18 +78,18 @@ class Chatbot:
                 if kind == "on_chat_model_end":
                     output = event.get("data", {}).get("output")
                     if isinstance(output, AIMessage):
-                        if settings.DEBUG:
-                            if output.tool_calls:
-                                print(f"[CHATBOT] AI Tool Calls: {output.tool_calls}")
-                            else:
-                                print(f"[CHATBOT] AI Response: {output.content}")
-                        
-                        if output.tool_calls and on_tool_call:
-                            for tc in output.tool_calls:
-                                await on_tool_call(tc["name"], tc.get("args", {}))
+                        if output.tool_calls:
+                            print(f"[CHATBOT] AI Tool Calls: {output.tool_calls}")
+                            if on_tool_call:
+                                for tc in output.tool_calls:
+                                    await on_tool_call(tc["name"], tc.get("args", {}))
+                        else:
+                            print(f"[CHATBOT] AI Response: {output.content}")
 
-                if kind == "on_tool_end" and settings.DEBUG:
-                    print(f"[CHATBOT] Tool Result ({event['name']}): {event['data'].get('output')}")
+                if kind == "on_tool_end":
+                    tool_name = event.get("name", "unknown")
+                    tool_output = event.get("data", {}).get("output")
+                    print(f"[CHATBOT] Tool Result ({tool_name}): {str(tool_output)[:500]}...")
 
                 # Track the final AI message from the agent
                 if kind == "on_chain_end" and event.get("name") == "LangGraph":
@@ -134,16 +134,14 @@ class Chatbot:
     def _build_messages(
         self,
         user_prompt: str,
-        document_text: str | None,
         chat_history: list[BaseMessage] | None,
+        context: str | None = None,
     ) -> list[BaseMessage]:
         """Assemble the full message list for the agent."""
         system_parts: list[str] = [self.system_prompt]
-        if document_text:
-            system_parts.append(
-                f"\n\n--- DOCUMENT CONTEXT ---\n{document_text}\n--- END CONTEXT ---"
-            )
-
+        if context:
+            system_parts.append(f"\n--- ADDITIONAL CONTEXT ---\n{context}\n")
+            
         messages: list[BaseMessage] = [SystemMessage(content="\n".join(system_parts))]
 
         if chat_history:

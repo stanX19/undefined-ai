@@ -22,7 +22,7 @@ class ChatService:
 
     @staticmethod
     async def send_message(
-        db: AsyncSession, topic_id: str, message: str, document_text: str | None,
+        db: AsyncSession, topic_id: str, message: str,
     ) -> ChatMessage:
         """Persist a user message and kick off the agent reply in the background.
 
@@ -39,7 +39,6 @@ class ChatService:
             ChatService._run_agent_and_stream(
                 topic_id=topic_id,
                 user_prompt=prompt,
-                document_text=document_text,
                 exclude_message_id=user_msg.message_id,
             )
         )
@@ -55,8 +54,14 @@ class ChatService:
         """Persist a single chat message."""
         msg = ChatMessage(topic_id=topic_id, role=role, message=message)
         db.add(msg)
-        await db.flush()      # populates server-side defaults (message_id, created_at)
-        await db.commit()
+        try:
+            # print(f"[CHAT] Flushing message (role={role})...")
+            await db.flush()      # populates server-side defaults (message_id, created_at)
+            # print(f"[CHAT] Committing message (role={role})...")
+            await db.commit()
+        except Exception as e:
+            print(f"[CHAT] Error adding message: {e}")
+            raise
         return msg
 
     @staticmethod
@@ -228,7 +233,6 @@ class ChatService:
     async def _run_agent_and_stream(
         topic_id: str,
         user_prompt: str,
-        document_text: str | None,
         exclude_message_id: str,
     ) -> None:
         """Background coroutine: build history, call agent, persist reply, emit SSE."""
@@ -246,6 +250,12 @@ class ChatService:
         await SseService.emit(session_id, SseNotifData(message="Processing your message…"))
 
         try:
+            # -- [NEW] Wait for ingestion to reach at least Level 1 --
+            from srcs.services.ingestion_service import IngestionService
+            if not IngestionService.is_topic_ready(topic_id):
+                await SseService.emit(session_id, SseNotifData(message="Waiting for document analysis to complete..."))
+                await IngestionService.wait_for_level_one(topic_id)
+
             # Use a fresh session so we see all previously committed data
             async with AsyncSessionLocal() as db:
                 chat_history = await ChatService._build_lc_history(
@@ -259,13 +269,14 @@ class ChatService:
                 current_ui = await UIService.get_ui_markdown(db, topic_id)
                 ui_info = f"--- CURRENT MARKGRAPH UI STATE ---\n{current_ui}\n--- END UI STATE ---\n\n"
 
-                context_text: str | None = document_text or "No document provided."
                 max_level = await RetrievalService.get_max_level(db, topic_id)
+                context_text = ""
                 if max_level is not None and max_level >= 1:
                     top_facts = await RetrievalService.get_facts_by_level(db, topic_id, level=max_level)
                     if top_facts:
                         concepts: list[str] = [f"- {f.content}" for f in top_facts]
                         context_text = (
+                            "[DOCUMENT HAS BEEN INGESTED TO KNOWLEDGE BASE]\n"
                             f"TOPIC KNOWLEDGE (max_level={max_level}, levels 0-{max_level} available).\n"
                             f"Use list_topic_facts with topic_id='{topic_alias}' and level=0..{max_level} to browse.\n"
                             f"Use retrieve_facts to drill into a specific fact_id.\n\n"
@@ -273,7 +284,11 @@ class ChatService:
                             + "\n".join(concepts)
                         )
                 
-                context_text = base_info + ui_info + context_text
+                context_payload = base_info + ui_info + context_text
+                
+                # Rehydrate mapper from history to recover previous turns' IDs
+                if chat_history:
+                    mapper.rehydrate(chat_history)
 
             async def _on_tool_call(tool_name: str, arguments: dict) -> None:
                 await SseService.emit(
@@ -283,9 +298,9 @@ class ChatService:
 
             answer, new_msgs = await chatbot.ask(
                 user_prompt=user_prompt,
-                document_text=context_text,
                 chat_history=chat_history,
                 on_tool_call=_on_tool_call,
+                context=context_payload,
             )
 
             async with AsyncSessionLocal() as db:

@@ -120,7 +120,6 @@ class RecommendationService:
 
     @staticmethod
     async def get_recommendations(
-        db: AsyncSession,
         user_id: str,
         topic_id: str,
     ) -> list[dict]:
@@ -128,23 +127,27 @@ class RecommendationService:
 
         Returns a list of dicts: [{"title", "difficulty", "reason"}, ...]
         """
-        topic = await db.get(Topic, topic_id)
-        if not topic:
-            return []
+        from srcs.database import AsyncSessionLocal
 
-        difficulty = topic.difficulty_level or 4
-        same = difficulty
-        plus1 = min(difficulty + 1, 6)
-        plus2 = min(difficulty + 2, 6)
+        async with AsyncSessionLocal() as db:
+            topic = await db.get(Topic, topic_id)
+            if not topic:
+                return []
 
-        max_level = await RecommendationService._get_max_level(db, topic_id)
-        concepts = await RecommendationService._get_top_facts(
-            db, topic_id, max_level,
-        )
-        concepts_text = "\n".join(f"- {c}" for c in concepts) if concepts else "(no facts extracted yet)"
+            topic_title = topic.title
+            difficulty = topic.difficulty_level or 4
+            same = difficulty
+            plus1 = min(difficulty + 1, 6)
+            plus2 = min(difficulty + 2, 6)
+
+            max_level = await RecommendationService._get_max_level(db, topic_id)
+            concepts = await RecommendationService._get_top_facts(
+                db, topic_id, max_level,
+            )
+            concepts_text = "\n".join(f"- {c}" for c in concepts) if concepts else "(no facts extracted yet)"
 
         prompt = _RECOMMEND_PROMPT.format(
-            title=topic.title,
+            title=topic_title,
             difficulty=difficulty,
             difficulty_label=_DIFFICULTY_LABELS.get(difficulty, "unknown"),
             same=same,

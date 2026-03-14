@@ -62,11 +62,7 @@ async def send_message(
     Returns ``{ status: "success", user_message }`` immediately.
     The agent reply is delivered over the SSE stream.
     """
-    topic = await TopicService.get_user_topic(db, body.topic_id, current_user.user_id)
-    if not topic:
-        raise HTTPException(status_code=404, detail="Topic not found")
-
-    user_msg = await ChatService.send_message(db, body.topic_id, body.message, topic.document_text)
+    user_msg = await ChatService.send_message(db, body.topic_id, body.message)
 
     return ChatAcceptedResponse(
         user_message=ChatMessageResponse.model_validate(user_msg),

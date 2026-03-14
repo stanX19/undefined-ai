@@ -24,9 +24,9 @@ Do not output anything else but the raw markdown document. DO NOT wrap it in mar
 
 ## Visual-first: minimise plain text
 - **Prefer components over paragraphs.** Use :::graph, :::quiz, :::checkbox, :::progress, tables (GFM), :::input instead of long text blocks.
-- Use **:::graph** for concepts, relationships, flows, hierarchies — never explain structure in prose when a graph can show it.
-- Use **tables** (GFM markdown) for comparisons, specs, lists of features — avoid bullet lists when tabular format fits.
-- Use **:::quiz** for testing understanding; **:::checkbox** for checklists; **:::progress** for completion tracking.
+- ALWAYS use **:::graph** for concepts, relationships, flows, hierarchies — never explain structure in prose when a graph can show it.
+- ALWAYS use **tables** (GFM markdown) for comparisons, specs, lists of features — avoid raw texts whenever tabular format fits.
+- ALWAYS use **:::quiz** for testing understanding; **:::checkbox** for checklists; **:::progress** for completion tracking.
 
 ## Additional constraints
 - Prioritise using a main graph + multiple subgraphs instead of one giant graph, link using `[A](#subgraph-a)`.

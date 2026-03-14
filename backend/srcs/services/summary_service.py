@@ -92,6 +92,7 @@ class SummaryService:
                 topic: Topic | None = await db.get(Topic, topic_id)
                 if not topic:
                     return
+                topic_title = topic.title
                 
                 # Fetch recent messages
                 history_rows = await ChatService.get_history(db, topic_id, limit=50)
@@ -110,18 +111,21 @@ class SummaryService:
                 
                 top_facts = await SummaryService.fetch_highest_level_facts(db, topic_id)
 
-                full_text: str = (
-                    f"Current Title: {topic.title}\n"
-                    f"Knowledge Facts (Highest level):\n{top_facts}\n"
-                    f"Recent Chat History:\n{context_str}"
-                )
+            full_text: str = (
+                f"Current Title: {topic_title}\n"
+                f"Knowledge Facts (Highest level):\n{top_facts}\n"
+                f"Recent Chat History:\n{context_str}"
+            )
+            
+            new_title: str = await SummaryService.generate_summary(full_text, length)
+            if not new_title or new_title == "New Topic":
+                return
                 
-                new_title: str = await SummaryService.generate_summary(full_text, length)
-                if not new_title or new_title == "New Topic":
-                    return
-                    
-                topic.title = new_title
-                await db.commit()
+            async with AsyncSessionLocal() as db:
+                topic = await db.get(Topic, topic_id)
+                if topic:
+                    topic.title = new_title
+                    await db.commit()
                 
             # Emit SSE outside of DB block
             await SseService.emit(

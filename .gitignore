@@ -42,6 +42,8 @@ activate.bat
 run_backend.bat
 run_frontend.bat
 *.db
+*.db-shm
+*.db-wal
 
 
 .github

@@ -41,9 +41,20 @@ def _set_sqlite_pragma(dbapi_conn, connection_record):
         cursor.execute("PRAGMA busy_timeout=30000")  # 30s wait for lock (ms)
         if not settings.USE_IN_MEMORY_DB:
             cursor.execute("PRAGMA journal_mode=WAL")
+            cursor.execute("PRAGMA synchronous=NORMAL")
+        
+        # Validation prints
+        cursor.execute("PRAGMA journal_mode")
+        jm = cursor.fetchone()[0]
+        cursor.execute("PRAGMA busy_timeout")
+        bt = cursor.fetchone()[0]
+        print(f"[DB] Connection initialized: journal_mode={jm}, busy_timeout={bt}")
+        
         cursor.close()
-    except Exception:
+    except Exception as e:
+        print(f"[DB] Error setting PRAGMAs: {e}")
         pass  # timeout in connect_args still applies
+
 
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,

@@ -17,10 +17,20 @@ from srcs.models.topic import Topic
 from srcs.schemas.chat_dto import SseIngestionProgressData
 from srcs.services.agents.cached_llm import cached_llm as rotating_llm
 from srcs.services.sse_service import SseService
+import hashlib
+from enum import IntEnum
 
+# -- In-memory status tracking ----------------------------------------------------
 
-# -- In-memory status tracking (POC) ---------------------------------------------
-_pipeline_status: dict[str, str] = {}  # topic_id -> status string
+class PipelineStatus(IntEnum):
+    """Pipeline progression levels."""
+    PENDING = 0
+    STAGE_1 = 1  # Raw text saved
+    LEVEL_1 = 2  # Atomic facts extracted
+    LEVEL_2 = 3
+    COMPLETED = 100
+    FAILED = -1
+
 
 # -- Stop condition for the compression loop --------------------------------------
 _MIN_FACTS_TO_COMPRESS = 4  # stop compressing when <= this many facts remain
@@ -74,26 +84,80 @@ Return JSON:
 class IngestionService:
     """Manages the ingestion pipeline lifecycle."""
 
+    # -- Internal State -----------------------------------------------------------
+
+    # topic_id -> {doc_hash: PipelineStatus}
+    _topic_pipelines: dict[str, dict[str, PipelineStatus]] = {}
+
+    # topic_id -> asyncio.Condition (for waiting on Level 1)
+    _topic_conditions: dict[str, asyncio.Condition] = {}
+
+    # topic_id -> asyncio.Lock (for cross-tree compression)
+    _cross_tree_locks: dict[str, asyncio.Lock] = {}
+
     # -- Public API ---------------------------------------------------------------
 
     @staticmethod
     def trigger_ingestion(topic_id: str, document_text: str) -> None:
-        """Kick off the pipeline as a background task. Returns immediately.
-        Delay start briefly so the upload request can commit and release its DB connection,
-        reducing SQLite "database table is locked" under concurrent load.
-        """
-        _pipeline_status[topic_id] = "processing"
+        """Kick off the pipeline as a background task. Returns immediately."""
+        doc_hash = hashlib.md5(document_text.encode("utf-8")).hexdigest()
 
-        async def _run_after_release() -> None:
-            await asyncio.sleep(1.0)
-            await IngestionService._run_pipeline(topic_id, document_text)
+        if topic_id not in IngestionService._topic_pipelines:
+            IngestionService._topic_pipelines[topic_id] = {}
+        
+        IngestionService._topic_pipelines[topic_id][doc_hash] = PipelineStatus.PENDING
 
-        asyncio.create_task(_run_after_release())
+        asyncio.create_task(
+            IngestionService._run_pipeline(topic_id, document_text, doc_hash)
+        )
 
     @staticmethod
     def get_status(topic_id: str) -> str:
-        """Return the current pipeline status for a topic."""
-        return _pipeline_status.get(topic_id, "pending")
+        """Return a summary status for the topic (lowest status among active docs)."""
+        pipelines = IngestionService._topic_pipelines.get(topic_id)
+        if not pipelines:
+            return "pending"
+        
+        # If any doc is at a certain level, return the "minimum" progress to be safe
+        min_status = min(pipelines.values())
+        
+        if min_status == PipelineStatus.COMPLETED:
+            return "completed"
+        if min_status == PipelineStatus.FAILED:
+            return "failed"
+        
+        return f"processing:{min_status.name.lower()}"
+
+    @staticmethod
+    async def wait_for_level_one(topic_id: str) -> bool:
+        """Block until all currently registered documents for the topic reach Level 1.
+        
+        Returns True if all reached Level 1, False if any failed.
+        """
+        if IngestionService.is_topic_ready(topic_id):
+            return True
+
+        if topic_id not in IngestionService._topic_conditions:
+            IngestionService._topic_conditions[topic_id] = asyncio.Condition()
+        
+        cond = IngestionService._topic_conditions[topic_id]
+        
+        async with cond:
+            while not IngestionService.is_topic_ready(topic_id):
+                await cond.wait()
+        
+        # Final failure check
+        pipelines = IngestionService._topic_pipelines.get(topic_id, {})
+        return not any(s == PipelineStatus.FAILED for s in pipelines.values())
+
+    @staticmethod
+    def is_topic_ready(topic_id: str) -> bool:
+        """Return True if all documents in the topic have reached Level 1 or higher."""
+        pipelines = IngestionService._topic_pipelines.get(topic_id, {})
+        if not pipelines:
+            return True  # no docs = no wait
+        
+        return all(s >= PipelineStatus.LEVEL_1 or s == PipelineStatus.FAILED for s in pipelines.values())
 
     @staticmethod
     async def _emit_progress(topic_id: str, stage: str, message: str) -> None:
@@ -107,13 +171,18 @@ class IngestionService:
     # -- Pipeline runner ----------------------------------------------------------
 
     @staticmethod
-    async def _run_pipeline(topic_id: str, document_text: str) -> None:
+    async def _run_pipeline(topic_id: str, document_text: str, doc_hash: str) -> None:
         """Execute the iterative pipeline: save raw text -> extract -> compress loop."""
         from srcs.database import AsyncSessionLocal
 
+        if topic_id not in IngestionService._topic_conditions:
+            IngestionService._topic_conditions[topic_id] = asyncio.Condition()
+        cond = IngestionService._topic_conditions[topic_id]
+
         try:
             async with AsyncSessionLocal() as db:
-                # Stage 1: Save raw document as a single level-0 chunk
+                # Stage 1: Save raw document
+                IngestionService._topic_pipelines[topic_id][doc_hash] = PipelineStatus.STAGE_1
                 await IngestionService._emit_progress(topic_id, "stage_1", "Saving document...")
                 chunk = AtomicFact(
                     topic_id=topic_id,
@@ -123,85 +192,109 @@ class IngestionService:
                     source_end=len(document_text),
                 )
                 db.add(chunk)
+                # print(f"[INGESTION] Stage 1: Flushing raw document...")
                 await db.flush()
+                # print(f"[INGESTION] Stage 1: Committing raw document...")
                 await db.commit()
-                print(f"[INGESTION] Stage 1: saved raw document ({len(document_text)} chars)")
+                chunk_fact_id = chunk.fact_id
+            print(f"[INGESTION] Stage 1: saved raw document ({len(document_text)} chars)")
 
-                # Stage 2: Extract atomic facts from the raw text
-                current_level = 1
-                _pipeline_status[topic_id] = f"processing:level_{current_level}"
+            current_level = 1
+            await IngestionService._emit_progress(
+                topic_id, f"level_{current_level}", "Extracting atomic facts...",
+            )
+            current_facts = await IngestionService._extract_facts(
+                topic_id, document_text, chunk_fact_id, len(document_text)
+            )
+
+            # Stage 2: Extract atomic facts from the raw text (NOW COMPLETE)
+            IngestionService._topic_pipelines[topic_id][doc_hash] = PipelineStatus.LEVEL_1
+            
+            async with cond:
+                cond.notify_all()
+
+            # Stage 3+: Iteratively compress until condensed
+            while len(current_facts) > _MIN_FACTS_TO_COMPRESS:
+                current_level += 1
+                # Map level to Enum if within range, otherwise just use LEVEL_2+ logic
+                IngestionService._topic_pipelines[topic_id][doc_hash] = PipelineStatus.LEVEL_2
                 await IngestionService._emit_progress(
-                    topic_id, f"level_{current_level}", "Extracting atomic facts...",
+                    topic_id,
+                    f"level_{current_level}",
+                    f"Compressing {len(current_facts)} facts -> level {current_level}...",
                 )
-                current_facts = await IngestionService._extract_facts(db, topic_id, chunk)
-
-                # Stage 3+: Iteratively compress until condensed
-                while len(current_facts) > _MIN_FACTS_TO_COMPRESS:
-                    current_level += 1
-                    _pipeline_status[topic_id] = f"processing:level_{current_level}"
-                    await IngestionService._emit_progress(
-                        topic_id,
-                        f"level_{current_level}",
-                        f"Compressing {len(current_facts)} facts -> level {current_level}...",
-                    )
-                    compressed = await IngestionService._compress_facts(
-                        db, topic_id, current_level, current_facts,
-                    )
-                    # Guard: stop if compression didn't reduce the count
-                    if len(compressed) >= len(current_facts):
-                        print(f"[INGESTION] Compression stalled at level {current_level}, stopping")
-                        break
-                    current_facts = compressed
-
-                # Cross-tree: merge across knowledge trees if combined count exceeds threshold
-                await IngestionService._cross_tree_compress(db, topic_id)
-
-                # Classify material difficulty and store on the topic
-                await IngestionService._classify_and_store_difficulty(
-                    db, topic_id, document_text,
+                compressed = await IngestionService._compress_facts(
+                    topic_id, current_level, current_facts,
                 )
+                # Guard: stop if compression didn't reduce the count
+                if len(compressed) >= len(current_facts):
+                    print(f"[INGESTION] Compression stalled at level {current_level}, stopping")
+                    break
+                current_facts = compressed
 
-            _pipeline_status[topic_id] = "completed"
+            # Cross-tree: merge across knowledge trees if combined count exceeds threshold
+            if topic_id not in IngestionService._cross_tree_locks:
+                IngestionService._cross_tree_locks[topic_id] = asyncio.Lock()
+            
+            async with IngestionService._cross_tree_locks[topic_id]:
+                await IngestionService._cross_tree_compress(topic_id)
+
+            # Classify material difficulty and store on the topic
+            await IngestionService._classify_and_store_difficulty(
+                topic_id, document_text,
+            )
+
+            IngestionService._topic_pipelines[topic_id][doc_hash] = PipelineStatus.COMPLETED
             await IngestionService._emit_progress(topic_id, "completed", "Ingestion complete.")
-            print(f"[INGESTION] Pipeline completed for topic {topic_id} (max level {current_level})")
+            print(f"[INGESTION] Pipeline completed for topic {topic_id} (doc {doc_hash[:8]})")
 
         except Exception as exc:
+            import traceback
             traceback.print_exc()
-            _pipeline_status[topic_id] = f"failed:{exc}"
-            print(f"[INGESTION] Pipeline FAILED for topic {topic_id}: {exc}")
+            IngestionService._topic_pipelines[topic_id][doc_hash] = PipelineStatus.FAILED
+            
+            async with cond:
+                cond.notify_all()
+
+            print(f"[INGESTION] Pipeline FAILED for topic {topic_id} (doc {doc_hash[:8]}): {exc}")
 
     # -- Fact extraction (level 0 -> level 1) ------------------------------------
 
     @staticmethod
     async def _extract_facts(
-        db: AsyncSession,
         topic_id: str,
-        chunk: AtomicFact,
+        chunk_content: str,
+        chunk_fact_id: str,
+        chunk_end: int,
     ) -> list[AtomicFact]:
         """Send the full document to the LLM and persist extracted facts."""
-        prompt: str = _EXTRACT_FACTS_PROMPT.format(document_text=chunk.content)
+        from srcs.database import AsyncSessionLocal
+
+        prompt: str = _EXTRACT_FACTS_PROMPT.format(document_text=chunk_content)
         response = await rotating_llm.send_message_get_json(
             prompt, temperature=0.0,
         )
         extracted: list[str] = response.json_data if isinstance(response.json_data, list) else []
 
         facts: list[AtomicFact] = []
-        for fact_text in extracted:
-            if not isinstance(fact_text, str) or not fact_text.strip():
-                continue
-            fact = AtomicFact(
-                topic_id=topic_id,
-                level=1,
-                content=fact_text.strip(),
-                source_chunk_id=chunk.fact_id,
-                source_start=0,
-                source_end=len(chunk.content),
-            )
-            db.add(fact)
-            facts.append(fact)
+        async with AsyncSessionLocal() as db:
+            for fact_text in extracted:
+                if not isinstance(fact_text, str) or not fact_text.strip():
+                    continue
+                fact = AtomicFact(
+                    topic_id=topic_id,
+                    level=1,
+                    content=fact_text.strip(),
+                    source_chunk_id=chunk_fact_id,
+                    source_start=0,
+                    source_end=chunk_end,
+                )
+                db.add(fact)
+                facts.append(fact)
 
-        await db.flush()
-        await db.commit()
+            await db.flush()
+            # print(f"[INGESTION] Level 1: Committing {len(facts)} facts...")
+            await db.commit()
         print(f"[INGESTION] Level 1: extracted {len(facts)} atomic facts")
         return facts
 
@@ -209,12 +302,12 @@ class IngestionService:
 
     @staticmethod
     async def _compress_facts(
-        db: AsyncSession,
         topic_id: str,
         target_level: int,
         source_facts: list[AtomicFact],
     ) -> list[AtomicFact]:
         """Compress a list of facts into fewer higher-level facts."""
+        from srcs.database import AsyncSessionLocal
         import json
 
         facts_json = json.dumps([f.content for f in source_facts], indent=2)
@@ -225,31 +318,31 @@ class IngestionService:
         compressed: list[str] = response.json_data if isinstance(response.json_data, list) else []
 
         new_facts: list[AtomicFact] = []
-        for fact_text in compressed:
-            if not isinstance(fact_text, str) or not fact_text.strip():
-                continue
-            fact = AtomicFact(
-                topic_id=topic_id,
-                level=target_level,
-                content=fact_text.strip(),
-                source_chunk_id=source_facts[0].source_chunk_id,
-                source_start=0,
-                source_end=source_facts[0].source_end or 0,
-            )
-            db.add(fact)
-            new_facts.append(fact)
+        async with AsyncSessionLocal() as db:
+            for fact_text in compressed:
+                if not isinstance(fact_text, str) or not fact_text.strip():
+                    continue
+                fact = AtomicFact(
+                    topic_id=topic_id,
+                    level=target_level,
+                    content=fact_text.strip(),
+                    source_chunk_id=source_facts[0].source_chunk_id,
+                    source_start=0,
+                    source_end=source_facts[0].source_end or 0,
+                )
+                db.add(fact)
+                new_facts.append(fact)
 
-        await db.flush()
-        await db.commit()
+            await db.flush()
+            # print(f"[INGESTION] Level {target_level}: Committing {len(new_facts)} facts...")
+            await db.commit()
         print(f"[INGESTION] Level {target_level}: compressed {len(source_facts)} -> {len(new_facts)} facts")
         return new_facts
 
     # -- Cross-tree compression (merges across multiple knowledge trees) ----------
 
     @staticmethod
-    async def _cross_tree_compress(
-        db: AsyncSession, topic_id: str,
-    ) -> None:
+    async def _cross_tree_compress(topic_id: str) -> None:
         """Merge facts across knowledge trees when their combined count exceeds threshold.
 
         After each individual tree is fully compressed, this method checks the
@@ -257,15 +350,18 @@ class IngestionService:
         trees) exceeds ``_MIN_FACTS_TO_COMPRESS``, it compresses them into a new
         higher level.  The process repeats until the top level is small enough.
         """
+        from srcs.database import AsyncSessionLocal
         from srcs.services.retrieval_service import RetrievalService
 
-        max_level = await RetrievalService.get_max_level(db, topic_id)
+        async with AsyncSessionLocal() as db:
+            max_level = await RetrievalService.get_max_level(db, topic_id)
         if max_level is None or max_level < 1:
             return
 
         current_level = max_level
         while True:
-            facts = await RetrievalService.get_facts_by_level(db, topic_id, current_level)
+            async with AsyncSessionLocal() as db:
+                facts = await RetrievalService.get_facts_by_level(db, topic_id, current_level)
             if len(facts) <= _MIN_FACTS_TO_COMPRESS:
                 break
 
@@ -276,7 +372,7 @@ class IngestionService:
             )
 
             compressed = await IngestionService._compress_facts(
-                db, topic_id, current_level + 1, facts,
+                topic_id, current_level + 1, facts,
             )
 
             if len(compressed) >= len(facts):
@@ -291,17 +387,19 @@ class IngestionService:
 
     @staticmethod
     async def _classify_and_store_difficulty(
-        db: AsyncSession, topic_id: str, document_text: str,
+        topic_id: str, document_text: str,
     ) -> None:
         """Run LLM difficulty classification and persist to the topic row."""
+        from srcs.database import AsyncSessionLocal
         from srcs.services.recommendation_service import RecommendationService
 
         try:
             level = await RecommendationService.classify_difficulty(document_text)
-            topic = await db.get(Topic, topic_id)
-            if topic:
-                topic.difficulty_level = level
-                await db.commit()
-                print(f"[INGESTION] Classified difficulty for topic {topic_id}: {level}")
+            async with AsyncSessionLocal() as db:
+                topic = await db.get(Topic, topic_id)
+                if topic:
+                    topic.difficulty_level = level
+                    await db.commit()
+                    print(f"[INGESTION] Classified difficulty for topic {topic_id}: {level}")
         except Exception as exc:
             print(f"[INGESTION] Difficulty classification failed: {exc}")
