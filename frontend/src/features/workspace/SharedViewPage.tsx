@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useMarkGraphStore } from "../markgraph/store.ts";
 import { MarkGraphRoot } from "../markgraph/components/MarkGraphRoot.tsx";
-import { Share2, ArrowLeft, Bot } from "lucide-react";
+import { Share2, ArrowLeft } from "lucide-react";
 
 export function SharedViewPage() {
   const { token } = useParams<{ token: string }>();
