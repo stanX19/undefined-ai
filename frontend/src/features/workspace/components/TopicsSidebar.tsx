@@ -12,6 +12,7 @@ import { useSurfaceStore } from "../../a2ui/store";
 import { useUIStore } from "../../ui_renderer/store";
 import { useMarkGraphStore } from "../../markgraph/store";
 import { useWorkspaceLayoutStore } from "../layoutStore";
+import { ConfirmDialog } from "../../../components/ui/ConfirmDialog";
 
 export function TopicsSidebar() {
     const topics = useTopicListStore((s) => s.topics);
@@ -34,6 +35,7 @@ export function TopicsSidebar() {
     const [sidebarWidth, setSidebarWidth] = useState(280);
     const [isResizing, setIsResizing] = useState(false);
     const [openMenuTopicId, setOpenMenuTopicId] = useState<string | null>(null);
+    const [topicToDelete, setTopicToDelete] = useState<string | null>(null);
     const sidebarRef = useRef<HTMLDivElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -311,9 +313,8 @@ export function TopicsSidebar() {
                                                         role="menuitem"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            if (window.confirm("Delete this topic? This cannot be undone.")) {
-                                                                handleDeleteTopic(topic.topic_id);
-                                                            }
+                                                            setTopicToDelete(topic.topic_id);
+                                                            setOpenMenuTopicId(null);
                                                         }}
                                                         className="flex w-[calc(100%-10px)] items-center gap-1.5 rounded-md px-2.5 py-1.5 ml-1 mr-2 text-[12px] text-red-600 transition-colors hover:bg-red-50"
                                                     >
@@ -358,6 +359,20 @@ export function TopicsSidebar() {
                     )}
                 </div>
             </div>
+
+            <ConfirmDialog
+                isOpen={!!topicToDelete}
+                onClose={() => setTopicToDelete(null)}
+                onConfirm={() => {
+                    if (topicToDelete) {
+                        handleDeleteTopic(topicToDelete);
+                    }
+                }}
+                title="Delete Topic?"
+                message="This will permanently delete this conversation and all its history. This action cannot be undone."
+                confirmText="Delete"
+                isDestructive
+            />
         </>
     );
 }
