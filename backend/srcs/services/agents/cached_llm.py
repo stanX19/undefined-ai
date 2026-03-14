@@ -91,34 +91,13 @@ class CachedLLM:
             model: str | None = None,
             **llm_kwargs
     ) -> LLMResponse:
-        key = _cache_key(messages, temperature, model)
-
-        # 1. Deduplicate concurrent requests
-        if key in self._in_flight:
-            print(f"[CACHED_LLM] Concurrent HIT ({key[:12]}…)")
-            return await self._in_flight[key]
-
-        # 2. Check disk cache
-        cached = _load_cache(key)
-        if cached is not None:
-            print(f"[CACHED_LLM] Cache HIT  ({key[:12]}…)")
-            return cached
-
-        # 3. Define the LLM call work
-        async def _do_send():
-            print(f"[CACHED_LLM] Cache MISS ({key[:12]}…)")
-            res = await self._llm.send_message(messages, config, temperature=temperature, model=model, **llm_kwargs)
-            if res.status == "ok":
-                _save_cache(key, res)
-            return res
-
-        # 4. Create and register task
-        task = asyncio.create_task(_do_send())
-        self._in_flight[key] = task
-        try:
-            return await task
-        finally:
-            self._in_flight.pop(key, None)
+        return await self._cached_call(
+            messages,
+            temperature,
+            model,
+            lambda: self._llm.send_message(messages, config, temperature=temperature, model=model, **llm_kwargs),
+            check_json=False
+        )
 
     async def send_message_get_json(
             self,
@@ -129,6 +108,24 @@ class CachedLLM:
             model: str | None = None,
             **llm_kwargs
     ) -> LLMResponse:
+        return await self._cached_call(
+            messages,
+            temperature,
+            model,
+            lambda: self._llm.send_message_get_json(
+                messages, config, retry=retry, temperature=temperature, model=model, **llm_kwargs
+            ),
+            check_json=True
+        )
+
+    async def _cached_call(
+            self,
+            messages,
+            temperature: float,
+            model: str | None,
+            call_llm_func,
+            check_json: bool = False
+    ) -> LLMResponse:
         key = _cache_key(messages, temperature, model)
 
         # 1. Deduplicate concurrent requests
@@ -138,27 +135,67 @@ class CachedLLM:
 
         # 2. Check disk cache
         cached = _load_cache(key)
-        if cached is not None and cached.json_data is not None:
-            print(f"[CACHED_LLM] Cache HIT  ({key[:12]}…)")
-            return cached
+        if cached is not None:
+            if not check_json or (cached.json_data is not None):
+                print(f"[CACHED_LLM] Cache HIT  ({key[:12]}…)")
+                return cached
 
         # 3. Define the LLM call work
-        async def _do_send_json():
+        async def _do_work():
             print(f"[CACHED_LLM] Cache MISS ({key[:12]}…)")
-            res = await self._llm.send_message_get_json(
-                messages, config, retry=retry, temperature=temperature, model=model, **llm_kwargs
-            )
-            if res.status == "ok" and res.json_data is not None:
-                _save_cache(key, res)
+            res = await call_llm_func()
+            if res.status == "ok":
+                if not check_json or (res.json_data is not None):
+                    _save_cache(key, res)
             return res
 
         # 4. Create and register task
-        task = asyncio.create_task(_do_send_json())
+        task = asyncio.create_task(_do_work())
         self._in_flight[key] = task
         try:
             return await task
         finally:
-            self._in_flight.pop(key, None)
+            # Only remove if we are the one who set it (though with the key logic it should be fine)
+            if self._in_flight.get(key) == task:
+                self._in_flight.pop(key, None)
 
 
 cached_llm = CachedLLM(rotating_llm)
+
+
+if __name__ == "__main__":
+    import unittest
+    from unittest.mock import AsyncMock, MagicMock
+
+    class TestCachedLLM(unittest.IsolatedAsyncioTestCase):
+        async def test_concurrent_deduplication(self):
+            # Setup mock LLM
+            mock_llm = MagicMock()
+            mock_llm.send_message = AsyncMock(return_value=LLMResponse(status="ok", text="shared result", model="mock-model"))
+            
+            # Create instance (bypass disk for simplicity in this test)
+            instance = CachedLLM(mock_llm)
+            
+            # To ensure it misses disk, we can mock _load_cache too or just use a unique message
+            # But here let's actually just verify the call count
+            msg = "test message 1"
+            
+            # Fire off two concurrent requests
+            results = await asyncio.gather(
+                instance.send_message(msg),
+                instance.send_message(msg)
+            )
+            
+            # Verify results are the same
+            self.assertEqual(results[0].text, "shared result")
+            self.assertEqual(results[1].text, "shared result")
+            
+            # Verify LLM was only called ONCE
+            self.assertEqual(mock_llm.send_message.call_count, 1)
+            print("\n[TEST] Concurrent deduplication verified: 2 requests -> 1 LLM call.")
+
+    async def run_test():
+        test_suite = unittest.TestLoader().loadTestsFromTestCase(TestCachedLLM)
+        await asyncio.to_thread(unittest.TextTestRunner().run, test_suite)
+
+    asyncio.run(run_test())
