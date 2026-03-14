@@ -12,7 +12,3 @@ React visualizer with Python/FastAPI. The UI versioning system is fully implemen
 - **UI Service**: Implemented `get_history` with regex-based heading extraction for scene descriptions.
 - **Frontend Store**: Added `fetchHistory` and `rollbackVersion` actions to `useMarkGraphStore`. Fixed `apiFetch` missing `Content-Type: application/json` for POST requests.
 - **Workspace UI**: Added `History` icon-button, dropdown menu, and click-away listeners in `WorkspacePage.tsx`.
-
-## Next Steps
-- **Branching Visualization**: Possibly show the version tree if the user starts editing from an old version (currently it creates a new "leaf" branching from the current pointer).
-- **UI Polish**: Improve dropdown styling or add "Preview" before rollback.

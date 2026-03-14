@@ -5,6 +5,7 @@ Cache key = hash of (messages + temperature + model).
 Only responses with status == "ok" are cached.
 """
 
+import asyncio
 import hashlib
 import json
 import os
@@ -76,6 +77,7 @@ class CachedLLM:
 
     def __init__(self, llm: RotatingLLM):
         self._llm = llm
+        self._in_flight = {}  # key -> Task
 
     # -- delegate everything else straight through --
     def __getattr__(self, name):
@@ -90,18 +92,33 @@ class CachedLLM:
             **llm_kwargs
     ) -> LLMResponse:
         key = _cache_key(messages, temperature, model)
+
+        # 1. Deduplicate concurrent requests
+        if key in self._in_flight:
+            print(f"[CACHED_LLM] Concurrent HIT ({key[:12]}…)")
+            return await self._in_flight[key]
+
+        # 2. Check disk cache
         cached = _load_cache(key)
         if cached is not None:
             print(f"[CACHED_LLM] Cache HIT  ({key[:12]}…)")
             return cached
 
-        print(f"[CACHED_LLM] Cache MISS ({key[:12]}…)")
-        result = await self._llm.send_message(messages, config, temperature=temperature, model=model, **llm_kwargs)
+        # 3. Define the LLM call work
+        async def _do_send():
+            print(f"[CACHED_LLM] Cache MISS ({key[:12]}…)")
+            res = await self._llm.send_message(messages, config, temperature=temperature, model=model, **llm_kwargs)
+            if res.status == "ok":
+                _save_cache(key, res)
+            return res
 
-        if result.status == "ok":
-            _save_cache(key, result)
-
-        return result
+        # 4. Create and register task
+        task = asyncio.create_task(_do_send())
+        self._in_flight[key] = task
+        try:
+            return await task
+        finally:
+            self._in_flight.pop(key, None)
 
     async def send_message_get_json(
             self,
@@ -113,20 +130,35 @@ class CachedLLM:
             **llm_kwargs
     ) -> LLMResponse:
         key = _cache_key(messages, temperature, model)
+
+        # 1. Deduplicate concurrent requests
+        if key in self._in_flight:
+            print(f"[CACHED_LLM] Concurrent HIT ({key[:12]}…)")
+            return await self._in_flight[key]
+
+        # 2. Check disk cache
         cached = _load_cache(key)
         if cached is not None and cached.json_data is not None:
             print(f"[CACHED_LLM] Cache HIT  ({key[:12]}…)")
             return cached
 
-        print(f"[CACHED_LLM] Cache MISS ({key[:12]}…)")
-        result = await self._llm.send_message_get_json(
-            messages, config, retry=retry, temperature=temperature, model=model, **llm_kwargs
-        )
+        # 3. Define the LLM call work
+        async def _do_send_json():
+            print(f"[CACHED_LLM] Cache MISS ({key[:12]}…)")
+            res = await self._llm.send_message_get_json(
+                messages, config, retry=retry, temperature=temperature, model=model, **llm_kwargs
+            )
+            if res.status == "ok" and res.json_data is not None:
+                _save_cache(key, res)
+            return res
 
-        if result.status == "ok" and result.json_data is not None:
-            _save_cache(key, result)
-
-        return result
+        # 4. Create and register task
+        task = asyncio.create_task(_do_send_json())
+        self._in_flight[key] = task
+        try:
+            return await task
+        finally:
+            self._in_flight.pop(key, None)
 
 
 cached_llm = CachedLLM(rotating_llm)

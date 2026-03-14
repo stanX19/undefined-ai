@@ -29,5 +29,12 @@ export async function apiFetch(
         ...((init?.headers as Record<string, string>) ?? {}),
     };
 
-    return fetch(input, { ...init, headers: mergedHeaders });
+    const response = await fetch(input, { ...init, headers: mergedHeaders });
+    
+    if (response.status === 401) {
+        useAuthStore.getState().logout();
+        window.location.href = "/login";
+    }
+
+    return response;
 }
