@@ -31,6 +31,10 @@ interface MarkGraphState {
     fetchHistory: (topicId: string) => Promise<void>;
     rollbackVersion: (topicId: string, sceneId: string) => Promise<void>;
 
+    // Sharing
+    createShareLink: (sceneId: string) => Promise<string | null>;
+    fetchPublicUI: (token: string) => Promise<void>;
+
     clear: () => void;
 }
 
@@ -170,6 +174,40 @@ export const useMarkGraphStore = create<MarkGraphState>((set) => ({
             store.setUI(data.topic_id, data.scene_id, data.ui_json, data.ui_markdown);
         } catch (err) {
             console.error(err);
+        }
+    },
+
+    createShareLink: async (sceneId) => {
+        try {
+            const res = await apiFetch(`/api/v1/ui/share/${sceneId}`, {
+                method: "POST",
+            });
+            if (!res.ok) throw new Error("Failed to create share link");
+            const data = await res.json();
+            return data.share_url;
+        } catch (err) {
+            console.error(err);
+            return null;
+        }
+    },
+
+    fetchPublicUI: async (token) => {
+        set({ isLoading: true, error: null });
+        try {
+            const res = await apiFetch(`/api/v1/ui/public/${token}`);
+            if (!res.ok) throw new Error("Failed to fetch public UI");
+            const data = await res.json();
+            set({ 
+                topicId: data.topic_id, 
+                sceneId: data.scene_id, 
+                ast: data.ui_json, 
+                markdown: data.ui_markdown,
+                error: null,
+                isLoading: false
+            });
+        } catch (err) {
+            console.error(err);
+            set({ error: (err as Error).message, isLoading: false });
         }
     },
 

@@ -47,6 +47,12 @@ class RollbackRequest(BaseModel):
     scene_id: str
 
 
+class ShareResponse(BaseModel):
+    """Response containing the public share token (hash)."""
+    token: str
+    share_url: str
+
+
 if __name__ == "__main__":
     sample = UIResponse(
         scene_id="s1",

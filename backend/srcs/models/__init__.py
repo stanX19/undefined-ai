@@ -4,5 +4,6 @@ from srcs.models.topic import Topic
 from srcs.models.chat_message import ChatMessage
 from srcs.models.atomic_fact import AtomicFact
 from srcs.models.scene import Scene
+from srcs.models.share import Share
 
-__all__ = ["User", "Topic", "ChatMessage", "AtomicFact", "Scene"]
+__all__ = ["User", "Topic", "ChatMessage", "AtomicFact", "Scene", "Share"]

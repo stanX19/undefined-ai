@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Semantic HTML and Accessibility for Interactive Elements\",\n    \"difficulty\": 4,\n    \"reason\": \"This topic delves into using the correct HTML elements for user interaction and navigation, ensuring accessibility and best practices.\"\n  },\n  {\n    \"title\": \"Advanced Data Grid Implementations with Modern JavaScript Frameworks\",\n    \"difficulty\": 5,\n    \"reason\": \"This explores how modern frameworks handle complex, interactive data displays, abstracting the underlying HTML elements into reusable components with advanced state management.\"\n  },\n  {\n    \"title\": \"Research on Scalable Interactive Data Visualization and User Experience\",\n    \"difficulty\": 6,\n    \"reason\": \"This involves investigating novel algorithms and human-computer interaction principles for efficiently rendering and enabling intuitive interaction with massive, complex datasets.\"\n  }\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...iy3qGnKTBg}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Semantic HTML and Accessibility for Interactive Elements",
+      "difficulty": 4,
+      "reason": "This topic delves into using the correct HTML elements for user interaction and navigation, ensuring accessibility and best practices."
+    },
+    {
+      "title": "Advanced Data Grid Implementations with Modern JavaScript Frameworks",
+      "difficulty": 5,
+      "reason": "This explores how modern frameworks handle complex, interactive data displays, abstracting the underlying HTML elements into reusable components with advanced state management."
+    },
+    {
+      "title": "Research on Scalable Interactive Data Visualization and User Experience",
+      "difficulty": 6,
+      "reason": "This involves investigating novel algorithms and human-computer interaction principles for efficiently rendering and enabling intuitive interaction with massive, complex datasets."
+    }
+  ]
+}

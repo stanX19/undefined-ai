@@ -126,8 +126,43 @@ class UIService:
                 created_at=s.created_at,
                 description=description
             ))
-        
+
         return history
+
+    @staticmethod
+    async def create_share(db: AsyncSession, scene_id: str) -> str:
+        """Create a public share record for a scene and return its share_id.
+        
+        If a share already exists for this scene, returns the existing share_id.
+        """
+        from srcs.models.share import Share
+        
+        # 1. Check if share already exists
+        result = await db.execute(select(Share).where(Share.scene_id == scene_id))
+        existing_share = result.scalar_one_or_none()
+        if existing_share:
+            return existing_share.share_id
+            
+        # 2. Create new Share record
+        new_share = Share(scene_id=scene_id)
+        db.add(new_share)
+        await db.commit()
+        await db.refresh(new_share)
+        
+        return new_share.share_id
+
+    @staticmethod
+    async def get_scene_by_share_id(db: AsyncSession, share_id: str) -> Scene | None:
+        """Retrieve a scene via its public share_id."""
+        from srcs.models.share import Share
+        
+        # Join Share and Scene
+        result = await db.execute(
+            select(Scene)
+            .join(Share, Scene.scene_id == Share.scene_id)
+            .where(Share.share_id == share_id)
+        )
+        return result.scalar_one_or_none()
 
     # -- Read helpers -------------------------------------------------------
 
