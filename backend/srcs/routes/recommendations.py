@@ -45,7 +45,7 @@ async def get_latest_recommendations(
         raise HTTPException(status_code=404, detail="User has no topics")
         
     latest_topic = topics[0]
-    results = await RecommendationService.get_recommendations(db, current_user.user_id, latest_topic.topic_id)
+    results = await RecommendationService.get_recommendations(current_user.user_id, latest_topic.topic_id)
 
     return RecommendationsResponse(
         topic_id=latest_topic.topic_id,
@@ -65,7 +65,7 @@ async def get_recommendations(
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
 
-    results = await RecommendationService.get_recommendations(db, current_user.user_id, topic_id)
+    results = await RecommendationService.get_recommendations(current_user.user_id, topic_id)
 
     return RecommendationsResponse(
         topic_id=topic_id,

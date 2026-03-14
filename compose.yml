@@ -7,7 +7,6 @@ services:
     volumes:
       - ./backend:/app
       - ./backend/uploads:/app/uploads
-      - ./backend/database.db:/app/database.db
     develop:
       watch:
         - action: sync

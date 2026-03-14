@@ -54,8 +54,14 @@ class ChatService:
         """Persist a single chat message."""
         msg = ChatMessage(topic_id=topic_id, role=role, message=message)
         db.add(msg)
-        await db.flush()      # populates server-side defaults (message_id, created_at)
-        await db.commit()
+        try:
+            # print(f"[CHAT] Flushing message (role={role})...")
+            await db.flush()      # populates server-side defaults (message_id, created_at)
+            # print(f"[CHAT] Committing message (role={role})...")
+            await db.commit()
+        except Exception as e:
+            print(f"[CHAT] Error adding message: {e}")
+            raise
         return msg
 
     @staticmethod

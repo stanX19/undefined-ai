@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Introduction to Computer Networking\",\n    \"difficulty\": 3,\n    \"reason\": \"This topic expands on the 'Network Manager' concept by exploring how computers communicate and share resources across networks.\"\n  },\n  {\n    \"title\": \"Operating Systems Principles\",\n    \"difficulty\": 4,\n    \"reason\": \"This topic delves deeper into the theoretical foundations and design of operating systems, building upon the basic understanding of OS components and their functions.\"\n  },\n  {\n    \"title\": \"Distributed Systems\",\n    \"difficulty\": 5,\n    \"reason\": \"This topic explores the challenges and designs of systems that operate across multiple networked computers, extending the concepts of OS resource management and cloud computing to a higher level.\"\n  }\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...PdFR2Equ6U}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Introduction to Computer Networking",
+      "difficulty": 3,
+      "reason": "This topic expands on the 'Network Manager' concept by exploring how computers communicate and share resources across networks."
+    },
+    {
+      "title": "Operating Systems Principles",
+      "difficulty": 4,
+      "reason": "This topic delves deeper into the theoretical foundations and design of operating systems, building upon the basic understanding of OS components and their functions."
+    },
+    {
+      "title": "Distributed Systems",
+      "difficulty": 5,
+      "reason": "This topic explores the challenges and designs of systems that operate across multiple networked computers, extending the concepts of OS resource management and cloud computing to a higher level."
+    }
+  ]
+}
