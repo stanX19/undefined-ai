@@ -141,6 +141,29 @@ function ElementRenderer({ element }: { element: MarkGraphElement }) {
                       tr: markdownComponents.tr as React.ComponentType<any>,
                       th: markdownComponents.th as React.ComponentType<any>,
                       td: markdownComponents.td as React.ComponentType<any>,
+                      a: ({ node: _node, href, children, ...props }) => {
+                        if (href?.startsWith("#")) {
+                          return (
+                            <a
+                              href={href}
+                              {...props}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                const targetId = href.replace(/^#/, "");
+                                useMarkGraphStore.getState().navigateScene(targetId);
+                              }}
+                              className="text-primary hover:underline mx-1 cursor-pointer"
+                            >
+                              {children}
+                            </a>
+                          );
+                        }
+                        return (
+                          <a href={href} target="_blank" rel="noopener noreferrer" {...props} className="text-primary hover:underline mx-1">
+                            {children}
+                          </a>
+                        );
+                      },
                     }}
                   >
                     {frag}
@@ -359,7 +382,7 @@ function ChildRenderer({ node }: { node: Container | MarkGraphElement }) {
 /* ── root ─────────────────────────────────────────────────────────────────── */
 
 export function MarkGraphRoot() {
-  const { ast, sceneId, scrollTarget, history, goBack } = useMarkGraphStore();
+  const { ast, viewId, scrollTarget, history, goBack } = useMarkGraphStore();
 
   // Handle scrolling when scrollTarget changes
   useEffect(() => {
@@ -379,7 +402,7 @@ export function MarkGraphRoot() {
     return null;
   }
 
-  const activeScene = ast.scenes.find(s => s.id === sceneId) || ast.scenes[0];
+  const activeScene = ast.scenes.find(s => s.id === viewId) || ast.scenes[0];
 
   return (
     <div className="flex flex-col gap-8 w-full animate-in fade-in duration-300 pb-20">

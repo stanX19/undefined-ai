@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { PanelLeft, Home, FolderOpen, Pin, MoreHorizontal, Bot, FileDown, History } from "lucide-react";
+import { PanelLeft, Home, FolderOpen, Pin, MoreHorizontal, Bot, FileDown, History, Share2, Copy, Check, X } from "lucide-react";
 import { UIRoot } from "../ui_renderer/components/UIRoot.tsx";
 import { useUIStore } from "../ui_renderer/store.ts";
 import { useMarkGraphStore, fetchMarkGraphUI } from "../markgraph/store.ts";
@@ -15,9 +15,12 @@ import { useTopicListStore } from "./hooks/useTopicList.ts";
 export function WorkspacePage() {
   const { topicId: chatTopicId, clear: clearChat } = useChatStore();
   const { topicId: uiTopicId, uiJson: a2uiJson } = useUIStore();
-  const { ast: markGraphAst, markdown: storedMarkdown } = useMarkGraphStore();
+  const { ast: markGraphAst, markdown: storedMarkdown, sceneId: currentSceneId } = useMarkGraphStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const historyRef = useRef<HTMLDivElement>(null);
   const topics = useTopicListStore((s) => s.topics);
@@ -138,6 +141,27 @@ export function WorkspacePage() {
     setMenuOpen(false);
   };
 
+  const createShareLink = useMarkGraphStore((s) => s.createShareLink);
+
+  const handleShare = async () => {
+    if (!currentSceneId) return;
+    setIsSharing(true);
+    const url = await createShareLink(currentSceneId);
+    if (url) {
+      // Prepend host if needed, but the backend returns /share/hash
+      const fullUrl = `${window.location.protocol}//${window.location.host}${url}`;
+      setShareUrl(fullUrl);
+    }
+    setIsSharing(false);
+  };
+
+  const handleCopyLink = () => {
+    if (!shareUrl) return;
+    void navigator.clipboard.writeText(shareUrl);
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2000);
+  };
+
   return (
     <div className="flex h-dvh w-full overflow-hidden bg-[#F7F5F3] relative font-sans">
       {/* Left — Topics sidebar */}
@@ -188,8 +212,12 @@ export function WorkspacePage() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <button className="hidden sm:flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-[#605A57] hover:bg-[rgba(55,50,47,0.08)] hover:text-[#37322F] transition-colors cursor-pointer">
-                    Share
+                  <button 
+                    onClick={handleShare}
+                    disabled={isSharing || !currentSceneId}
+                    className="hidden sm:flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-[#605A57] hover:bg-[rgba(55,50,47,0.08)] hover:text-[#37322F] transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    {isSharing ? "Sharing..." : "Share"}
                   </button>
 
                   <div ref={historyRef} className="relative">
@@ -310,6 +338,62 @@ export function WorkspacePage() {
           </>
         )}
       </div>
+
+      {/* Share Modal */}
+      {shareUrl && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/20 backdrop-blur-sm animate-in fade-in duration-300"
+            onClick={() => setShareUrl(null)}
+          />
+          <div className="relative w-full max-w-md scale-in-center overflow-hidden rounded-2xl bg-[#FAF9F8] p-6 shadow-2xl border border-[#E0DEDB] animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2 text-[#37322F]">
+                <div className="rounded-lg bg-[rgba(55,50,47,0.08)] p-2">
+                  <Share2 size={20} />
+                </div>
+                <h3 className="text-lg font-semibold font-sans">Share Revision</h3>
+              </div>
+              <button 
+                onClick={() => setShareUrl(null)}
+                className="rounded-lg p-1.5 text-[#605A57] hover:bg-[rgba(55,50,47,0.08)] hover:text-[#37322F] transition-colors"
+                aria-label="Close"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <p className="text-[13px] text-[#605A57] mb-4 font-sans leading-relaxed">
+              Anyone with this link can view this specific version of the interactive UI without logging in.
+            </p>
+
+            <div className="group relative mb-6">
+              <input
+                type="text"
+                readOnly
+                value={shareUrl}
+                className="w-full rounded-xl border border-[#E0DEDB] bg-white px-4 py-3 pr-12 text-[13px] text-[#49423D] transition-colors focus:border-[#37322F] focus:outline-none focus:ring-1 focus:ring-[#37322F] font-sans"
+              />
+              <button
+                onClick={handleCopyLink}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-[#605A57] hover:bg-[rgba(55,50,47,0.06)] hover:text-[#37322F] transition-colors"
+                title="Copy link"
+              >
+                {copySuccess ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}
+              </button>
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShareUrl(null)}
+                className="rounded-xl px-4 py-2 text-sm font-semibold text-white bg-[#37322F] hover:bg-[#49423D] transition-all shadow-md active:scale-95 font-sans"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

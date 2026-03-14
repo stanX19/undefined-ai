@@ -145,6 +145,7 @@ RE_INCLUDE_ONLY = re.compile(r'^!\[([^\]]*)\]\(#([^)]+)\)\s*$')
 RE_FENCE_OPEN   = re.compile(r'^:::([a-z]+)\s*$')
 RE_FENCE_CLOSE  = re.compile(r'^:::\s*$')
 RE_HR           = re.compile(r'^[-=]{3,}\s*$')
+RE_TABLE_ROW    = re.compile(r'^\s*\|.*\|\s*$')
 
 # inline patterns (used inside text / threshold bodies)
 RE_INLINE_INCLUDE = re.compile(r'!\[([^\]]*)\]\(#([^)]+)\)')
@@ -160,24 +161,50 @@ RE_INLINE = re.compile(
 def parse_inline(text: str) -> list[Any]:
     fragments = []
     last_end = 0
+    current_string = ""
+
     for m in RE_INLINE.finditer(text):
         start, end = m.span()
-        if start > last_end:
-            fragments.append(text[last_end:start])
         
-        if m.group('button'):
-            fragments.append(RedirLink(label=m.group('btn_label'), target=m.group('btn_target'), kind='button'))
-        elif m.group('button2'):
-            fragments.append(RedirLink(label=m.group('btn2_label'), target=m.group('btn2_target'), kind='button'))
-        elif m.group('include'):
-            fragments.append(Include(label=m.group('inc_label'), target=m.group('inc_target')))
-        elif m.group('link'):
-            fragments.append(RedirLink(label=m.group('lnk_label'), target=m.group('lnk_target'), kind='link'))
+        if start > last_end:
+            current_string += text[last_end:start]
+        
+        # Check if we are inside a table
+        line_start = text.rfind('\n', 0, start) + 1
+        line_end = text.find('\n', end)
+        if line_end == -1:
+            line_end = len(text)
+        current_line = text[line_start:line_end]
+        is_table = RE_TABLE_ROW.search(current_line) is not None
+
+        if is_table:
+            if m.group('button') or m.group('button2'):
+                lbl = m.group('btn_label') or m.group('btn2_label')
+                target = m.group('btn_target') or m.group('btn2_target')
+                current_string += f"[{lbl}](#{target})"
+            else:
+                current_string += m.group(0)
+        else:
+            if current_string:
+                fragments.append(current_string)
+                current_string = ""
+            
+            if m.group('button'):
+                fragments.append(RedirLink(label=m.group('btn_label'), target=m.group('btn_target'), kind='button'))
+            elif m.group('button2'):
+                fragments.append(RedirLink(label=m.group('btn2_label'), target=m.group('btn2_target'), kind='button'))
+            elif m.group('include'):
+                fragments.append(Include(label=m.group('inc_label'), target=m.group('inc_target')))
+            elif m.group('link'):
+                fragments.append(RedirLink(label=m.group('lnk_label'), target=m.group('lnk_target'), kind='link'))
             
         last_end = end
         
     if last_end < len(text):
-        fragments.append(text[last_end:])
+        current_string += text[last_end:]
+        
+    if current_string:
+        fragments.append(current_string)
         
     return fragments
 

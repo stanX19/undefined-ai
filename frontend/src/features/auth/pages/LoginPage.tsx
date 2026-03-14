@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 import { useAuthStore } from "../hooks/useAuthStore";
+import { apiFetch } from "../../../constants/api";
 
 export function LoginPage() {
   const [email, setEmail] = useState("");
@@ -9,10 +10,34 @@ export function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const { login } = useAuthStore();
+  const { login, accessToken } = useAuthStore();
   const navigate = useNavigate();
 
   const images = ["/image1.png", "/image2.png", "/image3.png"];
+
+  useEffect(() => {
+    if (!accessToken) return;
+
+    const checkSession = async () => {
+      try {
+        const res = await apiFetch("/api/v1/auth/profile");
+        if (!res.ok) return; // 401 handler in api.ts will handle cleanup
+
+        const profile = await res.json();
+        const serverEducationLevel = profile?.education_level;
+
+        if (serverEducationLevel) {
+          navigate("/menu", { replace: true });
+        } else {
+          navigate("/onboarding", { replace: true });
+        }
+      } catch (err) {
+        console.error("Session check failed:", err);
+      }
+    };
+
+    checkSession();
+  }, [accessToken, navigate]);
 
   useEffect(() => {
     const interval = setInterval(() => {

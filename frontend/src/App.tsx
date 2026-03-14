@@ -6,6 +6,7 @@ import { MenuPage } from "./features/onboarding/MenuPage.tsx";
 import { WorkspacePage } from "./features/workspace/WorkspacePage.tsx";
 import { AuthGuard } from "./features/auth/components/AuthGuard.tsx";
 import { useAuthStore } from "./features/auth/hooks/useAuthStore.ts";
+import { SharedViewPage } from "./features/workspace/SharedViewPage.tsx";
 
 function RootRedirect() {
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -30,6 +31,7 @@ export function App() {
         <Route path="/" element={<RootRedirect />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/share/:token" element={<SharedViewPage />} />
 
         {/* Protected routes */}
         <Route element={<AuthGuard />}>
