@@ -124,10 +124,10 @@ export function MenuPage() {
         <div className="flex h-full w-full lg:max-h-[850px] flex-col items-center justify-center rounded-lg border border-[rgba(55,50,47,0.12)] bg-[#FAF9F8] p-6 sm:p-10 lg:p-16">
           <div className="grid w-full max-w-[600px] grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
             {isLoadingRecs ? (
-              <div className="col-span-1 flex flex-col items-center justify-center gap-4 py-20 text-center sm:col-span-2">
+              <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#E0DEDB] border-t-[#37322F]" />
-                <span className="text-[#605A57] text-base font-medium font-sans">
-                  Generating recommendations for you...
+                <span className="text-[#605A57] text-base font-medium font-sans text-nowrap">
+                  Generating recommendations...
                 </span>
               </div>
             ) : (
@@ -167,21 +167,22 @@ export function MenuPage() {
                     </div>
                   </button>
                 ))}
-
-                <button
-                  type="button"
-                  onClick={handleNewTopic}
-                  className="group relative flex h-48 cursor-pointer flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-[#E0DEDB] bg-white p-6 transition-all duration-200 hover:border-[rgba(55,50,47,0.12)] hover:bg-[#FAF9F8] sm:h-56 sm:p-8"
-                >
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[#E0DEDB] bg-[#FAF9F8] text-[#605A57] transition-colors duration-200 group-hover:border-[rgba(55,50,47,0.12)] group-hover:bg-[#37322F] group-hover:text-white sm:h-16 sm:w-16">
-                    <Plus className="h-6 w-6 sm:h-8 sm:w-8" strokeWidth={2.5} />
-                  </div>
-                  <span className="text-lg font-semibold text-[#605A57] transition-colors duration-200 group-hover:text-[#37322F] font-sans sm:text-xl">
-                    New Topic
-                  </span>
-                </button>
               </>
             )}
+
+            <button
+              type="button"
+              onClick={handleNewTopic}
+              className="group relative flex h-48 cursor-pointer flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-[#E0DEDB] bg-white p-6 transition-all duration-200 hover:border-[rgba(55,50,47,0.12)] hover:bg-[#FAF9F8] sm:h-56 sm:p-8"
+            >
+              <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[#E0DEDB] bg-[#FAF9F8] text-[#605A57] transition-colors duration-200 group-hover:border-[rgba(55,50,47,0.12)] group-hover:bg-[#37322F] group-hover:text-white sm:h-16 sm:w-16">
+                <Plus className="h-6 w-6 sm:h-8 sm:w-8" strokeWidth={2.5} />
+              </div>
+              <span className="text-lg font-semibold text-[#605A57] transition-colors duration-200 group-hover:text-[#37322F] font-sans sm:text-xl">
+                New Topic
+              </span>
+            </button>
+
           </div>
         </div>
       </div>

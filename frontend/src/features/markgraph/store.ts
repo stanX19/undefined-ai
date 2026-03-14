@@ -2,6 +2,12 @@ import { create } from "zustand";
 import type { MarkGraphAST } from "./types.ts";
 import { apiFetch } from "../../constants/api";
 
+export interface UIHistoryItem {
+    scene_id: string;
+    created_at: string;
+    description: string;
+}
+
 interface MarkGraphState {
     sceneId: string | null;
     topicId: string | null;
@@ -19,6 +25,11 @@ interface MarkGraphState {
 
     // For reactive state
     updateSignal: (elementId: string, value: any) => void;
+
+    // History
+    versionHistory: UIHistoryItem[];
+    fetchHistory: (topicId: string) => Promise<void>;
+    rollbackVersion: (topicId: string, sceneId: string) => Promise<void>;
 
     clear: () => void;
 }
@@ -132,7 +143,37 @@ export const useMarkGraphStore = create<MarkGraphState>((set) => ({
             };
         }),
 
-    clear: () => set({ sceneId: null, topicId: null, ast: null, markdown: null, error: null, history: [] }),
+    versionHistory: [],
+
+    fetchHistory: async (topicId) => {
+        try {
+            const res = await apiFetch(`/api/v1/ui/${topicId}/history`);
+            if (!res.ok) throw new Error("Failed to fetch history");
+            const data = await res.json();
+            set({ versionHistory: data.versions });
+        } catch (err) {
+            console.error(err);
+        }
+    },
+
+    rollbackVersion: async (topicId, sceneId) => {
+        try {
+            const res = await apiFetch(`/api/v1/ui/${topicId}/rollback`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ scene_id: sceneId }),
+            });
+            if (!res.ok) throw new Error("Failed to rollback");
+            const data = await res.json();
+            // Update UI with the rolled back version
+            const store = useMarkGraphStore.getState();
+            store.setUI(data.topic_id, data.scene_id, data.ui_json, data.ui_markdown);
+        } catch (err) {
+            console.error(err);
+        }
+    },
+
+    clear: () => set({ sceneId: null, topicId: null, ast: null, markdown: null, error: null, history: [], versionHistory: [] }),
 }));
 
 export async function fetchMarkGraphUI(topicId: string) {

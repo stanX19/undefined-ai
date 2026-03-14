@@ -37,7 +37,7 @@ def run_interactive_chat():
         res = client.post(
             "/api/v1/auth/register",
             description="Register",
-            json={"email": "interactive_chat@test.com", "password": "ChatPass1"},
+            json={"email": "interactive_chat@test.com", "password": "ChatPass1", "username": "chat_user"},
         )
         client.headers["Authorization"] = f"Bearer {res['access_token']}"
 

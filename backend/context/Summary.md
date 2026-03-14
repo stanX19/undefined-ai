@@ -1,21 +1,14 @@
-# MarkGraph Progress Summary (March 14, 2026)
+# MarkGraph Progress Summary (March 15, 2026)
 
 ## Current State
-React-based visualizer with Python/FastAPI backend & SQLite. System is stable.
-- **SQLite Concurrency**: WAL mode and 30s timeouts resolved `database table is locked`.
-- **Docker Fixes**: Volume mount issues resolved (host file creation vs. directory).
+React visualizer with Python/FastAPI. The UI versioning system is fully implemented and interactive.
+- **UI Versioning Support**: Robust Git-like pointer system on `Topic` (HEAD).
+- **History API**: Endpoints now exist to list all historical scenes (`GET /history`) and trigger instant rollbacks (`POST /rollback`).
+- **Frontend History**: A "History" button is placed in the Workspace top bar (beside "Share"). It toggles a dropdown listing previous versions with auto-extracted titles (headings) and timestamps.
+- **Rollback Functionality**: Selecting a version from history instantly updates the MarkGraph UI to that state.
 
-## Progress & Recent Fixes (Chat & Ingestion)
-- **ID Persistence**: Fixed `ShortIdMapper` state loss across turns. The `rehydrate` method now scans chat history to recover `Short-ID → UUID` mappings, ensuring tools like `retrieve_facts` work for historical results.
-- **Context Injection**: Correctly passing `base_info` (current topic ID, UI state, and knowledge levels) to the chatbot agent. The agent is now aware of its topic and document status even when full context is omitted.
-- **Enhanced Logging**: Added robust `[CHATBOT]` logging to `chatbot.py`. All tool calls, results (truncated), and final AI responses are now visible in the backend logs for easier debugging.
-- **Memory Management**: Recursive truncation for tool results in DB prevents context explosion.
-
-## Findings
-- `ShortIdMapper` must be re-hydrated from history at the start of every `ChatService` run to maintain ID resolution consistency.
-- Gemini ReAct agent requires explicit topic/UI state in the system context to proactively interact with the document.
-
-## Next Steps (Roadmap)
-- **UI Robustness**: Fix table parsing where buttons inside tables break the layout; convert to standard links inside detected table rows.
-- **UX Improvements**: Implement custom frontend confirmation dialogs to replace browser default `yes/no` prompts.
-- **Verification**: Ensure multi-turn fact drill-down (F0 -> F1 -> Source) remains stable with rehydration.
+## Recent Changes
+- **Backend API**: Added `UIHistoryItem`, `UIHistoryResponse`, and `RollbackRequest` DTOs.
+- **UI Service**: Implemented `get_history` with regex-based heading extraction for scene descriptions.
+- **Frontend Store**: Added `fetchHistory` and `rollbackVersion` actions to `useMarkGraphStore`. Fixed `apiFetch` missing `Content-Type: application/json` for POST requests.
+- **Workspace UI**: Added `History` icon-button, dropdown menu, and click-away listeners in `WorkspacePage.tsx`.

@@ -25,6 +25,9 @@ class Topic(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
+    current_scene_id: Mapped[str | None] = mapped_column(
+        String, ForeignKey("scenes.scene_id", use_alter=True, name="fk_topic_scene"), nullable=True
+    )
 
     # Relationships
     user: Mapped["User"] = relationship(back_populates="topics")  # noqa: F821

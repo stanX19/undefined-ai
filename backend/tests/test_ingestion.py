@@ -133,10 +133,12 @@ def run_tests() -> None:
         # -- 2. Create user + topic ---------------------------------------
         print(f"\n{Colors.BOLD}--- 2. Setup: Create user + topic ---{Colors.END}")
         user_res = client.post(
-            "/api/v1/auth/login",
-            description="Login",
-            json={"user_id": "ingest_test_user"},
+            "/api/v1/auth/register",
+            description="Register",
+            json={"email": "ingest_test@test.com", "password": "SecurePass123", "username": "ingest_user"},
         )
+        token = user_res["access_token"]
+        client.headers["Authorization"] = f"Bearer {token}"
         user_id: str = user_res["user_id"]
 
         topic_res = client.post(

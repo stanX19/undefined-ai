@@ -28,6 +28,25 @@ class UIResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+# -- History & Rollback --------------------------------------------------------
+
+class UIHistoryItem(BaseModel):
+    """Summary of a historical scene version."""
+    scene_id: str
+    created_at: datetime
+    description: str  # Extra information about the scene (e.g. first heading)
+
+
+class UIHistoryResponse(BaseModel):
+    """List of historical scene versions."""
+    versions: list[UIHistoryItem]
+
+
+class RollbackRequest(BaseModel):
+    """Request to point Topic.current_scene_id back to an old scene."""
+    scene_id: str
+
+
 if __name__ == "__main__":
     sample = UIResponse(
         scene_id="s1",
