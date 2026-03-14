@@ -33,11 +33,11 @@ engine = create_async_engine(
 @event.listens_for(engine.sync_engine, "connect")
 def _set_sqlite_pragma(dbapi_conn, connection_record):
     """Run PRAGMAs on each new connection to improve concurrency.
-    aiosqlite wraps sqlite3; we use the raw connection when available.
+    aiosqlite wraps sqlite3; we use the provided DBAPI connection which 
+    handles the async-to-sync adaptation.
     """
-    raw = getattr(dbapi_conn, "_connection", dbapi_conn)
     try:
-        cursor = raw.cursor()
+        cursor = dbapi_conn.cursor()
         cursor.execute("PRAGMA busy_timeout=30000")  # 30s wait for lock (ms)
         if not settings.USE_IN_MEMORY_DB:
             cursor.execute("PRAGMA journal_mode=WAL")

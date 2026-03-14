@@ -3,12 +3,12 @@ import { useAuthStore } from "../hooks/useAuthStore";
 
 /**
  * Route guard that redirects unauthenticated users to /login.
- * Wrap protected routes with this component.
+ * Checks for the presence of a JWT access token (not just userId).
  */
 export function AuthGuard() {
-    const userId = useAuthStore((s) => s.userId);
+    const accessToken = useAuthStore((s) => s.accessToken);
 
-    if (!userId) {
+    if (!accessToken) {
         return <Navigate to="/login" replace />;
     }
 

@@ -34,6 +34,17 @@ class TopicService:
         return result.scalar_one_or_none()
 
     @staticmethod
+    async def get_user_topic(db: AsyncSession, topic_id: str, user_id: str) -> Topic | None:
+        """Fetch a topic by ID only if it belongs to the given user.
+
+        Returns None if the topic doesn't exist or belongs to another user.
+        """
+        result = await db.execute(
+            select(Topic).where(Topic.topic_id == topic_id, Topic.user_id == user_id)
+        )
+        return result.scalar_one_or_none()
+
+    @staticmethod
     async def get_user_topics(db: AsyncSession, user_id: str) -> list[Topic]:
         """List all topics belonging to a user, newest first."""
         result = await db.execute(

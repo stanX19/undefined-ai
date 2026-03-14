@@ -1,33 +1,31 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../auth/hooks/useAuthStore";
+import { apiFetch } from "../../constants/api";
 
 export function OnboardingPage() {
   const navigate = useNavigate();
   const [educationLevel, setEducationLevel] = useState("Undergraduate");
   const [isLoading, setIsLoading] = useState(false);
-  const userId = useAuthStore((s) => s.userId);
   const setEducationLevelInStore = useAuthStore((s) => s.setEducationLevel);
 
   const handleNext = async () => {
-    if (!userId) return;
-
     setIsLoading(true);
     try {
-      const res = await fetch("/api/v1/auth/login", {
-        method: "POST",
+      // Sync education level to backend
+      await apiFetch("/api/v1/auth/profile", {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userId, education_level: educationLevel }),
+        body: JSON.stringify({ education_level: educationLevel }),
       });
 
-      if (res.ok) {
-        setEducationLevelInStore(educationLevel);
-        navigate("/menu");
-      } else {
-        console.error("Failed to save education level");
-      }
+      setEducationLevelInStore(educationLevel);
+      navigate("/menu");
     } catch (err) {
       console.error("Error saving education level:", err);
+      // Still save locally and navigate even if backend fails
+      setEducationLevelInStore(educationLevel);
+      navigate("/menu");
     } finally {
       setIsLoading(false);
     }
@@ -76,11 +74,10 @@ export function OnboardingPage() {
                   <button
                     onClick={() => setEducationLevel(option)}
                     type="button"
-                    className={`block cursor-pointer rounded-full px-5 py-3 sm:px-7 sm:py-3.5 text-base sm:text-lg font-medium font-sans transition-colors duration-200 ${
-                      isSelected
-                        ? "bg-orange-500 text-white shadow-sm ring-2 ring-orange-400 ring-offset-2 ring-offset-[#F7F5F3]"
-                        : "bg-white border border-[#E0DEDB] text-[#605A57] hover:bg-[#FAF9F8] hover:text-[#37322F] hover:border-[rgba(55,50,47,0.12)]"
-                    }`}
+                    className={`block cursor-pointer rounded-full px-5 py-3 sm:px-7 sm:py-3.5 text-base sm:text-lg font-medium font-sans transition-colors duration-200 ${isSelected
+                      ? "bg-orange-500 text-white shadow-sm ring-2 ring-orange-400 ring-offset-2 ring-offset-[#F7F5F3]"
+                      : "bg-white border border-[#E0DEDB] text-[#605A57] hover:bg-[#FAF9F8] hover:text-[#37322F] hover:border-[rgba(55,50,47,0.12)]"
+                      }`}
                   >
                     {option}
                   </button>

@@ -147,8 +147,7 @@ class ChatService:
                 
             elif isinstance(msg, ToolMessage):
                 # Check if the tool has logic to replace the log content (Option 6)
-                log_content = ToolRegistry.get_metadata(msg.name, "log_replacement") or msg.content
-
+                log_content = ToolRegistry.get_log_replacement(msg.name, msg.content)
                 payload = {
                     "tool_call_id": msg.tool_call_id,
                     "name": msg.name,

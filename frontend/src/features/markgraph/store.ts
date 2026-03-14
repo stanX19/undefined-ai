@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { MarkGraphAST } from "./types.ts";
-import { useAuthStore } from "../auth/hooks/useAuthStore.ts";
+import { apiFetch } from "../../constants/api";
 
 interface MarkGraphState {
     sceneId: string | null;
@@ -16,7 +16,7 @@ interface MarkGraphState {
     goBack: () => void;
     scrollTarget: { id: string; ts: number } | null;
     history: string[]; // Stack of scene IDs
-    
+
     // For reactive state
     updateSignal: (elementId: string, value: any) => void;
 
@@ -33,10 +33,10 @@ export const useMarkGraphStore = create<MarkGraphState>((set) => ({
     scrollTarget: null,
     history: [],
 
-    setUI: (topicId, sceneId, ast, markdown) => 
+    setUI: (topicId, sceneId, ast, markdown) =>
         set({ topicId, sceneId, ast, markdown, error: null, scrollTarget: null, history: [] }),
 
-    navigateScene: (targetId) => 
+    navigateScene: (targetId) =>
         set((state) => {
             if (!state.ast) return state;
 
@@ -81,20 +81,20 @@ export const useMarkGraphStore = create<MarkGraphState>((set) => ({
             // Scene sections use id={scene.id}; when resolved via fallback, targetId won't match DOM—use foundSceneId
             const scrollId: string = matchedViaFallback && foundSceneId ? foundSceneId : targetId;
 
-            return { 
+            return {
                 sceneId: foundSceneId,
                 history: newHistory,
                 scrollTarget: { id: scrollId, ts: Date.now() }
             };
         }),
 
-    goBack: () => 
+    goBack: () =>
         set((state) => {
             if (state.history.length === 0) return state;
-            
+
             const newHistory = [...state.history];
             const prevSceneId = newHistory.pop();
-            
+
             return {
                 sceneId: prevSceneId,
                 history: newHistory,
@@ -105,14 +105,14 @@ export const useMarkGraphStore = create<MarkGraphState>((set) => ({
     updateSignal: (elementId, value) =>
         set((state) => {
             if (!state.ast) return state;
-            
+
             // Note: In MarkGraph, user interactions (checking a box, picking quiz answer)
             // will need to update the AST id_map element to re-render properly. 
             // The renderer components should read from id_map or directly from the tree,
             // but updating deeply nested tree elements is hard. Since our parser populates
             // id_map, we can mutate id_map directly, or we can deep clone logic.
             // For now, let's deep clone the id_map for reactivity:
-            
+
             const newIdMap = { ...state.ast.id_map };
             if (newIdMap[elementId]) {
                 const node = newIdMap[elementId];
@@ -139,10 +139,7 @@ export async function fetchMarkGraphUI(topicId: string) {
     const store = useMarkGraphStore.getState();
     useMarkGraphStore.setState({ isLoading: true, error: null });
     try {
-        const userId = useAuthStore.getState().userId;
-        const res = await fetch(`/api/v1/ui/${topicId}`, {
-            headers: { "X-User-Id": userId || "" }
-        });
+        const res = await apiFetch(`/api/v1/ui/${topicId}`);
         if (!res.ok) {
             throw new Error(`Failed to fetch UI: ${res.statusText}`);
         }

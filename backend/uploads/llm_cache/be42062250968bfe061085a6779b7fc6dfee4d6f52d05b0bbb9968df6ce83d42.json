@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Computer Networks Fundamentals\",\n    \"difficulty\": 3,\n    \"reason\": \"Extends the Network Manager component by teaching how computers communicate and share data across local and wide area networks.\"\n  },\n  {\n    \"title\": \"Process Scheduling Algorithms\",\n    \"difficulty\": 4,\n    \"reason\": \"Deepens understanding of the Processor Manager by exploring how operating systems allocate CPU time using algorithms like FCFS, SJF, and Round Robin.\"\n  },\n  {\n    \"title\": \"Distributed Operating Systems\",\n    \"difficulty\": 5,\n    \"reason\": \"Advances knowledge by examining how OS manages multiple interconnected computers that appear as a single system to users, building on multiprocessing and cloud computing concepts.\"\n  }\n]\n```",
+  "model": "ChatMinimax (MiniMax-M2.5) {api=...NTUF42ohUc}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Computer Networks Fundamentals",
+      "difficulty": 3,
+      "reason": "Extends the Network Manager component by teaching how computers communicate and share data across local and wide area networks."
+    },
+    {
+      "title": "Process Scheduling Algorithms",
+      "difficulty": 4,
+      "reason": "Deepens understanding of the Processor Manager by exploring how operating systems allocate CPU time using algorithms like FCFS, SJF, and Round Robin."
+    },
+    {
+      "title": "Distributed Operating Systems",
+      "difficulty": 5,
+      "reason": "Advances knowledge by examining how OS manages multiple interconnected computers that appear as a single system to users, building on multiprocessing and cloud computing concepts."
+    }
+  ]
+}

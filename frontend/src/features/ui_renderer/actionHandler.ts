@@ -1,6 +1,6 @@
 import { useUIStore } from "./store.ts";
 import type { UIAction, UIEvents } from "./types.ts";
-import { useAuthStore } from "../auth/hooks/useAuthStore.ts";
+import { apiFetch } from "../../constants/api";
 
 export async function handleAction(action: UIAction) {
     const store = useUIStore.getState();
@@ -15,10 +15,8 @@ export async function handleAction(action: UIAction) {
 
         case "fetch":
             console.log(`Fetching ${action.payload.method} ${action.payload.endpoint}`);
-            const userId = useAuthStore.getState().userId;
-            fetch(action.payload.endpoint, {
+            apiFetch(action.payload.endpoint, {
                 method: action.payload.method,
-                headers: { "X-User-Id": userId || "" }
             }).then(res => res.json()).then(data => {
                 console.log("Fetch result:", data);
                 // Dispatch updates back to UI if needed

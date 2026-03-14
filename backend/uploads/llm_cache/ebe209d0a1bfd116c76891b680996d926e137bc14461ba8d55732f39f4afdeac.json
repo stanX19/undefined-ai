@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"The Ethics of Artificial Intelligence\",\n    \"difficulty\": 3,\n    \"reason\": \"This topic explores the crucial societal implications and responsibilities surrounding AI development, fostering essential critical thinking.\"\n  },\n  {\n    \"title\": \"Introduction to Genomics and CRISPR Technology\",\n    \"difficulty\": 3,\n    \"reason\": \"Explore the foundational science behind genetic engineering and its profound impact on medicine, agriculture, and our understanding of life.\"\n  },\n  {\n    \"title\": \"Mastering Critical Thinking and Problem Solving\",\n    \"difficulty\": 2,\n    \"reason\": \"This foundational skill is invaluable for evaluating information, making informed decisions, and succeeding in any academic or professional pursuit.\"\n  }\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...xqRWLYChJM}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "The Ethics of Artificial Intelligence",
+      "difficulty": 3,
+      "reason": "This topic explores the crucial societal implications and responsibilities surrounding AI development, fostering essential critical thinking."
+    },
+    {
+      "title": "Introduction to Genomics and CRISPR Technology",
+      "difficulty": 3,
+      "reason": "Explore the foundational science behind genetic engineering and its profound impact on medicine, agriculture, and our understanding of life."
+    },
+    {
+      "title": "Mastering Critical Thinking and Problem Solving",
+      "difficulty": 2,
+      "reason": "This foundational skill is invaluable for evaluating information, making informed decisions, and succeeding in any academic or professional pursuit."
+    }
+  ]
+}

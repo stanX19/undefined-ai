@@ -33,10 +33,13 @@ def run_interactive_chat():
     client = TestClient(base_url, actor_name="User")
 
     try:
-        # Setup: login + create topic
-        USER_ID = "interactive_user_001"
-        client.post("/api/v1/auth/login", description="Login", json={"user_id": USER_ID})
-        client.headers["X-User-Id"] = USER_ID
+        # Setup: register + set bearer token
+        res = client.post(
+            "/api/v1/auth/register",
+            description="Register",
+            json={"email": "interactive_chat@test.com", "password": "ChatPass1"},
+        )
+        client.headers["Authorization"] = f"Bearer {res['access_token']}"
 
         res = client.post(
             "/api/v1/topics/",

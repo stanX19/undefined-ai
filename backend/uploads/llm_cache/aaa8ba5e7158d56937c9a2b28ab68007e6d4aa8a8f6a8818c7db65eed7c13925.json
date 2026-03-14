@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Foundations of Educational Psychology\",\n    \"difficulty\": 4,\n    \"reason\": \"This topic provides the theoretical underpinnings for understanding how students learn and the pedagogical strategies effective in the LA role.\"\n  },\n  {\n    \"title\": \"Instructional Design Principles for Higher Education\",\n    \"difficulty\": 5,\n    \"reason\": \"Building on practical LA experience, this topic explores the systematic process of creating effective learning experiences and materials.\"\n  },\n  {\n    \"title\": \"Researching the Impact of Peer-Led Learning Models on Student Outcomes\",\n    \"difficulty\": 6,\n    \"reason\": \"This topic delves into advanced research methodologies and educational theory to critically evaluate the effectiveness and mechanisms of programs like those LAs facilitate.\"\n  }\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=..._IV6TW2o-s}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Foundations of Educational Psychology",
+      "difficulty": 4,
+      "reason": "This topic provides the theoretical underpinnings for understanding how students learn and the pedagogical strategies effective in the LA role."
+    },
+    {
+      "title": "Instructional Design Principles for Higher Education",
+      "difficulty": 5,
+      "reason": "Building on practical LA experience, this topic explores the systematic process of creating effective learning experiences and materials."
+    },
+    {
+      "title": "Researching the Impact of Peer-Led Learning Models on Student Outcomes",
+      "difficulty": 6,
+      "reason": "This topic delves into advanced research methodologies and educational theory to critically evaluate the effectiveness and mechanisms of programs like those LAs facilitate."
+    }
+  ]
+}

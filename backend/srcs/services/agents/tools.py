@@ -4,7 +4,7 @@ from langchain_core.tools import tool
 from srcs.services.retrieval_service import RetrievalService
 from srcs.services.web_search_service import WebSearchService, WebSearchNotAvailableException
 from srcs.services.agents.id_mapper import current_mapper
-from srcs.services.agents.tool_registry import ToolRegistry
+from srcs.services.agents.tool_registry import ToolDecorator
 
 
 @tool
@@ -158,15 +158,15 @@ async def ingest_url(topic_id: str, url: str) -> str:
 
 
 @tool
-@ToolRegistry.replace_log_memory("[UI Updated Successfully]")
+@ToolDecorator.replace_log_memory("[UI Updated Successfully]")
 async def edit_ui(topic_id: str, description: str, header_name: str | None = None, fact_ids: list[str] | None = None) -> str:
     """Design or edit the UI surface for a topic.
 
     This delegates to a specialised UIAgent that reads the current MarkGraph UI state,
     and returns a newly generated MarkGraph UI document.
 
-    If you have any specific facts in mind, pass their IDs in the `fact_ids`
-    parameter instead of including them in the `description`.
+    If you have any specific facts in mind, pass their IDs in the `fact_ids` parameter
+    **NEVER** include those facts in the `description`.
 
     Args:
         topic_id: The topic whose UI to edit.

@@ -16,3 +16,6 @@ exa-py
 elevenlabs
 requests
 gTTS
+python-jose[cryptography]
+bcrypt
+slowapi
