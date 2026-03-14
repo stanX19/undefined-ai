@@ -1,6 +1,7 @@
 """UI route — read the current MarkGraph Document for a topic."""
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from srcs.database import get_db
 from srcs.schemas.ui_dto import UIResponse, UIHistoryResponse, RollbackRequest, ShareResponse
@@ -8,6 +9,8 @@ from srcs.services.ui_service import UIService
 from srcs.utils.markgraph.markgraph_parser import compile_markgraph, export_to_dict
 from srcs.dependencies import get_current_user
 from srcs.models.user import User
+from srcs.models.scene import Scene
+from srcs.models.topic import Topic
 
 router = APIRouter(prefix="/api/v1/ui", tags=["UI"])
 
@@ -72,6 +75,22 @@ async def share_ui(
     db: AsyncSession = Depends(get_db)
 ):
     """Generate a share token for a specific scene."""
+    # Ensure the scene exists and belongs to the current user before creating a share.
+    result = await db.execute(
+        select(Scene, Topic.user_id)
+        .join(Topic, Scene.topic_id == Topic.topic_id)
+        .where(Scene.scene_id == scene_id)
+    )
+    row = result.first()
+    if row is None:
+        # Scene does not exist
+        raise HTTPException(status_code=404, detail="Scene not found")
+
+    _, owner_user_id = row
+    if owner_user_id != current_user.user_id:
+        # Scene exists but is not owned by the current user
+        raise HTTPException(status_code=403, detail="Not authorized to share this scene")
+
     try:
         token = await UIService.create_share(db, scene_id)
         return ShareResponse(
@@ -79,7 +98,6 @@ async def share_ui(
             share_url=f"/share/{token}"
         )
     except ValueError as e:
-        from fastapi import HTTPException
         raise HTTPException(status_code=404, detail=str(e))
 
 
@@ -92,7 +110,6 @@ async def get_public_ui(
     scene = await UIService.get_scene_by_share_id(db, token)
     
     if not scene:
-        from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Shared UI not found")
     
     result = compile_markgraph(scene.ui_markdown)
