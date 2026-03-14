@@ -9,7 +9,8 @@ export interface UIHistoryItem {
 }
 
 interface MarkGraphState {
-    sceneId: string | null;
+    sceneId: string | null;   // Database UUID
+    viewId: string | null;    // Local MarkGraph scene ID (e.g. "root-scene")
     topicId: string | null;
     ast: MarkGraphAST | null;
     markdown: string | null;
@@ -40,6 +41,7 @@ interface MarkGraphState {
 
 export const useMarkGraphStore = create<MarkGraphState>((set) => ({
     sceneId: null,
+    viewId: null,
     topicId: null,
     ast: null,
     markdown: null,
@@ -48,8 +50,10 @@ export const useMarkGraphStore = create<MarkGraphState>((set) => ({
     scrollTarget: null,
     history: [],
 
-    setUI: (topicId, sceneId, ast, markdown) =>
-        set({ topicId, sceneId, ast, markdown, error: null, scrollTarget: null, history: [] }),
+    setUI: (topicId, sceneId, ast, markdown) => {
+        const firstSceneId = ast.scenes && ast.scenes.length > 0 ? ast.scenes[0].id : null;
+        set({ topicId, sceneId, viewId: firstSceneId, ast, markdown, error: null, scrollTarget: null, history: [] });
+    },
 
     navigateScene: (targetId) =>
         set((state) => {
@@ -97,7 +101,7 @@ export const useMarkGraphStore = create<MarkGraphState>((set) => ({
             const scrollId: string = matchedViaFallback && foundSceneId ? foundSceneId : targetId;
 
             return {
-                sceneId: foundSceneId,
+                viewId: foundSceneId,
                 history: newHistory,
                 scrollTarget: { id: scrollId, ts: Date.now() }
             };
@@ -111,7 +115,7 @@ export const useMarkGraphStore = create<MarkGraphState>((set) => ({
             const prevSceneId = newHistory.pop();
 
             return {
-                sceneId: prevSceneId,
+                viewId: prevSceneId,
                 history: newHistory,
                 scrollTarget: null // Clear scroll target when going back
             };
@@ -197,9 +201,11 @@ export const useMarkGraphStore = create<MarkGraphState>((set) => ({
             const res = await apiFetch(`/api/v1/ui/public/${token}`);
             if (!res.ok) throw new Error("Failed to fetch public UI");
             const data = await res.json();
+            const firstSceneId = data.ui_json.scenes && data.ui_json.scenes.length > 0 ? data.ui_json.scenes[0].id : null;
             set({ 
                 topicId: data.topic_id, 
                 sceneId: data.scene_id, 
+                viewId: firstSceneId,
                 ast: data.ui_json, 
                 markdown: data.ui_markdown,
                 error: null,
@@ -211,7 +217,7 @@ export const useMarkGraphStore = create<MarkGraphState>((set) => ({
         }
     },
 
-    clear: () => set({ sceneId: null, topicId: null, ast: null, markdown: null, error: null, history: [], versionHistory: [] }),
+    clear: () => set({ sceneId: null, viewId: null, topicId: null, ast: null, markdown: null, error: null, history: [], versionHistory: [] }),
 }));
 
 export async function fetchMarkGraphUI(topicId: string) {

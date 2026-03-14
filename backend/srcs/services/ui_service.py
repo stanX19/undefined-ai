@@ -2,11 +2,13 @@
 
 Manages scene persistence.
 """
+import re
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from srcs.models.scene import Scene
-
+from srcs.schemas.ui_dto import UIHistoryItem
+from srcs.models.topic import Topic
+from srcs.models.share import Share
 
 # Default empty MarkGraph document
 _EMPTY_MARKGRAPH: str = "# Root Scene\n"
@@ -19,7 +21,6 @@ class UIService:
     @staticmethod
     async def get_scene(db: AsyncSession, topic_id: str) -> Scene | None:
         """Return the scene pointed to by Topic.current_scene_id, or ``None``."""
-        from srcs.models.topic import Topic
         
         result = await db.execute(
             select(Topic).where(Topic.topic_id == topic_id)
@@ -46,7 +47,6 @@ class UIService:
         await db.flush()
 
         # Update Topic pointer
-        from srcs.models.topic import Topic
         result = await db.execute(
             select(Topic).where(Topic.topic_id == topic_id)
         )
@@ -62,7 +62,6 @@ class UIService:
         db: AsyncSession, topic_id: str, ui_markdown: str
     ) -> Scene:
         """Push a NEW UI version. Points the topic's HEAD to it. Returns the new Scene."""
-        from srcs.models.topic import Topic
         result = await db.execute(
             select(Topic).where(Topic.topic_id == topic_id)
         )
@@ -89,7 +88,6 @@ class UIService:
         db: AsyncSession, topic_id: str, scene_id: str
     ) -> None:
         """Set the Topic's current UI pointer to a specific historical scene_id."""
-        from srcs.models.topic import Topic
         result = await db.execute(
             select(Topic).where(Topic.topic_id == topic_id)
         )
@@ -101,11 +99,8 @@ class UIService:
         await db.commit()
 
     @staticmethod
-    async def get_history(db: AsyncSession, topic_id: str):
+    async def get_history(db: AsyncSession, topic_id: str) -> list[UIHistoryItem]:
         """Return a list of historical scene metadata for a topic."""
-        import re
-        from srcs.schemas.ui_dto import UIHistoryItem
-
         result = await db.execute(
             select(Scene)
             .where(Scene.topic_id == topic_id)
@@ -135,7 +130,6 @@ class UIService:
         
         If a share already exists for this scene, returns the existing share_id.
         """
-        from srcs.models.share import Share
         
         # 1. Ensure the referenced Scene exists to avoid FK integrity errors
         scene_result = await db.execute(select(Scene).where(Scene.scene_id == scene_id))
@@ -160,8 +154,6 @@ class UIService:
     @staticmethod
     async def get_scene_by_share_id(db: AsyncSession, share_id: str) -> Scene | None:
         """Retrieve a scene via its public share_id."""
-        from srcs.models.share import Share
-        
         # Join Share and Scene
         result = await db.execute(
             select(Scene)

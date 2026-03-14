@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Information Retrieval\",\n    \"difficulty\": 4,\n    \"reason\": \"This topic explores the techniques and algorithms behind search engines and document ranking, a key application area mentioned in the NLP overview.\"\n  },\n  {\n    \"title\": \"Deep Learning Architectures for NLP\",\n    \"difficulty\": 5,\n    \"reason\": \"This topic delves into advanced neural network models like Transformers and their applications, providing a deeper understanding of the 'large models' and their computational challenges in modern NLP.\"\n  },\n  {\n    \"title\": \"Low-Resource and Cross-Lingual NLP\",\n    \"difficulty\": 6,\n    \"reason\": \"This research area directly addresses the significant challenge of data scarcity for many non-English languages, requiring innovative approaches to adapt NLP models across diverse linguistic contexts.\"\n  }\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...iy3qGnKTBg}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Information Retrieval",
+      "difficulty": 4,
+      "reason": "This topic explores the techniques and algorithms behind search engines and document ranking, a key application area mentioned in the NLP overview."
+    },
+    {
+      "title": "Deep Learning Architectures for NLP",
+      "difficulty": 5,
+      "reason": "This topic delves into advanced neural network models like Transformers and their applications, providing a deeper understanding of the 'large models' and their computational challenges in modern NLP."
+    },
+    {
+      "title": "Low-Resource and Cross-Lingual NLP",
+      "difficulty": 6,
+      "reason": "This research area directly addresses the significant challenge of data scarcity for many non-English languages, requiring innovative approaches to adapt NLP models across diverse linguistic contexts."
+    }
+  ]
+}
