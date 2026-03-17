@@ -200,8 +200,11 @@ async def edit_ui(topic_id: str, description: str, header_name: str | None = Non
             traceback.print_exc()
             return f"UI editing failed during fact retrieval: {exc}"
 
-    # ui_agent.edit returns {"ui_json": {...}, "ui_markdown": "..."} or {"error": "..."}
-    result = await ui_agent.edit(topic_id, description, header_name)
+    # Route to plan_and_edit if it's a full rewrite with many facts (>5)
+    if header_name is None and fact_ids and len(fact_ids) > 5:
+        result = await ui_agent.plan_and_edit(topic_id, description)
+    else:
+        result = await ui_agent.edit(topic_id, description, header_name)
 
     if "error" in result:
         return f"UI editing failed: {result['error']}"

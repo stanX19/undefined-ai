@@ -11,7 +11,7 @@ import traceback
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, BaseMessage
 
 from srcs.services.agents.rotating_llm import rotating_llm, LLMResponse
-from srcs.services.agents.prompts.ui_agent import UI_AGENT_PROMPT
+from srcs.services.agents.prompts.ui_agent import UI_AGENT_PROMPT, UI_PLANNER_PROMPT
 from srcs.services.agents.id_mapper import current_mapper
 from srcs.utils.markgraph.markgraph_parser import compile_markgraph, export_to_dict
 from srcs.utils.markgraph.markgraph_spec import MARKGRAPH_SPEC
@@ -123,6 +123,50 @@ class UIAgent:
 
         return {"error": "Max retries exceeded while fixing syntax errors."}
 
+    async def plan_and_edit(self, topic_id: str, prompt: str) -> dict:
+        """Two-step UI editing: first plan the architecture, then generate MarkGraph.
+
+        This is used for complex full-document rewrites with many facts.
+        """
+        # Fetch current UI state first
+        from srcs.database import AsyncSessionLocal
+        from srcs.services.ui_service import UIService
+        
+        async with AsyncSessionLocal() as db:
+            current_ui = await UIService.get_ui_markdown(db, topic_id)
+
+        # Step 1: Planning
+        planning_system_prompt = UI_PLANNER_PROMPT
+        planning_messages = [
+            SystemMessage(content=planning_system_prompt),
+            HumanMessage(content=(
+                f"Topic ID: {current_mapper().shorten(topic_id, prefix='T')}\n\n"
+                f"--- CURRENT FULL UI STATE ---\n{current_ui}\n--- END UI STATE ---\n\n"
+                f"Instruction: {prompt}"
+            ))
+        ]
+
+        try:
+            planner_response: LLMResponse = await rotating_llm.send_message(planning_messages, temperature=0.2)
+            plan_content = planner_response.text
+
+            # Step 2: Generation using the plan
+            augmented_prompt = (
+                f"{prompt}\n\n"
+                f"--- UI ARCHITECT PLAN ---\n"
+                f"{plan_content}\n"
+                f"--- END PLAN ---\n\n"
+                f"CRITICAL: The Scene name and ALL link ids **MUST** follow the provided plan to ensure its ACTUALLY CONNECTED\n"
+                f"Please generate the full MarkGraph document strictly following the logic and structure defined in the plan above."
+            )
+
+            # Delegate to the standard edit method (header_name=None for full rewrite)
+            return await self.edit(topic_id, augmented_prompt, header_name=None)
+
+        except Exception as exc:
+            traceback.print_exc()
+            return {"error": f"Planning phase failed: {exc}"}
+
 
 # -- Module-level singleton ---------------------------------------------------
 ui_agent = UIAgent()
@@ -196,6 +240,5 @@ Some content C
         print("\nAll tests passed locally!")
 
 
-if __name__ == "__main__":
     import asyncio
     asyncio.run(main())

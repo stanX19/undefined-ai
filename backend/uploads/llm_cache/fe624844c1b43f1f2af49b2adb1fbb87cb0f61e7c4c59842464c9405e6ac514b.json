@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Paging and Segmentation\",\n    \"difficulty\": 4,\n    \"reason\": \"This topic introduces modern non-contiguous memory allocation techniques that directly address the fragmentation and multiprogramming limitations of early schemes.\"\n  },\n  {\n    \"title\": \"Advanced Virtual Memory Performance and Optimization\",\n    \"difficulty\": 5,\n    \"reason\": \"This explores the performance implications and advanced policies of virtual memory, such as thrashing, working set models, and detailed page replacement algorithms, which are crucial for system design.\"\n  },\n  {\n    \"title\": \"Memory Management for Non-Volatile Memory (NVM) and Persistent Memory (PMEM)\",\n    \"difficulty\": 6,\n    \"reason\": \"This cutting-edge area investigates novel memory management paradigms required to effectively utilize new memory technologies that blur the traditional lines between volatile memory and persistent storage.\"\n  }\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...UcyXMAY5Vs}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Paging and Segmentation",
+      "difficulty": 4,
+      "reason": "This topic introduces modern non-contiguous memory allocation techniques that directly address the fragmentation and multiprogramming limitations of early schemes."
+    },
+    {
+      "title": "Advanced Virtual Memory Performance and Optimization",
+      "difficulty": 5,
+      "reason": "This explores the performance implications and advanced policies of virtual memory, such as thrashing, working set models, and detailed page replacement algorithms, which are crucial for system design."
+    },
+    {
+      "title": "Memory Management for Non-Volatile Memory (NVM) and Persistent Memory (PMEM)",
+      "difficulty": 6,
+      "reason": "This cutting-edge area investigates novel memory management paradigms required to effectively utilize new memory technologies that blur the traditional lines between volatile memory and persistent storage."
+    }
+  ]
+}
