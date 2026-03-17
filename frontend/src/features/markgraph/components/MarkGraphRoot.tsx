@@ -115,6 +115,10 @@ function ElementRenderer({ element }: { element: MarkGraphElement }) {
     if (element.fragments && element.fragments.length > 0) {
       return (
         <div id={element.explicit_id || undefined} className="prose prose-sm dark:prose-invert max-w-none text-text-primary">
+          {/* Render hidden anchors for inline IDs to enable navigation scrolling */}
+          {element.inline_texts && Object.keys(element.inline_texts).map((id) => (
+            <span key={id} id={id} style={{ display: "none" }} aria-hidden="true" />
+          ))}
           {element.fragments.map((frag: any, i: number) => {
             if (typeof frag === "string") {
               return (

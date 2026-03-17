@@ -22,6 +22,7 @@ export interface TextNode {
     markdown: string;
     explicit_id?: string | null;
     fragments?: any[]; 
+    inline_texts?: Record<string, string>;
 }
 
 export interface GraphVertex {

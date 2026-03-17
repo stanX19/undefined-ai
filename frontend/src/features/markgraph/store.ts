@@ -65,6 +65,7 @@ export const useMarkGraphStore = create<MarkGraphState>((set) => ({
             // Helper to recursively check if a container or element has the ID
             const hasId = (node: any, id: string): boolean => {
                 if (node.id === id || node.explicit_id === id) return true;
+                if (node.inline_texts && node.inline_texts[id]) return true;
                 if (node.children) {
                     return node.children.some((child: any) => hasId(child, id));
                 }

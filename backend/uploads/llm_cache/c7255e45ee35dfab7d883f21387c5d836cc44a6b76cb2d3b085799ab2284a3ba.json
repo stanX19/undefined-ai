@@ -1,0 +1,10 @@
+{
+  "text": "[\n  \"Early memory management schemes, such as the Single-User Contiguous Scheme (1940s-1950s), were foundational but designed for limited, batch processing computers, requiring entire programs to be loaded contiguously and sequentially, which restricted job sizes, lacked multiprogramming support, and are rarely used today.\",\n  \"The first multiprogramming attempts involved Fixed Partitions, which divided memory statically and suffered from internal fragmentation, and Dynamic Partitions, which allocated memory as needed but caused external fragmentation due to scattered free blocks, both requiring the Memory Manager to maintain detailed location lists.\",\n  \"Memory allocation employs methods like First-fit and Best-fit, while deallocation ranges from simple marking in fixed partitions to complex algorithms in dynamic ones; to combat fragmentation, Relocatable Dynamic Partitions compact memory by relocating programs and adjusting addresses, a process that optimizes memory use but incurs overhead.\"\n]",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=..._IV6TW2o-s}",
+  "status": "ok",
+  "json_data": [
+    "Early memory management schemes, such as the Single-User Contiguous Scheme (1940s-1950s), were foundational but designed for limited, batch processing computers, requiring entire programs to be loaded contiguously and sequentially, which restricted job sizes, lacked multiprogramming support, and are rarely used today.",
+    "The first multiprogramming attempts involved Fixed Partitions, which divided memory statically and suffered from internal fragmentation, and Dynamic Partitions, which allocated memory as needed but caused external fragmentation due to scattered free blocks, both requiring the Memory Manager to maintain detailed location lists.",
+    "Memory allocation employs methods like First-fit and Best-fit, while deallocation ranges from simple marking in fixed partitions to complex algorithms in dynamic ones; to combat fragmentation, Relocatable Dynamic Partitions compact memory by relocating programs and adjusting addresses, a process that optimizes memory use but incurs overhead."
+  ]
+}

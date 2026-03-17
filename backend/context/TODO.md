@@ -1,4 +1,4 @@
-
+Strict graph parsing force id and link to match (ui agent keeps mismatching causing new nodes to be created instead of linking existing nodes)
 
 Things to do before deploying:
 1. "Ways startup website gets hacked"
