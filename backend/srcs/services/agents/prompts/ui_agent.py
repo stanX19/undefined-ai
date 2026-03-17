@@ -21,6 +21,7 @@ Do not output anything else but the raw markdown document. DO NOT wrap it in mar
 - IDs are auto-generated from headings, but use `{{#explicit-id}}` when necessary for linking.
 - Prioritise using as many `# scenes` as possible and use `[links](#different-scenes)` for navigation between them.
 - Always prioritise using graphs for everything, it is the soul of MarkGraph.
+- DO NOT cite original fact ids in the UI, it is only for internal use
 
 ## Visual-first: minimise plain text
 - **Prefer components over paragraphs.** Use :::graph, :::quiz, :::checkbox, :::progress, tables (GFM), :::input instead of long text blocks.

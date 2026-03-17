@@ -20,12 +20,23 @@ import type { NodeData, EdgeData } from "../hooks/useForceLayout.ts";
 import { useMarkGraphStore } from "../store.ts";
 
 function NeoNode({ data, id }: any) {
+  const isClickable = !!data.nav_target;
   // If the explicit label (display text) is different from the ID, 
   // we show the ID in parentheses as context if it fits.
   const displayLabel = data.label === id ? id : `(${id}) ${data.label}`;
   
   return (
-    <div title={displayLabel} className="flex items-center justify-center min-w-[120px] max-w-[200px] min-h-[60px] p-3 bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 rounded-2xl border-4 border-blue-500/20 shadow-lg cursor-pointer hover:ring-2 hover:ring-blue-500/50 transition-all font-bold text-xs text-center leading-snug">
+    <div 
+      title={displayLabel} 
+      className={`
+        flex items-center justify-center min-w-[120px] max-w-[200px] min-h-[60px] p-3 rounded-2xl border-4 shadow-lg transition-all font-bold text-xs text-center leading-snug
+        bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 
+        ${isClickable 
+          ? "border-blue-500/20 cursor-pointer hover:ring-2 hover:ring-blue-500/50" 
+          : "border-blue-100/20"
+        }
+      `}
+    >
       <span>{displayLabel}</span>
       <Handle type="source" position={Position.Bottom} style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} className="opacity-0 w-0 h-0" />
       <Handle type="target" position={Position.Top} style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} className="opacity-0 w-0 h-0" />
