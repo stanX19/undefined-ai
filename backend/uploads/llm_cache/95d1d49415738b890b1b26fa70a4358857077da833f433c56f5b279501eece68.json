@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Responsive Web Design Principles\",\n    \"difficulty\": 4,\n    \"reason\": \"This topic extends the foundational understanding of layout from a fixed 2x2 table to designing interfaces that adapt seamlessly across various screen sizes and devices.\"\n  },\n  {\n    \"title\": \"Component-Based UI Development with React/Vue\",\n    \"difficulty\": 5,\n    \"reason\": \"This topic introduces modern architectural patterns for building complex and maintainable user interfaces by treating elements like buttons as reusable components.\"\n  },\n  {\n    \"title\": \"Generative User Interface Design via Machine Learning\",\n    \"difficulty\": 6,\n    \"reason\": \"This research-level topic explores how artificial intelligence can automate the creation and optimization of user interfaces, moving beyond manual design and development.\"\n  }\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...EBRnaNs1P8}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Responsive Web Design Principles",
+      "difficulty": 4,
+      "reason": "This topic extends the foundational understanding of layout from a fixed 2x2 table to designing interfaces that adapt seamlessly across various screen sizes and devices."
+    },
+    {
+      "title": "Component-Based UI Development with React/Vue",
+      "difficulty": 5,
+      "reason": "This topic introduces modern architectural patterns for building complex and maintainable user interfaces by treating elements like buttons as reusable components."
+    },
+    {
+      "title": "Generative User Interface Design via Machine Learning",
+      "difficulty": 6,
+      "reason": "This research-level topic explores how artificial intelligence can automate the creation and optimization of user interfaces, moving beyond manual design and development."
+    }
+  ]
+}

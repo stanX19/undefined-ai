@@ -49,6 +49,7 @@ class TextNode:
     markdown: str
     explicit_id: str | None = None
     fragments: list[Any] = field(default_factory=list)
+    inline_texts: dict[str, str] = field(default_factory=dict)
 
 @dataclass
 class GraphVertex:
@@ -155,11 +156,13 @@ RE_INLINE = re.compile(
     r'(?P<button>\[\[(?P<btn_label>[^\]]+)\]\]\(#(?P<btn_target>[^)]+)\))|'
     r'(?P<button2>\[\[(?P<btn2_label>[^\]]+)\]\(#(?P<btn2_target>[^)]+)\)\])|'
     r'(?P<include>!\[(?P<inc_label>[^\]]*)\]\(#(?P<inc_target>[^)]+)\))|'
-    r'(?P<link>(?<!\[)\[(?P<lnk_label>[^\]]+)\]\(#(?P<lnk_target>[^)]+)\))'
+    r'(?P<link>(?<!\[)\[(?P<lnk_label>[^\]]+)\]\(#(?P<lnk_target>[^)]+)\))|'
+    r'(?P<inline_id>\{#(?P<iid>[a-z0-9][a-z0-9_-]*)\})'
 )
 
-def parse_inline(text: str) -> list[Any]:
+def parse_inline(text: str) -> tuple[list[Any], dict[str, str]]:
     fragments = []
+    inline_texts: dict[str, str] = {}
     last_end = 0
     current_string = ""
 
@@ -169,6 +172,19 @@ def parse_inline(text: str) -> list[Any]:
         if start > last_end:
             current_string += text[last_end:start]
         
+        if m.group('inline_id'):
+            # It's an inline id tag like {#foo}. 
+            # We map whatever is currently in our accumulated string buffer to this ID.
+            # (In a more complex implementation, we might split by words, but grabbing all preceding accumulated text in this fragment is a safe superset).
+            iid = m.group('iid')
+            if current_string:
+                inline_texts[iid] = current_string.strip()
+            else:
+                inline_texts[iid] = "" # fallback if it's the very first token
+            # We DO NOT append the {#id} to the current_string. It is silently consumed.
+            last_end = end
+            continue
+            
         # Check if we are inside a table
         line_start = text.rfind('\n', 0, start) + 1
         line_end = text.find('\n', end)
@@ -206,7 +222,7 @@ def parse_inline(text: str) -> list[Any]:
     if current_string:
         fragments.append(current_string)
         
-    return fragments
+    return fragments, inline_texts
 
 # block sub-parsers
 RE_GRAPH_VERTEX_DEF  = re.compile(r'^\[([^\]]+)\]\(#([^)]+)\)\s*::\s*(.+)$')  # [id](#nav) :: text
@@ -639,7 +655,29 @@ def build_scene_graph(tokens: list[Token], diags: list[Diagnostic]) -> list[Scen
 
         # ── Text / HR ─────────────────────────────────────────────────────────
         if tok.kind in ("TEXT", "HR"):
-            append_element(TextNode(markdown=tok.value, fragments=parse_inline(tok.value)))
+            frags, inl_texts = parse_inline(tok.value)
+            
+            # Since fragments has the #id stripped, let's also reconstruct 
+            # the clean markdown string for rendering without the tags.
+            # Text nodes might be entirely string based if in a table.
+            clean_md = "".join(f if isinstance(f, str) else tok.value for f in frags) # simple fallback reconstruction, though renderer uses fragments usually
+            # Actually, `frags` represents the parsed structure. Let's rebuild `markdown` field accurately
+            
+            # A more accurate clean markdown reconstruction from fragments
+            parts = []
+            for f in frags:
+                if isinstance(f, str):
+                    parts.append(f)
+                elif isinstance(f, RedirLink):
+                    if f.kind == 'button':
+                        parts.append(f"[[{f.label}](#{f.target})]")
+                    else:
+                        parts.append(f"[{f.label}](#{f.target})")
+                elif isinstance(f, Include):
+                    parts.append(f"![{f.label}](#{f.target})")
+            clean_md = "".join(parts)
+            
+            append_element(TextNode(markdown=clean_md, fragments=frags, inline_texts=inl_texts))
             continue
 
     return scenes
@@ -674,8 +712,18 @@ def _collect_ids(scenes: list[Scene]) -> dict[str, Any]:
                         registry[node.id] = child
                         if not child.explicit_id:
                             child.explicit_id = node.id
+                elif isinstance(child, TextNode):
+                    if child.inline_texts:
+                        for inl_id, text in child.inline_texts.items():
+                            registry[inl_id] = {"type": "InlineText", "parent_id": node.id, "text": text}
+                    walk(child)
                 else:
                     walk(child)
+        elif isinstance(node, TextNode):
+            if getattr(node, "inline_texts", None):
+                for inl_id, text in node.inline_texts.items():
+                    # For top-level TextNodes (direct children of scene usually handled above, but just in case)
+                    registry[inl_id] = {"type": "InlineText", "text": text}
 
     for scene in scenes:
         walk(scene)
