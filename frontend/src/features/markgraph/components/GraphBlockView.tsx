@@ -155,7 +155,7 @@ export function GraphBlockView({ block }: { block: GraphBlock }) {
       source: e.src,
       target: e.dst,
       animated: e.op === "->" || e.op === "<-",
-      type: "smoothstep",
+      type: "default", // Curvy Bezier lines look more organic and less tangled than straight/orthogonal ones
       style,
     };
 
