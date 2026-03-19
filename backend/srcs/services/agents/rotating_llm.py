@@ -4,7 +4,7 @@ import asyncio
 import random
 import json
 import re
-from typing import Any, Optional
+from typing import Optional
 
 import requests
 from dotenv import load_dotenv
@@ -16,6 +16,7 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.runnables import RunnableWithFallbacks, Runnable
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage, ToolMessage
 from langchain_core.outputs import ChatGeneration, ChatResult
+from google.api_core.exceptions import ResourceExhausted
 from langchain_google_genai import ChatGoogleGenerativeAI
 from pydantic import BaseModel
 from srcs.config import get_settings
@@ -47,7 +48,7 @@ class ChatMinimax(BaseChatModel):
     def _llm_type(self) -> str:
         return "minimax"
 
-    def bind_tools(self, tools: Any, **kwargs: Any) -> Runnable:
+    def bind_tools(self, tools: any, **kwargs: any) -> Runnable:
         """Bind tools to the model."""
         from langchain_core.utils.function_calling import convert_to_openai_tool
         formatted_tools = [convert_to_openai_tool(tool) for tool in tools]
@@ -63,7 +64,7 @@ class ChatMinimax(BaseChatModel):
             elif isinstance(msg, HumanMessage):
                 result.append({"role": "user", "content": msg.content})
             elif isinstance(msg, AIMessage):
-                d: dict[str, Any] = {"role": "assistant", "content": msg.content or ""}
+                d: dict[str, any] = {"role": "assistant", "content": msg.content or ""}
                 if msg.tool_calls:
                     d["tool_calls"] = [
                         {
@@ -130,8 +131,8 @@ class ChatMinimax(BaseChatModel):
             "Content-Type": "application/json",
         }
 
-    def _build_payload(self, messages: list[BaseMessage], **kwargs: Any) -> dict[str, Any]:
-        payload: dict[str, Any] = {
+    def _build_payload(self, messages: list[BaseMessage], **kwargs: any) -> dict[str, any]:
+        payload: dict[str, any] = {
             "model": self.model,
             "messages": self._convert_messages(messages),
             "temperature": self.temperature,
@@ -165,7 +166,7 @@ class ChatMinimax(BaseChatModel):
         messages: list[BaseMessage],
         stop: Optional[list[str]] = None,
         run_manager: Optional[CallbackManagerForLLMRun] = None,
-        **kwargs: Any,
+        **kwargs: any,
     ) -> ChatResult:
         payload = self._build_payload(messages, **kwargs)
         if stop:
@@ -186,7 +187,7 @@ class ChatMinimax(BaseChatModel):
         messages: list[BaseMessage],
         stop: Optional[list[str]] = None,
         run_manager: Optional[AsyncCallbackManagerForLLMRun] = None,
-        **kwargs: Any,
+        **kwargs: any,
     ) -> ChatResult:
         return await asyncio.to_thread(
             self._generate, messages, stop, None, **kwargs
@@ -279,39 +280,68 @@ class RotatingLLM:
             self.llm_configs = self.llm_configs[1:] + self.llm_configs[:1]
             return self.llm_configs
 
-    async def get_runnable(self, temperature: float = 0.7, model: str | None = None, **kwargs) -> RunnableWithFallbacks:
-        """
-        Get a runnable with fallbacks, creating LLM instances with specified parameters
+    async def get_runnable(self, temperature: float = 0.7, model: str | None = None, **kwargs: any) -> RunnableWithFallbacks:
+        """Get a runnable with fallbacks, creating LLM instances with specified parameters.
 
-        :param temperature: Temperature for LLM generation
-        :param model: Specific model to use, overriding config
-        :param kwargs: Additional arguments to pass to LLM constructors
-        :return: RunnableWithFallbacks instance
+        Args:
+            temperature: Temperature for LLM generation. Defaults to 0.7.
+            model: Specific model to use, overriding default config.
+            **kwargs: Additional arguments to pass to LLM constructors.
+
+        Returns:
+            RunnableWithFallbacks: A chain that automatically rotates to fallbacks on error.
+        
+        Raises:
+            ValueError: If no LLMs are configured.
         """
-        ordered = await self._rotate()
+        ordered: list[LLMConfig] = await self._rotate()
         ordered = ordered[:RotatingLLM.MAX_RETRIES + 1]  # +1 for main
-        runnables = [config.create_runnable(temperature=temperature, model=model, **kwargs) for config in ordered]
+        runnables: list[Runnable] = [config.create_runnable(temperature=temperature, model=model, **kwargs) for config in ordered]
+        
         if not runnables:
             raise ValueError("no llm configured")
-        primary, *fallbacks = runnables
-        return RunnableWithFallbacks(runnable=primary, fallbacks=fallbacks)
+            
+        primary: Runnable = runnables[0]
+        fallbacks: list[Runnable] = runnables[1:]
+        
+        return RunnableWithFallbacks(
+            runnable=primary, 
+            fallbacks=fallbacks,
+            exceptions_to_handle=(ResourceExhausted, Exception)
+        )
 
-    async def get_runnable_with_tools(self, tools: list, temperature: float = 0.7, model: str | None = None, **kwargs) -> RunnableWithFallbacks:
-        """
-        Get a runnable with fallbacks, where each LLM instance has the specified tools bound to it.
+    async def get_runnable_with_tools(self, tools: list[any], temperature: float = 0.7, model: str | None = None, **kwargs: any) -> RunnableWithFallbacks:
+        """Get a runnable with fallbacks, where each LLM instance has tools bound.
 
-        :param tools: The tools to bind to the LLM instances
-        :param temperature: Temperature for LLM generation
-        :param model: Specific model to use, overriding config
-        :param kwargs: Additional arguments to pass to LLM constructors
-        :return: RunnableWithFallbacks instance
+        Args:
+            tools: The list of tools to bind to the LLM instances.
+            temperature: Temperature for LLM generation. Defaults to 0.7.
+            model: Specific model to use, overriding default config.
+            **kwargs: Additional arguments to pass to LLM constructors.
+
+        Returns:
+            RunnableWithFallbacks: A chain that automatically rotates to fallbacks on error.
+
+        Raises:
+            ValueError: If no LLMs are configured.
         """
-        ordered = await self._rotate()
-        runnables = [config.create_runnable(temperature=temperature, model=model, **kwargs).bind_tools(tools) for config in ordered]
+        ordered: list[LLMConfig] = await self._rotate()
+        runnables: list[Runnable] = [
+            config.create_runnable(temperature=temperature, model=model, **kwargs).bind_tools(tools) 
+            for config in ordered
+        ]
+        
         if not runnables:
             raise ValueError("no llm configured")
-        primary, *fallbacks = runnables
-        return RunnableWithFallbacks(runnable=primary, fallbacks=fallbacks)
+            
+        primary: Runnable = runnables[0]
+        fallbacks: list[Runnable] = runnables[1:]
+        
+        return RunnableWithFallbacks(
+            runnable=primary, 
+            fallbacks=fallbacks,
+            exceptions_to_handle=(ResourceExhausted, Exception)
+        )
 
     async def get_next_api_key(self, provider: str = "minimax") -> str:
         """

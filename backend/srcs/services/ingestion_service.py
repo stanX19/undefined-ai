@@ -10,7 +10,7 @@ The final level N is dynamic -- large documents produce more levels.
 import asyncio
 import traceback
 
-from sqlalchemy.ext.asyncio import AsyncSession
+from google.api_core.exceptions import ResourceExhausted
 
 from srcs.models.atomic_fact import AtomicFact
 from srcs.models.topic import Topic
@@ -248,8 +248,15 @@ class IngestionService:
             await IngestionService._emit_progress(topic_id, "completed", "Ingestion complete.")
             print(f"[INGESTION] Pipeline completed for topic {topic_id} (doc {doc_hash[:8]})")
 
+        except ResourceExhausted:
+            IngestionService._topic_pipelines[topic_id][doc_hash] = PipelineStatus.FAILED
+            
+            async with cond:
+                cond.notify_all()
+
+            print(f"[INGESTION] Pipeline RATE LIMITED for topic {topic_id} (doc {doc_hash[:8]})")
+
         except Exception as exc:
-            import traceback
             traceback.print_exc()
             IngestionService._topic_pipelines[topic_id][doc_hash] = PipelineStatus.FAILED
             
