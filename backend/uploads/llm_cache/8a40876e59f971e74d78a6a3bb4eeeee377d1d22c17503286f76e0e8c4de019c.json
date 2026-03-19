@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"CPU Scheduling Algorithms\",\n    \"difficulty\": 4,\n    \"reason\": \"Understanding how processes are scheduled provides context for how memory resources are utilized and contended for by active programs.\"\n  },\n  {\n    \"title\": \"Cache Coherence Protocols\",\n    \"difficulty\": 5,\n    \"reason\": \"This topic extends the understanding of memory hierarchies and performance optimization to multi-processor systems, building on the concept of associative memory.\"\n  },\n  {\n    \"title\": \"Persistent Memory Programming Models\",\n    \"difficulty\": 6,\n    \"reason\": \"This explores how new non-volatile memory technologies are changing fundamental assumptions about memory hierarchies and allocation, posing new research challenges.\"\n  }\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...UcyXMAY5Vs}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "CPU Scheduling Algorithms",
+      "difficulty": 4,
+      "reason": "Understanding how processes are scheduled provides context for how memory resources are utilized and contended for by active programs."
+    },
+    {
+      "title": "Cache Coherence Protocols",
+      "difficulty": 5,
+      "reason": "This topic extends the understanding of memory hierarchies and performance optimization to multi-processor systems, building on the concept of associative memory."
+    },
+    {
+      "title": "Persistent Memory Programming Models",
+      "difficulty": 6,
+      "reason": "This explores how new non-volatile memory technologies are changing fundamental assumptions about memory hierarchies and allocation, posing new research challenges."
+    }
+  ]
+}

@@ -64,11 +64,14 @@ function applySugiyamaLayout(nodes: NodeData[], edges: EdgeData[], width: number
   });
 
   // --- Phase 2: Ordering (Group by level and sort) ---
-  const layers: string[][] = [];
+  const initialLayers: string[][] = [];
   Object.entries(levels).forEach(([id, level]) => {
-    if (!layers[level]) layers[level] = [];
-    layers[level].push(id);
+    if (!initialLayers[level]) initialLayers[level] = [];
+    initialLayers[level].push(id);
   });
+
+  // Filter out any holes (undefined or empty) in the layers array to ensure it is contiguous
+  const layers = initialLayers.filter(layer => !!layer && layer.length > 0);
 
   // Barycenter heuristic: Sort each level based on the average position of its parents/children
   for (let i = 1; i < layers.length; i++) {
