@@ -9,6 +9,7 @@ from srcs.services.topic_service import TopicService
 from srcs.services.document_service import DocumentService
 from srcs.services.ingestion_service import IngestionService
 from srcs.dependencies import get_current_user
+from srcs.services.usage_service import UsageService
 from srcs.models.user import User
 
 router: APIRouter = APIRouter(prefix="/api/v1/topics", tags=["topics"])
@@ -70,7 +71,10 @@ async def upload_document(
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
 
+    # Charge after validation + ownership, before expensive work
     settings = get_settings()
+    await UsageService.check_and_consume_units(db, current_user, settings.UNIT_COST_INGESTION)
+
     file_path: str = DocumentService.save_pdf(content, file.filename, settings.UPLOAD_DIR)
     extracted: str = DocumentService.extract_text(file_path)
 

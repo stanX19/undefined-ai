@@ -39,8 +39,21 @@ class Settings(BaseSettings):
     FIREBASE_CREDENTIALS_JSON_PATH: str = "firebase_key.json"
 
     # Database Configuration
+    DATABASE_URL: str | None = None
     USE_IN_MEMORY_DB: bool = False
     DB_NAME: str = "database_dev.db"
+
+    # Rate Limiting / Quota
+    RATE_LIMIT_FREE_UNITS_BY_PLAN: dict[str, int] = {
+        "free": 10,
+        "pro": 100,
+        "enterprise": 1000,
+    }
+    UNIT_COST_CHAT: int = 1
+    UNIT_COST_INGESTION: int = 3
+    UNIT_COST_RECOMMENDATIONS: int = 1
+    UNIT_COST_SPEECH: int = 1
+    UNIT_COST_UI: int = 1
 
     # Application Settings
     DEBUG: bool = False

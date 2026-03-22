@@ -9,7 +9,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
 from srcs.config import get_settings
-from srcs.database import engine, Base
+from srcs.database import engine, Base, SQLALCHEMY_DATABASE_URL
 
 # Import models so Base.metadata knows about every table
 import srcs.models  # noqa: F401
@@ -25,22 +25,21 @@ from srcs.routes.speech import router as speech_router
 from srcs.routes.ui import router as ui_router
 
 
-from sqlalchemy import text
-
-def _add_missing_columns(sync_conn):
-    """Best-effort migration for new columns on an existing SQLite DB."""
-    cursor = sync_conn.execute(text("PRAGMA table_info(users)"))
-    existing = {row[1] for row in cursor.fetchall()}
-    if "username" not in existing:
-        sync_conn.execute(text("ALTER TABLE users ADD COLUMN username TEXT"))
-
-
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
-    """Create DB tables on startup (no Alembic for POC)."""
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-        await conn.run_sync(_add_missing_columns)
+    """Hybrid bootstrap strategy:
+
+    - **SQLite (local dev/test):** ``create_all()`` builds the full
+      schema from ORM metadata so you can boot without running Alembic
+      first.  This is intentional for throwaway local databases.
+    - **Postgres / Supabase:** ``create_all()`` is skipped.  Schema
+      must be created by running ``alembic upgrade head`` before the
+      app starts.  Alembic is the single source of truth for
+      production schema.
+    """
+    if "sqlite" in SQLALCHEMY_DATABASE_URL:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
     yield
 
 

@@ -19,3 +19,4 @@ gTTS
 python-jose[cryptography]
 bcrypt
 slowapi
+alembic

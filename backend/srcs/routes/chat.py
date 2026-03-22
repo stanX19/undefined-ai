@@ -5,10 +5,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from srcs.config import get_settings
 from srcs.database import get_db
 from srcs.schemas.chat_dto import ChatRequest, ChatMessageResponse, ChatAcceptedResponse
 from srcs.services.chat_service import ChatService
 from srcs.services.topic_service import TopicService
+from srcs.services.usage_service import UsageService
 from srcs.services.sse_service import SseService
 from srcs.dependencies import get_current_user
 from srcs.models.user import User
@@ -62,6 +64,13 @@ async def send_message(
     Returns ``{ status: "success", user_message }`` immediately.
     The agent reply is delivered over the SSE stream.
     """
+    topic = await TopicService.get_user_topic(db, body.topic_id, current_user.user_id)
+    if not topic:
+        raise HTTPException(status_code=404, detail="Topic not found")
+
+    settings = get_settings()
+    await UsageService.check_and_consume_units(db, current_user, settings.UNIT_COST_CHAT)
+
     user_msg = await ChatService.send_message(db, body.topic_id, body.message)
 
     return ChatAcceptedResponse(
@@ -78,7 +87,6 @@ async def get_history(
     db: AsyncSession = Depends(get_db),
 ) -> list[ChatMessageResponse]:
     """Return chat history for a topic."""
-    # Verify the topic belongs to the current user
     topic = await TopicService.get_user_topic(db, topic_id, current_user.user_id)
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
@@ -93,7 +101,6 @@ async def clear_history(
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, str]:
     """Delete all chat messages for a topic."""
-    # Verify the topic belongs to the current user
     topic = await TopicService.get_user_topic(db, topic_id, current_user.user_id)
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")

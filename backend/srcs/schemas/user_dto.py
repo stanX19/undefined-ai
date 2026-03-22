@@ -56,6 +56,8 @@ class TokenResponse(BaseModel):
     email: str
     username: str | None = None
     education_level: str | None = None
+    plan_tier: str = "free"
+    credits_balance: int = 0
 
 
 class ProfileUpdateRequest(BaseModel):
@@ -69,5 +71,7 @@ class ProfileResponse(BaseModel):
     email: str
     username: str | None = None
     education_level: str | None = None
+    plan_tier: str = "free"
+    credits_balance: int = 0
 
     model_config = {"from_attributes": True}
