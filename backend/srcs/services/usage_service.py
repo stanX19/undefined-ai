@@ -14,7 +14,9 @@ Concurrency strategy:
 - SQLite: concurrent aiosqlite connections hitting the same table trigger
   SQLITE_LOCKED (table-level lock) which is NOT covered by busy_timeout.
   An asyncio.Lock serializes quota mutations so only one coroutine writes
-  at a time — matching SQLite's single-writer nature with no throughput loss.
+  at a time — matching SQLite's single-writer nature with no throughput loss
+  inside one app process. Multi-worker or multi-instance SQLite deployments
+  are not supported by this in-process lock.
 - Postgres: FOR UPDATE on the DailyUsage SELECT reduces wasted work by
   holding a row-level lock until commit; credits_balance is protected by
   a WHERE guard on the UPDATE (rowcount == 0 ⇒ concurrent spend won).

@@ -26,36 +26,61 @@ from tests.test_client import TestClient, Colors, ThreadFilter
 
 ThreadFilter.redirect_all_other()
 
-# Force a fresh throwaway database for this test run.
-# Set DATABASE_URL explicitly so any .env override is ignored.
-_test_db = os.path.join(tempfile.gettempdir(), f"undefinedai_test_{os.getpid()}.db")
-os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{_test_db}"
-os.environ["DB_NAME"] = _test_db
+_test_db: str | None = None
+_app = None
 
-from main import app  # noqa: E402 — must import after env override
+
+def _get_test_db() -> str:
+    global _test_db
+    if _test_db is None:
+        _test_db = os.path.join(tempfile.gettempdir(), f"undefinedai_test_{os.getpid()}.db")
+        os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{_test_db}"
+        os.environ["DB_NAME"] = _test_db
+    return _test_db
+
+
+def _get_app():
+    global _app
+    if _app is None:
+        _get_test_db()
+        from main import app as fastapi_app  # noqa: E402
+        _app = fastapi_app
+    return _app
 
 
 def start_server(port: int = 8005):
-    uvicorn.run(app, host="127.0.0.1", port=port, log_level="error")
+    uvicorn.run(_get_app(), host="127.0.0.1", port=port, log_level="error")
 
 
-def _register_and_login(client: TestClient, email: str, password: str = "TestPass1") -> str:
-    """Register a user and return the JWT token."""
+def _register_and_login(client: TestClient, email: str, password: str = "TestPass1") -> tuple[str, str]:
+    """Register a user and return (JWT token, user_id)."""
     res = client.post(
         "/api/v1/auth/register",
         description=f"Register {email}",
         json={"email": email, "password": password, "username": email.split("@")[0]},
     )
-    return res["access_token"]
+    return res["access_token"], res["user_id"]
 
 
 def run_tests():
+    test_db = _get_test_db()
     port = 8005
     base_url = f"http://127.0.0.1:{port}"
     print(f"{Colors.BLUE}Starting Server (port {port})...{Colors.END}")
     server_thread = threading.Thread(target=start_server, kwargs={"port": port}, daemon=True)
     server_thread.start()
-    time.sleep(2)
+    # Alembic migrations may take longer than a fixed sleep.
+    # Poll the health endpoint until the server is ready (or time out).
+    for _ in range(40):
+        try:
+            raw = requests.get(f"{base_url}/health", timeout=0.5)
+            if raw.status_code == 200:
+                break
+        except Exception:
+            pass
+        time.sleep(0.25)
+    else:
+        raise RuntimeError("Server did not become ready in time")
 
     start_time = time.time()
     client = TestClient(base_url, actor_name="QuotaTest")
@@ -63,7 +88,7 @@ def run_tests():
     try:
         # -- Setup: register user + create topic -------------------------
         print(f"\n{Colors.BOLD}=== QUOTA TEST SETUP ==={Colors.END}\n")
-        token = _register_and_login(client, "quota_user@test.com")
+        token, quota_user_id = _register_and_login(client, "quota_user@test.com")
         client.headers["Authorization"] = f"Bearer {token}"
 
         topic = client.post(
@@ -118,12 +143,51 @@ def run_tests():
         print(f"{Colors.GREEN}Upload with .txt returned 400 (no units burned){Colors.END}")
 
         # =================================================================
+        # TEST 3b: Validation-before-charge — invalid .pdf should not burn quota
+        # =================================================================
+        import sqlite3
+
+        conn = sqlite3.connect(test_db)
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT COALESCE(SUM(units_used), 0) FROM daily_usage WHERE user_id = ?",
+            (quota_user_id,),
+        )
+        before_units = cursor.fetchone()[0]
+        conn.close()
+
+        raw = requests.post(
+            f"{base_url}/api/v1/topics/{topic_id}/upload",
+            headers={"Authorization": f"Bearer {token}"},
+            files={"file": ("fake.pdf", b"", "application/pdf")},
+        )
+        assert raw.status_code == 400, f"Expected 400, got {raw.status_code}"
+
+        raw = requests.post(
+            f"{base_url}/api/v1/topics/{topic_id}/upload",
+            headers={"Authorization": f"Bearer {token}"},
+            files={"file": ("fake.pdf", b"not a pdf", "application/pdf")},
+        )
+        assert raw.status_code == 400, f"Expected 400, got {raw.status_code}"
+
+        conn = sqlite3.connect(test_db)
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT COALESCE(SUM(units_used), 0) FROM daily_usage WHERE user_id = ?",
+            (quota_user_id,),
+        )
+        after_units = cursor.fetchone()[0]
+        conn.close()
+
+        assert after_units == before_units, f"Units burned for invalid PDFs: before={before_units}, after={after_units}"
+
+        # =================================================================
         # TEST 4: Quota exhaustion — free tier is 10 units
         # =================================================================
         print(f"\n{Colors.BOLD}--- TEST 4: Quota exhaustion (free tier = 10 units) ---{Colors.END}")
 
         # Register a fresh user to get a clean 10-unit quota
-        token_exhaust = _register_and_login(client, "exhaust@test.com")
+        token_exhaust, _ = _register_and_login(client, "exhaust@test.com")
         topic_exhaust = requests.post(
             f"{base_url}/api/v1/topics/",
             headers={"Authorization": f"Bearer {token_exhaust}"},
@@ -160,7 +224,7 @@ def run_tests():
         # =================================================================
         print(f"\n{Colors.BOLD}--- TEST 5: Concurrent requests (5 parallel chat sends) ---{Colors.END}")
 
-        token_conc = _register_and_login(client, "concurrent@test.com")
+        token_conc, _ = _register_and_login(client, "concurrent@test.com")
         topic_conc = requests.post(
             f"{base_url}/api/v1/topics/",
             headers={"Authorization": f"Bearer {token_conc}"},
@@ -210,7 +274,7 @@ def run_tests():
         # We'll directly manipulate the credits_balance via SQL to simulate
         # a payment without needing Stripe.
         import sqlite3
-        conn = sqlite3.connect(_test_db)
+        conn = sqlite3.connect(test_db)
         cursor = conn.cursor()
 
         # Give the exhausted user some credits
@@ -246,7 +310,7 @@ def run_tests():
         assert credit_successes == 5, f"Expected 5 credit-funded successes, got {credit_successes}"
 
         # Verify credits_balance is now 0
-        conn = sqlite3.connect(_test_db)
+        conn = sqlite3.connect(test_db)
         cursor = conn.cursor()
         cursor.execute(
             "SELECT credits_balance FROM users WHERE email = ?",
@@ -269,9 +333,9 @@ def run_tests():
         traceback.print_exc()
     finally:
         # Cleanup temp database
-        if os.path.exists(_test_db):
+        if test_db and os.path.exists(test_db):
             try:
-                os.unlink(_test_db)
+                os.unlink(test_db)
             except OSError:
                 pass
 

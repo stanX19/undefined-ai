@@ -69,13 +69,29 @@ async def upload_document(
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
 
-    # Charge after validation + ownership, before reading/extraction work
+    content: bytes = await file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty")
+
     settings = get_settings()
+
+    # Cheap PDF signature check before consuming quota.
+    # Many non-PDF inputs will fail quickly here, avoiding extraction work and quota spend.
+    if not content.lstrip().startswith(b"%PDF-"):
+        raise HTTPException(status_code=400, detail="Invalid PDF file")
+
+    # Charge before expensive work so over-quota users don't trigger PDF I/O/extraction.
     await UsageService.check_and_consume_units(db, current_user, settings.UNIT_COST_INGESTION)
 
-    content: bytes = await file.read()
     file_path: str = DocumentService.save_pdf(content, file.filename, settings.UPLOAD_DIR)
-    extracted: str = DocumentService.extract_text(file_path)
+    try:
+        extracted: str = DocumentService.extract_text(file_path)
+    except RuntimeError as exc:
+        # Extraction failures are treated as a bad request; under the selected policy,
+        # quota has already been consumed.
+        raise HTTPException(status_code=400, detail="Failed to process PDF file") from exc
+
+    # Persist extracted content (non-blocking ingestion is triggered after persistence).
 
     topic = await TopicService.set_document_text(db, topic_id, extracted)
 

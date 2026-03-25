@@ -2,6 +2,7 @@
 import os
 from asyncio import to_thread
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import AsyncGenerator
 
 from alembic import command
@@ -13,7 +14,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
 from srcs.config import get_settings
-from srcs.database import engine, Base, SQLALCHEMY_DATABASE_URL
+from srcs.database import SQLALCHEMY_DATABASE_URL
 
 # Import models so Base.metadata knows about every table
 import srcs.models  # noqa: F401
@@ -29,18 +30,8 @@ from srcs.routes.speech import router as speech_router
 from srcs.routes.ui import router as ui_router
 
 
-def _sqlite_db_exists() -> bool:
-    if "sqlite" not in SQLALCHEMY_DATABASE_URL or ":memory:" in SQLALCHEMY_DATABASE_URL or "mode=memory" in SQLALCHEMY_DATABASE_URL:
-        return False
-    prefix = "sqlite+aiosqlite:///"
-    if not SQLALCHEMY_DATABASE_URL.startswith(prefix):
-        return False
-    db_path = SQLALCHEMY_DATABASE_URL[len(prefix):]
-    return os.path.exists(db_path)
-
-
 def _run_alembic_upgrade_head() -> None:
-    alembic_cfg = Config(os.path.join(os.path.dirname(__file__), "alembic.ini"))
+    alembic_cfg = Config(str(Path(__file__).resolve().parent / "alembic.ini"))
     command.upgrade(alembic_cfg, "head")
 
 
@@ -48,20 +39,15 @@ def _run_alembic_upgrade_head() -> None:
 async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     """Hybrid bootstrap strategy:
 
-    - **SQLite (local dev/test):** ``create_all()`` builds the full
-      schema from ORM metadata so you can boot without running Alembic
-      first.  This is intentional for throwaway local databases.
+    - **SQLite (local dev/test):** run ``alembic upgrade head`` so
+      file-backed databases are versioned consistently across restarts.
     - **Postgres / Supabase:** ``create_all()`` is skipped.  Schema
       must be created by running ``alembic upgrade head`` before the
       app starts.  Alembic is the single source of truth for
       production schema.
     """
     if "sqlite" in SQLALCHEMY_DATABASE_URL:
-        if _sqlite_db_exists():
-            await to_thread(_run_alembic_upgrade_head)
-        else:
-            async with engine.begin() as conn:
-                await conn.run_sync(Base.metadata.create_all)
+        await to_thread(_run_alembic_upgrade_head)
     yield
 
 

@@ -1,5 +1,5 @@
 """DailyUsage ORM model — tracks global unit consumption per user per UTC day."""
-from datetime import datetime, timezone
+from datetime import datetime
 
 from sqlalchemy import Integer, String, DateTime, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
