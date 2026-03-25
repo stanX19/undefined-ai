@@ -147,7 +147,7 @@ def run_tests():
         # =================================================================
         import sqlite3
 
-        conn = sqlite3.connect(test_db)
+        conn = sqlite3.connect(test_db, timeout=30)
         cursor = conn.cursor()
         cursor.execute(
             "SELECT COALESCE(SUM(units_used), 0) FROM daily_usage WHERE user_id = ?",
@@ -170,7 +170,7 @@ def run_tests():
         )
         assert raw.status_code == 400, f"Expected 400, got {raw.status_code}"
 
-        conn = sqlite3.connect(test_db)
+        conn = sqlite3.connect(test_db, timeout=30)
         cursor = conn.cursor()
         cursor.execute(
             "SELECT COALESCE(SUM(units_used), 0) FROM daily_usage WHERE user_id = ?",
@@ -274,7 +274,7 @@ def run_tests():
         # We'll directly manipulate the credits_balance via SQL to simulate
         # a payment without needing Stripe.
         import sqlite3
-        conn = sqlite3.connect(test_db)
+        conn = sqlite3.connect(test_db, timeout=30)
         cursor = conn.cursor()
 
         # Give the exhausted user some credits
@@ -310,7 +310,7 @@ def run_tests():
         assert credit_successes == 5, f"Expected 5 credit-funded successes, got {credit_successes}"
 
         # Verify credits_balance is now 0
-        conn = sqlite3.connect(test_db)
+        conn = sqlite3.connect(test_db, timeout=30)
         cursor = conn.cursor()
         cursor.execute(
             "SELECT credits_balance FROM users WHERE email = ?",
@@ -378,7 +378,7 @@ def test_alembic_fresh_database():
         print(f"{Colors.GREEN}alembic upgrade head succeeded{Colors.END}")
 
         # Verify schema
-        conn = sqlite3.connect(fresh_db)
+        conn = sqlite3.connect(fresh_db, timeout=30)
         cursor = conn.cursor()
 
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
