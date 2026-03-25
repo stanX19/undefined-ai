@@ -1,7 +1,11 @@
 """UndefinedAI — Phase 1 POC backend entry-point."""
+import os
+from asyncio import to_thread
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+from alembic import command
+from alembic.config import Config
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -25,6 +29,21 @@ from srcs.routes.speech import router as speech_router
 from srcs.routes.ui import router as ui_router
 
 
+def _sqlite_db_exists() -> bool:
+    if "sqlite" not in SQLALCHEMY_DATABASE_URL or ":memory:" in SQLALCHEMY_DATABASE_URL or "mode=memory" in SQLALCHEMY_DATABASE_URL:
+        return False
+    prefix = "sqlite+aiosqlite:///"
+    if not SQLALCHEMY_DATABASE_URL.startswith(prefix):
+        return False
+    db_path = SQLALCHEMY_DATABASE_URL[len(prefix):]
+    return os.path.exists(db_path)
+
+
+def _run_alembic_upgrade_head() -> None:
+    alembic_cfg = Config(os.path.join(os.path.dirname(__file__), "alembic.ini"))
+    command.upgrade(alembic_cfg, "head")
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     """Hybrid bootstrap strategy:
@@ -38,8 +57,11 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
       production schema.
     """
     if "sqlite" in SQLALCHEMY_DATABASE_URL:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
+        if _sqlite_db_exists():
+            await to_thread(_run_alembic_upgrade_head)
+        else:
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
     yield
 
 
@@ -76,8 +98,6 @@ app.include_router(speech_router)
 app.include_router(ui_router)
 
 # -- Static files (uploaded PDFs) ---------------------------------------------
-import os
-
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 

@@ -59,6 +59,8 @@ class UsageService:
         Raises ``HTTPException(429)`` when the user cannot cover the
         overage with their ``credits_balance``.
         """
+        if units <= 0:
+            raise HTTPException(status_code=400, detail="units must be greater than 0")
         if _is_sqlite:
             async with _sqlite_quota_lock:
                 return await UsageService._check_and_consume(db, user, units)

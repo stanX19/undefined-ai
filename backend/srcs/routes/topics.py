@@ -64,17 +64,16 @@ async def upload_document(
     if not file.filename or not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are accepted")
 
-    content: bytes = await file.read()
-
     # Verify ownership
     topic = await TopicService.get_user_topic(db, topic_id, current_user.user_id)
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
 
-    # Charge after validation + ownership, before expensive work
+    # Charge after validation + ownership, before reading/extraction work
     settings = get_settings()
     await UsageService.check_and_consume_units(db, current_user, settings.UNIT_COST_INGESTION)
 
+    content: bytes = await file.read()
     file_path: str = DocumentService.save_pdf(content, file.filename, settings.UPLOAD_DIR)
     extracted: str = DocumentService.extract_text(file_path)
 

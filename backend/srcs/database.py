@@ -1,12 +1,14 @@
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.pool import AsyncAdaptedQueuePool, NullPool
+from sqlalchemy.pool import AsyncAdaptedQueuePool
 from typing import AsyncGenerator
+import logging
 
 from srcs.config import get_settings
 
 settings = get_settings()
+logger = logging.getLogger(__name__)
 
 if settings.DATABASE_URL:
     SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
@@ -33,7 +35,6 @@ if _is_sqlite:
 else:
     engine = create_async_engine(
         SQLALCHEMY_DATABASE_URL,
-        poolclass=NullPool,
         echo=False,
     )
 
@@ -53,11 +54,12 @@ if _is_sqlite:
             jm = cursor.fetchone()[0]
             cursor.execute("PRAGMA busy_timeout")
             bt = cursor.fetchone()[0]
-            print(f"[DB] Connection initialized: journal_mode={jm}, busy_timeout={bt}")
+            if settings.DEBUG:
+                logger.debug("SQLite connection initialized: journal_mode=%s, busy_timeout=%s", jm, bt)
 
             cursor.close()
         except Exception as e:
-            print(f"[DB] Error setting PRAGMAs: {e}")
+            logger.exception("Error setting SQLite PRAGMAs: %s", e)
 
 
 AsyncSessionLocal = async_sessionmaker(

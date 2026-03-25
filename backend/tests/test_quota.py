@@ -15,9 +15,12 @@ import time
 import threading
 import tempfile
 import concurrent.futures
+from pathlib import Path
 
 import requests
 import uvicorn
+from alembic.config import Config
+from alembic.script import ScriptDirectory
 
 from tests.test_client import TestClient, Colors, ThreadFilter
 
@@ -339,8 +342,12 @@ def test_alembic_fresh_database():
 
         # Verify alembic_version
         cursor.execute("SELECT version_num FROM alembic_version")
-        version = cursor.fetchone()[0]
-        assert version == "f6fd255228f7", f"Expected head revision f6fd255228f7, got {version}"
+        row = cursor.fetchone()
+        assert row is not None and row[0], "Alembic version_num is missing or empty"
+        version = row[0]
+        alembic_cfg = Config(str(Path(backend_dir) / "alembic.ini"))
+        expected_head = ScriptDirectory.from_config(alembic_cfg).get_current_head()
+        assert version == expected_head, f"Expected head revision {expected_head}, got {version}"
         print(f"{Colors.GREEN}Alembic version stamp: {version}{Colors.END}")
 
         conn.close()
