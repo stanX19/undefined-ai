@@ -14,7 +14,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
 from srcs.config import get_settings
-from srcs.database import SQLALCHEMY_DATABASE_URL
+from srcs.database import SQLALCHEMY_DATABASE_URL, Base, engine
 
 # Import models so Base.metadata knows about every table
 import srcs.models  # noqa: F401
@@ -47,7 +47,13 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
       production schema.
     """
     if "sqlite" in SQLALCHEMY_DATABASE_URL:
-        await to_thread(_run_alembic_upgrade_head)
+        if settings.USE_IN_MEMORY_DB:
+            # In-memory SQLite lifetime is tied to active connections, so Alembic's
+            # separate engine can produce non-persistent schema. Build schema directly.
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+        else:
+            await to_thread(_run_alembic_upgrade_head)
     yield
 
 

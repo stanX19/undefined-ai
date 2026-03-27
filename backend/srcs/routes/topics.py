@@ -1,4 +1,5 @@
 """Topic routes — CRUD + PDF upload."""
+import os
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -87,6 +88,11 @@ async def upload_document(
     try:
         extracted: str = DocumentService.extract_text(file_path)
     except RuntimeError as exc:
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except OSError:
+                pass
         # Extraction failures are treated as a bad request; under the selected policy,
         # quota has already been consumed.
         raise HTTPException(status_code=400, detail="Failed to process PDF file") from exc

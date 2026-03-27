@@ -24,7 +24,7 @@ def upgrade() -> None:
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
         sa.Column('user_id', sa.String(), nullable=False),
         sa.Column('bucket_start_utc', sa.DateTime(timezone=True), nullable=False),
-        sa.Column('units_used', sa.Integer(), nullable=False),
+        sa.Column('units_used', sa.Integer(), server_default='0', nullable=False),
         sa.ForeignKeyConstraint(['user_id'], ['users.user_id']),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('user_id', 'bucket_start_utc', name='uq_daily_usage_user_bucket'),
@@ -65,7 +65,17 @@ def downgrade() -> None:
     bind = op.get_bind()
     dialect = bind.dialect.name
 
-    if dialect != 'sqlite':
+    if dialect == 'sqlite':
+        existing = {
+            row[1]
+            for row in bind.execute(sa.text("PRAGMA table_info(users)")).fetchall()
+        }
+        with op.batch_alter_table('users') as batch_op:
+            if 'credits_balance' in existing:
+                batch_op.drop_column('credits_balance')
+            if 'plan_tier' in existing:
+                batch_op.drop_column('plan_tier')
+    else:
         op.drop_column('users', 'credits_balance')
         op.drop_column('users', 'plan_tier')
 
