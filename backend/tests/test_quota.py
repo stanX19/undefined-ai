@@ -64,6 +64,14 @@ def _register_and_login(client: TestClient, email: str, password: str = "TestPas
 
 def run_tests():
     test_db = _get_test_db()
+    _get_app()
+    from srcs.config import get_settings
+
+    settings = get_settings()
+    free_units = settings.RATE_LIMIT_FREE_UNITS_BY_PLAN["free"]
+    chat_unit_cost = settings.UNIT_COST_CHAT
+    expected_chat_successes = free_units // chat_unit_cost
+
     port = 8005
     base_url = f"http://127.0.0.1:{port}"
     print(f"{Colors.BLUE}Starting Server (port {port})...{Colors.END}")
@@ -184,9 +192,9 @@ def run_tests():
         # =================================================================
         # TEST 4: Quota exhaustion — free tier is 10 units
         # =================================================================
-        print(f"\n{Colors.BOLD}--- TEST 4: Quota exhaustion (free tier = 10 units) ---{Colors.END}")
+        print(f"\n{Colors.BOLD}--- TEST 4: Quota exhaustion (free tier chat quota = {expected_chat_successes} requests) ---{Colors.END}")
 
-        # Register a fresh user to get a clean 10-unit quota
+        # Register a fresh user to get a clean free-tier chat quota
         token_exhaust, _ = _register_and_login(client, "exhaust@test.com")
         topic_exhaust = requests.post(
             f"{base_url}/api/v1/topics/",
@@ -197,7 +205,7 @@ def run_tests():
 
         succeeded = 0
         got_429 = False
-        for i in range(15):
+        for i in range(expected_chat_successes + 5):
             raw = requests.post(
                 f"{base_url}/api/v1/chat/",
                 headers={"Authorization": f"Bearer {token_exhaust}"},
@@ -215,9 +223,9 @@ def run_tests():
                 print(f"{Colors.RED}Unexpected status {raw.status_code}: {raw.text}{Colors.END}")
                 break
 
-        assert got_429, "Expected 429 after exhausting 10-unit free quota"
-        assert succeeded == 10, f"Expected exactly 10 successes before 429, got {succeeded}"
-        print(f"{Colors.GREEN}Free quota correctly exhausted at 10 units{Colors.END}")
+        assert got_429, f"Expected 429 after exhausting free chat quota of {expected_chat_successes} requests"
+        assert succeeded == expected_chat_successes, f"Expected exactly {expected_chat_successes} successes before 429, got {succeeded}"
+        print(f"{Colors.GREEN}Free quota correctly exhausted at {expected_chat_successes} chat requests{Colors.END}")
 
         # =================================================================
         # TEST 5: Concurrent requests — verify total units_used is correct
@@ -247,10 +255,10 @@ def run_tests():
 
         ok_count = results.count(200)
         print(f"  {ok_count}/{n_concurrent} returned 200")
-        assert ok_count == n_concurrent, f"Expected all {n_concurrent} to succeed (within 10-unit quota), got {ok_count}"
+        assert ok_count == n_concurrent, f"Expected all {n_concurrent} to succeed within free chat quota, got {ok_count}"
 
         # Now send more to see where the cutoff lands — should be at 10 total
-        remaining_quota = 10 - n_concurrent
+        remaining_quota = max(0, expected_chat_successes - n_concurrent)
         for i in range(remaining_quota + 3):
             raw = requests.post(
                 f"{base_url}/api/v1/chat/",
@@ -259,12 +267,12 @@ def run_tests():
             )
             if raw.status_code == 429:
                 total_sent = n_concurrent + i
-                print(f"{Colors.GREEN}429 after {total_sent} total requests (expected 10){Colors.END}")
-                assert total_sent == 10, f"Expected cutoff at 10, got {total_sent}"
+                print(f"{Colors.GREEN}429 after {total_sent} total requests (expected {expected_chat_successes}){Colors.END}")
+                assert total_sent == expected_chat_successes, f"Expected cutoff at {expected_chat_successes}, got {total_sent}"
                 break
         else:
             print(f"{Colors.RED}Never got 429 — concurrency may have lost updates{Colors.END}")
-            assert False, "Expected 429 after 10 total units but never received one"
+            assert False, f"Expected 429 after {expected_chat_successes} total requests but never received one"
 
         # =================================================================
         # TEST 6: Credits overage deduction

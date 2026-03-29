@@ -17,6 +17,7 @@ _ALLOWED_AUDIO_EXTENSIONS = {
     ".mp3", ".mp4", ".mpeg", ".mpga", ".m4a",
     ".wav", ".webm", ".ogg", ".flac",
 }
+_AUDIO_READ_CHUNK_SIZE = 1024 * 1024
 
 
 @router.post("/stt")
@@ -36,11 +37,24 @@ async def speech_to_text(
             detail=f"Unsupported audio format '{ext}'. Accepted: {', '.join(sorted(_ALLOWED_AUDIO_EXTENSIONS))}",
         )
 
-    content: bytes = await file.read()
+    settings = get_settings()
+    max_bytes = settings.MAX_AUDIO_UPLOAD_BYTES
+
+    content_bytes = bytearray()
+    while True:
+        remaining = max_bytes + 1 - len(content_bytes)
+        if remaining <= 0:
+            raise HTTPException(status_code=413, detail="Uploaded audio file is too large")
+
+        chunk = await file.read(min(_AUDIO_READ_CHUNK_SIZE, remaining))
+        if not chunk:
+            break
+        content_bytes.extend(chunk)
+
+    content: bytes = bytes(content_bytes)
     if len(content) == 0:
         raise HTTPException(status_code=400, detail="Uploaded audio file is empty")
 
-    settings = get_settings()
     await UsageService.check_and_consume_units(db, current_user, settings.UNIT_COST_SPEECH)
     try:
         transcript: str | None = await SpeechService.transcribe_audio(content)

@@ -157,8 +157,16 @@ class UsageService:
         )
 
         bucket = _today_bucket()
-        row = await UsageService._get_or_create_daily_row(db, user.user_id, bucket)
-        if row.units_used < units:
+        sel = select(DailyUsage).where(
+            DailyUsage.user_id == user.user_id,
+            DailyUsage.bucket_start_utc == bucket,
+        )
+        if not _is_sqlite:
+            sel = sel.with_for_update()
+
+        result = await db.execute(sel)
+        row = result.scalar_one_or_none()
+        if row is None or row.units_used < units:
             raise HTTPException(status_code=400, detail="cannot refund more units than were consumed")
 
         pre_refund_used = row.units_used

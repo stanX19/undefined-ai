@@ -53,6 +53,7 @@ class Settings(BaseSettings):
     UNIT_COST_RECOMMENDATIONS: int = 1
     UNIT_COST_SPEECH: int = 1
     UNIT_COST_UI: int = 1
+    MAX_AUDIO_UPLOAD_BYTES: int = 25 * 1024 * 1024
 
     # Application Settings
     DEBUG: bool = False
