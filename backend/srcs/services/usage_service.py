@@ -22,6 +22,7 @@ Concurrency strategy:
   a WHERE guard on the UPDATE (rowcount == 0 ⇒ concurrent spend won).
 """
 import asyncio
+import logging
 from datetime import datetime, timezone, time
 
 from fastapi import HTTPException
@@ -35,6 +36,7 @@ from srcs.models.daily_usage import DailyUsage
 from srcs.models.user import User
 
 _sqlite_quota_lock = asyncio.Lock()
+logger = logging.getLogger(__name__)
 
 
 def _today_bucket() -> datetime:
@@ -82,6 +84,18 @@ class UsageService:
                 await UsageService._refund_units(db, user, units)
                 return
         await UsageService._refund_units(db, user, units)
+
+    @staticmethod
+    async def safe_refund_units(
+        db: AsyncSession,
+        user: User,
+        units: int,
+    ) -> None:
+        """Best-effort refund helper that never masks the original failure."""
+        try:
+            await UsageService.refund_units(db, user, units)
+        except Exception:
+            logger.exception("Failed to refund %s units for user %s", units, user.user_id)
 
     @staticmethod
     async def _check_and_consume(

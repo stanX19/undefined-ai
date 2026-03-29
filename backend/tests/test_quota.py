@@ -341,11 +341,13 @@ def run_tests():
         traceback.print_exc()
     finally:
         # Cleanup temp database
-        if test_db and os.path.exists(test_db):
-            try:
-                os.unlink(test_db)
-            except OSError:
-                pass
+        if test_db:
+            for path in (test_db, f"{test_db}-wal", f"{test_db}-shm"):
+                if os.path.exists(path):
+                    try:
+                        os.unlink(path)
+                    except OSError:
+                        pass
 
 
 def test_alembic_fresh_database():
@@ -428,11 +430,12 @@ def test_alembic_fresh_database():
     except AssertionError:
         raise
     finally:
-        if os.path.exists(fresh_db):
-            try:
-                os.unlink(fresh_db)
-            except OSError:
-                pass
+        for path in (fresh_db, f"{fresh_db}-wal", f"{fresh_db}-shm"):
+            if os.path.exists(path):
+                try:
+                    os.unlink(path)
+                except OSError:
+                    pass
 
 
 if __name__ == "__main__":

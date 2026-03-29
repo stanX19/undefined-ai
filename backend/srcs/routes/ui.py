@@ -63,9 +63,14 @@ async def get_ui(
     If no scene exists yet, creates an empty default scene and returns it.
     """
     await _get_owned_topic_or_404(db, topic_id, current_user)
+    settings = get_settings()
     await _consume_ui_units(db, current_user)
-    scene = await UIService.get_or_create_scene(db, topic_id)
-    return _build_ui_response(scene)
+    try:
+        scene = await UIService.get_or_create_scene(db, topic_id)
+        return _build_ui_response(scene)
+    except Exception:
+        await UsageService.safe_refund_units(db, current_user, settings.UNIT_COST_UI)
+        raise
 
 
 @router.get("/{topic_id}/history", response_model=UIHistoryResponse)
@@ -76,9 +81,14 @@ async def get_ui_history(
 ):
     """Return the historical versions of the UI for this topic."""
     await _get_owned_topic_or_404(db, topic_id, current_user)
+    settings = get_settings()
     await _consume_ui_units(db, current_user)
-    history = await UIService.get_history(db, topic_id)
-    return UIHistoryResponse(versions=history)
+    try:
+        history = await UIService.get_history(db, topic_id)
+        return UIHistoryResponse(versions=history)
+    except Exception:
+        await UsageService.safe_refund_units(db, current_user, settings.UNIT_COST_UI)
+        raise
 
 
 @router.post("/{topic_id}/rollback", response_model=UIResponse)
@@ -105,10 +115,15 @@ async def rollback_ui(
     if scene_obj.topic_id != topic_id:
         raise HTTPException(status_code=400, detail="Scene does not belong to the specified topic")
 
+    settings = get_settings()
     await _consume_ui_units(db, current_user)
-    await UIService.set_current_ui_to_version(db, topic_id, req.scene_id)
-    scene = await UIService.get_or_create_scene(db, topic_id)
-    return _build_ui_response(scene)
+    try:
+        await UIService.set_current_ui_to_version(db, topic_id, req.scene_id)
+        scene = await UIService.get_or_create_scene(db, topic_id)
+        return _build_ui_response(scene)
+    except Exception:
+        await UsageService.safe_refund_units(db, current_user, settings.UNIT_COST_UI)
+        raise
 
 
 @router.post("/share/{scene_id}", response_model=ShareResponse)
