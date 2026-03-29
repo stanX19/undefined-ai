@@ -22,7 +22,7 @@ class DailyUsage(Base):
         DateTime(timezone=True), nullable=False
     )
     units_used: Mapped[int] = mapped_column(
-        Integer, default=0, server_default="0", nullable=False
+        Integer, server_default='0', nullable=False
     )
 
     __table_args__ = (

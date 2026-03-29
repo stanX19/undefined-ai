@@ -1,5 +1,6 @@
 """UndefinedAI — Phase 1 POC backend entry-point."""
 import os
+import sqlite3
 from asyncio import to_thread
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -35,6 +36,34 @@ def _run_alembic_upgrade_head() -> None:
     command.upgrade(alembic_cfg, "head")
 
 
+def _run_alembic_stamp(revision: str) -> None:
+    alembic_cfg = Config(str(Path(__file__).resolve().parent / "alembic.ini"))
+    command.stamp(alembic_cfg, revision)
+
+
+def _sqlite_db_needs_baseline_stamp() -> bool:
+    """Return True when a file-backed SQLite DB has tables but no Alembic versioning."""
+    db_path = SQLALCHEMY_DATABASE_URL.removeprefix("sqlite+aiosqlite:///")
+    if not db_path or db_path.startswith("file:") or not os.path.exists(db_path):
+        return False
+
+    conn = sqlite3.connect(db_path)
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT name
+            FROM sqlite_master
+            WHERE type = 'table'
+              AND name NOT LIKE 'sqlite_%'
+            """
+        )
+        tables = {row[0] for row in cursor.fetchall()}
+        return bool(tables) and "alembic_version" not in tables
+    finally:
+        conn.close()
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     """Hybrid bootstrap strategy:
@@ -53,6 +82,10 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
             async with engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
         else:
+            if _sqlite_db_needs_baseline_stamp():
+                # Older local DBs may have been created via create_all() and therefore
+                # contain app tables but no alembic_version row yet.
+                await to_thread(_run_alembic_stamp, "a001_baseline")
             await to_thread(_run_alembic_upgrade_head)
     yield
 

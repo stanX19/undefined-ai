@@ -384,7 +384,7 @@ def test_alembic_fresh_database():
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
         tables = {row[0] for row in cursor.fetchall()}
         expected = {"users", "topics", "scenes", "atomic_facts", "chat_history",
-                    "shares", "daily_usage", "alembic_version"}
+                    "shares", "topic_progress", "daily_usage", "alembic_version"}
         missing = expected - tables
         assert not missing, f"Missing tables: {missing}"
         print(f"{Colors.GREEN}All expected tables present: {sorted(expected - {'alembic_version'})}{Colors.END}")

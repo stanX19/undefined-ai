@@ -4,7 +4,7 @@ Mental checklist:
 - Free quota is global per UTC day
 - Credits only cover overage
 - check_and_consume_units is one atomic transactional operation
-- No automatic refunds in v1
+- Explicit refunds are available for downstream failures after quota spend
 
 Concurrency strategy:
 - All mutations use SQL-level column expressions (e.g. units_used = units_used + N)
@@ -69,6 +69,21 @@ class UsageService:
         return await UsageService._check_and_consume(db, user, units)
 
     @staticmethod
+    async def refund_units(
+        db: AsyncSession,
+        user: User,
+        units: int,
+    ) -> None:
+        """Best-effort rollback of previously consumed units for failed work."""
+        if units <= 0:
+            raise HTTPException(status_code=400, detail="units must be greater than 0")
+        if _is_sqlite:
+            async with _sqlite_quota_lock:
+                await UsageService._refund_units(db, user, units)
+                return
+        await UsageService._refund_units(db, user, units)
+
+    @staticmethod
     async def _check_and_consume(
         db: AsyncSession,
         user: User,
@@ -125,6 +140,46 @@ class UsageService:
                     "credits_balance": user.credits_balance,
                     "credits_needed": incremental_overage,
                 },
+            )
+
+        await db.commit()
+        await db.refresh(user)
+
+    @staticmethod
+    async def _refund_units(
+        db: AsyncSession,
+        user: User,
+        units: int,
+    ) -> None:
+        settings = get_settings()
+        daily_free = settings.RATE_LIMIT_FREE_UNITS_BY_PLAN.get(
+            user.plan_tier, settings.RATE_LIMIT_FREE_UNITS_BY_PLAN.get("free", 10)
+        )
+
+        bucket = _today_bucket()
+        row = await UsageService._get_or_create_daily_row(db, user.user_id, bucket)
+        if row.units_used < units:
+            raise HTTPException(status_code=400, detail="cannot refund more units than were consumed")
+
+        pre_refund_used = row.units_used
+
+        await db.execute(
+            update(DailyUsage)
+            .where(DailyUsage.id == row.id)
+            .where(DailyUsage.units_used >= units)
+            .values(units_used=DailyUsage.units_used - units)
+        )
+        await db.refresh(row)
+
+        overage_before = max(0, pre_refund_used - daily_free)
+        overage_after = max(0, row.units_used - daily_free)
+        credits_to_restore = overage_before - overage_after
+
+        if credits_to_restore > 0:
+            await db.execute(
+                update(User)
+                .where(User.user_id == user.user_id)
+                .values(credits_balance=User.credits_balance + credits_to_restore)
             )
 
         await db.commit()

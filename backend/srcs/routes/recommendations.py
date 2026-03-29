@@ -21,6 +21,27 @@ router: APIRouter = APIRouter(
 )
 
 
+async def _get_billable_recommendations(
+    db: AsyncSession,
+    current_user: User,
+    fetch_fn,
+) -> list[dict]:
+    """Consume recommendation units only for non-empty successful results."""
+    settings = get_settings()
+    await UsageService.check_and_consume_units(db, current_user, settings.UNIT_COST_RECOMMENDATIONS)
+    try:
+        results = await fetch_fn()
+    except Exception:
+        await UsageService.refund_units(db, current_user, settings.UNIT_COST_RECOMMENDATIONS)
+        raise
+
+    if not results:
+        await UsageService.refund_units(db, current_user, settings.UNIT_COST_RECOMMENDATIONS)
+        raise HTTPException(status_code=503, detail="Failed to generate recommendations")
+
+    return results
+
+
 @router.get("/default", response_model=RecommendationsResponse)
 async def get_default_recommendations(
     education_level: str = Query(..., description="The user's selected education level"),
@@ -28,10 +49,11 @@ async def get_default_recommendations(
     db: AsyncSession = Depends(get_db),
 ) -> RecommendationsResponse:
     """Return 3 introductory suggested topics based on education level."""
-    settings = get_settings()
-    await UsageService.check_and_consume_units(db, current_user, settings.UNIT_COST_RECOMMENDATIONS)
-
-    results = await RecommendationService.get_default_recommendations(education_level)
+    results = await _get_billable_recommendations(
+        db,
+        current_user,
+        lambda: RecommendationService.get_default_recommendations(education_level),
+    )
 
     return RecommendationsResponse(
         topic_id=None,
@@ -52,10 +74,11 @@ async def get_latest_recommendations(
 
     latest_topic = topics[0]
 
-    settings = get_settings()
-    await UsageService.check_and_consume_units(db, current_user, settings.UNIT_COST_RECOMMENDATIONS)
-
-    results = await RecommendationService.get_recommendations(current_user.user_id, latest_topic.topic_id)
+    results = await _get_billable_recommendations(
+        db,
+        current_user,
+        lambda: RecommendationService.get_recommendations(current_user.user_id, latest_topic.topic_id),
+    )
 
     return RecommendationsResponse(
         topic_id=latest_topic.topic_id,
@@ -75,10 +98,11 @@ async def get_recommendations(
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
 
-    settings = get_settings()
-    await UsageService.check_and_consume_units(db, current_user, settings.UNIT_COST_RECOMMENDATIONS)
-
-    results = await RecommendationService.get_recommendations(current_user.user_id, topic_id)
+    results = await _get_billable_recommendations(
+        db,
+        current_user,
+        lambda: RecommendationService.get_recommendations(current_user.user_id, topic_id),
+    )
 
     return RecommendationsResponse(
         topic_id=topic_id,

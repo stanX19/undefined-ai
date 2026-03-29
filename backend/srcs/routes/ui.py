@@ -3,9 +3,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
+from srcs.config import get_settings
 from srcs.database import get_db
 from srcs.schemas.ui_dto import UIResponse, UIHistoryResponse, RollbackRequest, ShareResponse
 from srcs.services.ui_service import UIService
+from srcs.services.usage_service import UsageService
 from srcs.utils.markgraph.markgraph_parser import compile_markgraph, export_to_dict
 from srcs.dependencies import get_current_user
 from srcs.models.user import User
@@ -15,18 +17,12 @@ from srcs.models.topic import Topic
 router = APIRouter(prefix="/api/v1/ui", tags=["UI"])
 
 
-@router.get("/{topic_id}", response_model=UIResponse)
-async def get_ui(
-    topic_id: str,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """Return the current UI scene for a topic.
+async def _consume_ui_units(db: AsyncSession, current_user: User) -> None:
+    settings = get_settings()
+    await UsageService.check_and_consume_units(db, current_user, settings.UNIT_COST_UI)
 
-    If no scene exists yet, creates an empty default scene and returns it.
-    """
-    scene = await UIService.get_or_create_scene(db, topic_id)
-    
+
+def _build_ui_response(scene: Scene) -> UIResponse:
     result = compile_markgraph(scene.ui_markdown)
     ast_dict = export_to_dict(result.scenes)
     ui_json = {
@@ -44,6 +40,21 @@ async def get_ui(
     )
 
 
+@router.get("/{topic_id}", response_model=UIResponse)
+async def get_ui(
+    topic_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Return the current UI scene for a topic.
+
+    If no scene exists yet, creates an empty default scene and returns it.
+    """
+    scene = await UIService.get_or_create_scene(db, topic_id)
+    await _consume_ui_units(db, current_user)
+    return _build_ui_response(scene)
+
+
 @router.get("/{topic_id}/history", response_model=UIHistoryResponse)
 async def get_ui_history(
     topic_id: str,
@@ -52,6 +63,7 @@ async def get_ui_history(
 ):
     """Return the historical versions of the UI for this topic."""
     history = await UIService.get_history(db, topic_id)
+    await _consume_ui_units(db, current_user)
     return UIHistoryResponse(versions=history)
 
 
@@ -64,8 +76,9 @@ async def rollback_ui(
 ):
     """Set the topic's current UI pointer to a previous version."""
     await UIService.set_current_ui_to_version(db, topic_id, req.scene_id)
-    # Return the new current UI
-    return await get_ui(topic_id, current_user, db)
+    scene = await UIService.get_or_create_scene(db, topic_id)
+    await _consume_ui_units(db, current_user)
+    return _build_ui_response(scene)
 
 
 @router.post("/share/{scene_id}", response_model=ShareResponse)
@@ -91,6 +104,7 @@ async def share_ui(
         # Scene exists but is not owned by the current user
         raise HTTPException(status_code=403, detail="Not authorized to share this scene")
 
+    await _consume_ui_units(db, current_user)
     try:
         token = await UIService.create_share(db, scene_id)
         return ShareResponse(
@@ -108,25 +122,11 @@ async def get_public_ui(
 ):
     """Return UI data for a public share. No auth required."""
     scene = await UIService.get_scene_by_share_id(db, token)
-    
+
     if not scene:
         raise HTTPException(status_code=404, detail="Shared UI not found")
-    
-    result = compile_markgraph(scene.ui_markdown)
-    ast_dict = export_to_dict(result.scenes)
-    ui_json = {
-        "version": "0.2",
-        "scenes": ast_dict,
-        "id_map": {k: export_to_dict(v) for k, v in result.id_map.items()}
-    }
 
-    return UIResponse(
-        scene_id=scene.scene_id,
-        topic_id=scene.topic_id,
-        ui_markdown=scene.ui_markdown,
-        ui_json=ui_json,
-        created_at=scene.created_at,
-    )
+    return _build_ui_response(scene)
 
 
 if __name__ == "__main__":

@@ -42,10 +42,14 @@ async def speech_to_text(
 
     settings = get_settings()
     await UsageService.check_and_consume_units(db, current_user, settings.UNIT_COST_SPEECH)
-
-    transcript: str | None = await SpeechService.transcribe_audio(content)
+    try:
+        transcript: str | None = await SpeechService.transcribe_audio(content)
+    except Exception:
+        await UsageService.refund_units(db, current_user, settings.UNIT_COST_SPEECH)
+        raise
 
     if transcript is None:
-        raise HTTPException(status_code=500, detail="Speech-to-text processing failed or returned no text")
+        await UsageService.refund_units(db, current_user, settings.UNIT_COST_SPEECH)
+        raise HTTPException(status_code=502, detail="Speech-to-text processing failed or returned no text")
 
     return {"text": transcript}

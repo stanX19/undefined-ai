@@ -83,23 +83,33 @@ async def upload_document(
 
     # Charge before expensive work so over-quota users don't trigger PDF I/O/extraction.
     await UsageService.check_and_consume_units(db, current_user, settings.UNIT_COST_INGESTION)
-
-    file_path: str = DocumentService.save_pdf(content, file.filename, settings.UPLOAD_DIR)
+    file_path: str | None = None
     try:
+        file_path = DocumentService.save_pdf(content, file.filename, settings.UPLOAD_DIR)
         extracted: str = DocumentService.extract_text(file_path)
     except RuntimeError as exc:
-        if os.path.exists(file_path):
+        if file_path and os.path.exists(file_path):
             try:
                 os.remove(file_path)
             except OSError:
                 pass
-        # Extraction failures are treated as a bad request; under the selected policy,
-        # quota has already been consumed.
+        await UsageService.refund_units(db, current_user, settings.UNIT_COST_INGESTION)
         raise HTTPException(status_code=400, detail="Failed to process PDF file") from exc
+    except Exception:
+        if file_path and os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except OSError:
+                pass
+        await UsageService.refund_units(db, current_user, settings.UNIT_COST_INGESTION)
+        raise
 
     # Persist extracted content (non-blocking ingestion is triggered after persistence).
-
-    topic = await TopicService.set_document_text(db, topic_id, extracted)
+    try:
+        topic = await TopicService.set_document_text(db, topic_id, extracted)
+    except Exception:
+        await UsageService.refund_units(db, current_user, settings.UNIT_COST_INGESTION)
+        raise
 
     # Auto-trigger ingestion pipeline in background (non-blocking)
     IngestionService.trigger_ingestion(topic_id, extracted)

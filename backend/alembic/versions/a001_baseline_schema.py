@@ -107,6 +107,19 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_shares_scene_id'), 'shares', ['scene_id'], unique=True)
 
+    op.create_table(
+        'topic_progress',
+        sa.Column('progress_id', sa.String(), nullable=False),
+        sa.Column('topic_id', sa.String(), nullable=False),
+        sa.Column('user_id', sa.String(), nullable=False),
+        sa.Column('last_fact_id', sa.String(), nullable=True),
+        sa.Column('last_accessed', sa.DateTime(timezone=True), nullable=False),
+        sa.ForeignKeyConstraint(['last_fact_id'], ['atomic_facts.fact_id']),
+        sa.ForeignKeyConstraint(['topic_id'], ['topics.topic_id']),
+        sa.ForeignKeyConstraint(['user_id'], ['users.user_id']),
+        sa.PrimaryKeyConstraint('progress_id'),
+    )
+
 
 def downgrade() -> None:
     """Drop all baseline tables."""
@@ -117,6 +130,7 @@ def downgrade() -> None:
 
     op.drop_index(op.f('ix_shares_scene_id'), table_name='shares')
     op.drop_table('shares')
+    op.drop_table('topic_progress')
     op.drop_table('chat_history')
     op.drop_table('atomic_facts')
     op.drop_index(op.f('ix_scenes_topic_id'), table_name='scenes')

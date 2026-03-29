@@ -70,8 +70,11 @@ async def send_message(
 
     settings = get_settings()
     await UsageService.check_and_consume_units(db, current_user, settings.UNIT_COST_CHAT)
-
-    user_msg = await ChatService.send_message(db, body.topic_id, body.message)
+    try:
+        user_msg = await ChatService.send_message(db, body.topic_id, body.message)
+    except Exception:
+        await UsageService.refund_units(db, current_user, settings.UNIT_COST_CHAT)
+        raise
 
     return ChatAcceptedResponse(
         user_message=ChatMessageResponse.model_validate(user_msg),
