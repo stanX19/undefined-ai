@@ -163,12 +163,15 @@ class UsageService:
 
         pre_refund_used = row.units_used
 
-        await db.execute(
+        result = await db.execute(
             update(DailyUsage)
             .where(DailyUsage.id == row.id)
             .where(DailyUsage.units_used >= units)
             .values(units_used=DailyUsage.units_used - units)
         )
+        if result.rowcount == 0:
+            await db.rollback()
+            raise HTTPException(status_code=409, detail="Quota refund conflict; please retry")
         await db.refresh(row)
 
         overage_before = max(0, pre_refund_used - daily_free)

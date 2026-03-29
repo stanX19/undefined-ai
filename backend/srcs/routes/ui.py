@@ -6,6 +6,7 @@ from sqlalchemy import select
 from srcs.config import get_settings
 from srcs.database import get_db
 from srcs.schemas.ui_dto import UIResponse, UIHistoryResponse, RollbackRequest, ShareResponse
+from srcs.services.topic_service import TopicService
 from srcs.services.ui_service import UIService
 from srcs.services.usage_service import UsageService
 from srcs.utils.markgraph.markgraph_parser import compile_markgraph, export_to_dict
@@ -20,6 +21,17 @@ router = APIRouter(prefix="/api/v1/ui", tags=["UI"])
 async def _consume_ui_units(db: AsyncSession, current_user: User) -> None:
     settings = get_settings()
     await UsageService.check_and_consume_units(db, current_user, settings.UNIT_COST_UI)
+
+
+async def _get_owned_topic_or_404(
+    db: AsyncSession,
+    topic_id: str,
+    current_user: User,
+) -> Topic:
+    topic = await TopicService.get_user_topic(db, topic_id, current_user.user_id)
+    if not topic:
+        raise HTTPException(status_code=404, detail="Topic not found")
+    return topic
 
 
 def _build_ui_response(scene: Scene) -> UIResponse:
@@ -50,8 +62,9 @@ async def get_ui(
 
     If no scene exists yet, creates an empty default scene and returns it.
     """
-    scene = await UIService.get_or_create_scene(db, topic_id)
+    await _get_owned_topic_or_404(db, topic_id, current_user)
     await _consume_ui_units(db, current_user)
+    scene = await UIService.get_or_create_scene(db, topic_id)
     return _build_ui_response(scene)
 
 
@@ -62,8 +75,9 @@ async def get_ui_history(
     db: AsyncSession = Depends(get_db)
 ):
     """Return the historical versions of the UI for this topic."""
-    history = await UIService.get_history(db, topic_id)
+    await _get_owned_topic_or_404(db, topic_id, current_user)
     await _consume_ui_units(db, current_user)
+    history = await UIService.get_history(db, topic_id)
     return UIHistoryResponse(versions=history)
 
 
@@ -75,9 +89,25 @@ async def rollback_ui(
     db: AsyncSession = Depends(get_db)
 ):
     """Set the topic's current UI pointer to a previous version."""
+    await _get_owned_topic_or_404(db, topic_id, current_user)
+    result = await db.execute(
+        select(Scene, Topic.user_id)
+        .join(Topic, Scene.topic_id == Topic.topic_id)
+        .where(Scene.scene_id == req.scene_id)
+    )
+    row = result.first()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Scene not found")
+
+    scene_obj, owner_user_id = row
+    if owner_user_id != current_user.user_id:
+        raise HTTPException(status_code=403, detail="Not authorized to modify this topic")
+    if scene_obj.topic_id != topic_id:
+        raise HTTPException(status_code=400, detail="Scene does not belong to the specified topic")
+
+    await _consume_ui_units(db, current_user)
     await UIService.set_current_ui_to_version(db, topic_id, req.scene_id)
     scene = await UIService.get_or_create_scene(db, topic_id)
-    await _consume_ui_units(db, current_user)
     return _build_ui_response(scene)
 
 
