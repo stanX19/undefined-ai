@@ -69,6 +69,7 @@ async def get_ui(
         scene = await UIService.get_or_create_scene(db, topic_id)
         return _build_ui_response(scene)
     except Exception:
+        await db.rollback()
         await UsageService.safe_refund_units(db, current_user, settings.UNIT_COST_UI)
         raise
 
@@ -87,6 +88,7 @@ async def get_ui_history(
         history = await UIService.get_history(db, topic_id)
         return UIHistoryResponse(versions=history)
     except Exception:
+        await db.rollback()
         await UsageService.safe_refund_units(db, current_user, settings.UNIT_COST_UI)
         raise
 
@@ -122,6 +124,7 @@ async def rollback_ui(
         scene = await UIService.get_or_create_scene(db, topic_id)
         return _build_ui_response(scene)
     except Exception:
+        await db.rollback()
         await UsageService.safe_refund_units(db, current_user, settings.UNIT_COST_UI)
         raise
 
@@ -158,9 +161,11 @@ async def share_ui(
             share_url=f"/share/{token}"
         )
     except ValueError as e:
+        await db.rollback()
         await UsageService.safe_refund_units(db, current_user, settings.UNIT_COST_UI)
         raise HTTPException(status_code=404, detail=str(e))
     except Exception:
+        await db.rollback()
         await UsageService.safe_refund_units(db, current_user, settings.UNIT_COST_UI)
         raise
 

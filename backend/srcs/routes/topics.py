@@ -78,7 +78,8 @@ async def upload_document(
 
     # Cheap PDF signature check before consuming quota.
     # Many non-PDF inputs will fail quickly here, avoiding extraction work and quota spend.
-    if not content.lstrip().startswith(b"%PDF-"):
+    pdf_header_prefix = content[:4096]
+    if not pdf_header_prefix.lstrip().startswith(b"%PDF-"):
         raise HTTPException(status_code=400, detail="Invalid PDF file")
 
     # Charge before expensive work so over-quota users don't trigger PDF I/O/extraction.
