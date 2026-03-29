@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+from sqlalchemy.engine import make_url
 
 from srcs.config import get_settings
 from srcs.database import SQLALCHEMY_DATABASE_URL, Base, engine
@@ -41,10 +42,21 @@ def _run_alembic_stamp(revision: str) -> None:
     command.stamp(alembic_cfg, revision)
 
 
+def _get_sqlite_db_path() -> str | None:
+    """Return the filesystem path for a file-backed SQLite DB, if any."""
+    url = make_url(SQLALCHEMY_DATABASE_URL)
+    db_path = url.database
+    if not db_path or db_path.startswith("file:"):
+        return None
+
+    path = Path(db_path)
+    return str(path)
+
+
 def _sqlite_db_needs_baseline_stamp() -> bool:
     """Return True when a file-backed SQLite DB has tables but no Alembic versioning."""
-    db_path = SQLALCHEMY_DATABASE_URL.removeprefix("sqlite+aiosqlite:///")
-    if not db_path or db_path.startswith("file:") or not os.path.exists(db_path):
+    db_path = _get_sqlite_db_path()
+    if not db_path or not os.path.exists(db_path):
         return False
 
     conn = sqlite3.connect(db_path)
