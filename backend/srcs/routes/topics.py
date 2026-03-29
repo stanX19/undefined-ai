@@ -108,7 +108,8 @@ async def upload_document(
     try:
         topic = await TopicService.set_document_text(db, topic_id, extracted)
     except Exception:
-        await UsageService.refund_units(db, current_user, settings.UNIT_COST_INGESTION)
+        await db.rollback()
+        await UsageService.safe_refund_units(db, current_user, settings.UNIT_COST_INGESTION)
         raise
 
     # Auto-trigger ingestion pipeline in background (non-blocking)

@@ -73,7 +73,8 @@ async def send_message(
     try:
         user_msg = await ChatService.send_message(db, body.topic_id, body.message)
     except Exception:
-        await UsageService.refund_units(db, current_user, settings.UNIT_COST_CHAT)
+        await db.rollback()
+        await UsageService.safe_refund_units(db, current_user, settings.UNIT_COST_CHAT)
         raise
 
     return ChatAcceptedResponse(
