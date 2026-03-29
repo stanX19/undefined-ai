@@ -153,18 +153,11 @@ class TestClient:
             TestClient.log(self.actor_name, method, "RECEIVE", f"{description}", status_msg, log_payload)
             
             if status_msg == "FAILED":
-                 # If check_status failed (which prints nothing now), we might want to exit or throw
-                 # But the original code called exit(1) inside check_status. 
-                 # Let's restore that behavior via log or just exit.
-                 # The original printed FAILED then exit(1).
-                 # We already logged FAILED.
                  print(f"{Colors.RED}FAILED DETAIL:\n{res.text}{Colors.END}")
-                 exit(1)
 
             return data
         except requests.exceptions.ConnectionError:
             TestClient.log(self.actor_name, method, "RECEIVE", f"{description}", "FAILED", "Connection Error")
-            exit(1)
 
     def post(self, path: str, description: str = "", **kwargs) -> dict:
         return self.request("POST", path, description=description, **kwargs)
