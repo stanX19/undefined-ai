@@ -93,7 +93,7 @@ async def upload_document(
                 os.remove(file_path)
             except OSError:
                 pass
-        await UsageService.refund_units(db, current_user, settings.UNIT_COST_INGESTION)
+        await UsageService.safe_refund_units(db, current_user, settings.UNIT_COST_INGESTION)
         raise HTTPException(status_code=400, detail="Failed to process PDF file") from exc
     except Exception:
         if file_path and os.path.exists(file_path):
@@ -101,7 +101,7 @@ async def upload_document(
                 os.remove(file_path)
             except OSError:
                 pass
-        await UsageService.refund_units(db, current_user, settings.UNIT_COST_INGESTION)
+        await UsageService.safe_refund_units(db, current_user, settings.UNIT_COST_INGESTION)
         raise
 
     # Persist extracted content (non-blocking ingestion is triggered after persistence).

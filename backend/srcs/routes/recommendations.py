@@ -32,11 +32,11 @@ async def _get_billable_recommendations(
     try:
         results = await fetch_fn()
     except Exception:
-        await UsageService.refund_units(db, current_user, settings.UNIT_COST_RECOMMENDATIONS)
+        await UsageService.safe_refund_units(db, current_user, settings.UNIT_COST_RECOMMENDATIONS)
         raise
 
     if not results:
-        await UsageService.refund_units(db, current_user, settings.UNIT_COST_RECOMMENDATIONS)
+        await UsageService.safe_refund_units(db, current_user, settings.UNIT_COST_RECOMMENDATIONS)
         raise HTTPException(status_code=503, detail="Failed to generate recommendations")
 
     return results

@@ -150,6 +150,7 @@ async def share_ui(
         raise HTTPException(status_code=403, detail="Not authorized to share this scene")
 
     await _consume_ui_units(db, current_user)
+    settings = get_settings()
     try:
         token = await UIService.create_share(db, scene_id)
         return ShareResponse(
@@ -157,7 +158,11 @@ async def share_ui(
             share_url=f"/share/{token}"
         )
     except ValueError as e:
+        await UsageService.safe_refund_units(db, current_user, settings.UNIT_COST_UI)
         raise HTTPException(status_code=404, detail=str(e))
+    except Exception:
+        await UsageService.safe_refund_units(db, current_user, settings.UNIT_COST_UI)
+        raise
 
 
 @router.get("/public/{token}", response_model=UIResponse)
