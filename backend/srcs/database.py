@@ -1,4 +1,5 @@
 from sqlalchemy import event
+from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.pool import AsyncAdaptedQueuePool
@@ -17,7 +18,8 @@ elif settings.USE_IN_MEMORY_DB:
 else:
     SQLALCHEMY_DATABASE_URL = f"sqlite+aiosqlite:///./{settings.DB_NAME}"
 
-_is_sqlite = "sqlite" in SQLALCHEMY_DATABASE_URL
+_database_url = make_url(SQLALCHEMY_DATABASE_URL)
+_is_sqlite = _database_url.get_backend_name() == "sqlite"
 
 if _is_sqlite:
     _CONNECT_ARGS = {

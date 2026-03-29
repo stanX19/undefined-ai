@@ -16,7 +16,7 @@ from slowapi.errors import RateLimitExceeded
 from sqlalchemy.engine import make_url
 
 from srcs.config import get_settings
-from srcs.database import SQLALCHEMY_DATABASE_URL, Base, engine
+from srcs.database import SQLALCHEMY_DATABASE_URL, Base, engine, _is_sqlite
 
 # Import models so Base.metadata knows about every table
 import srcs.models  # noqa: F401
@@ -87,7 +87,7 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
       app starts.  Alembic is the single source of truth for
       production schema.
     """
-    if "sqlite" in SQLALCHEMY_DATABASE_URL:
+    if _is_sqlite:
         if settings.USE_IN_MEMORY_DB:
             # In-memory SQLite lifetime is tied to active connections, so Alembic's
             # separate engine can produce non-persistent schema. Build schema directly.
