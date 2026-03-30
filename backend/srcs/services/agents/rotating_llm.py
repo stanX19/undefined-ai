@@ -393,18 +393,19 @@ class RotatingLLM:
 
     def _log_health(self) -> None:
         """Log a formatted health summary of all API keys."""
-        counts = list(self._call_counts.values())
-        min_count = min(counts)
-        threshold = max(min_count + 10, min_count * 1.5)
+        counts: list[int] = list(self._call_counts.values())
+        min_count: int = min(counts)
+        threshold: int = 10
 
         logger.info("[ROTATING_LLM] ⚖️ KEY USAGE SUMMARY:")
         for config in self.llm_configs:
-            count = self._call_counts[config.api_key]
-            is_min = count == min_count
-            is_penalized = count > threshold
+            count: int = self._call_counts[config.api_key]
+            is_min: bool = count == min_count
+            diff: int = count - min_count
+            is_penalized: bool = diff > threshold
             
-            icon = "[->]" if is_min else ("[KO]" if is_penalized else "[OK]")
-            status = " (PREFERRED)" if is_min else (" (PENALIZED)" if is_penalized else "")
+            icon: str = "❌" if is_penalized else "✅"
+            status: str = " (PENALIZED)" if is_penalized else ""
             
             logger.info("  %s %-7s (..%s) : [ %-6d ]%s", 
                         icon, config.provider, config.api_key[-4:], count, status)
