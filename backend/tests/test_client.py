@@ -41,12 +41,19 @@ class ThreadFilter:
 
     @staticmethod
     def redirect_all_other():
+        # Ensure stdout can handle UTF-8 characters on Windows
+        try:
+            sys.stdout.reconfigure(encoding="utf-8", errors="backslashreplace")
+            sys.stderr.reconfigure(encoding="utf-8", errors="backslashreplace")
+        except Exception:
+            pass
+
         current_thread = threading.current_thread()
         if current_thread in ThreadFilter._main_threads:
             return
         ThreadFilter._main_threads.append(current_thread)
         if ThreadFilter._log_file is None:
-            ThreadFilter._log_file = open(ThreadFilter._log_path, "w+")
+            ThreadFilter._log_file = open(ThreadFilter._log_path, "w+", encoding="utf-8")
             sys.stdout = ThreadFilter()
             sys.stderr = ThreadFilter()
 

@@ -1,5 +1,4 @@
 import enum
-import logging
 import traceback
 import os
 import asyncio
@@ -22,12 +21,10 @@ from google.api_core.exceptions import ResourceExhausted
 from langchain_google_genai import ChatGoogleGenerativeAI
 from pydantic import BaseModel, ConfigDict
 from srcs.config import get_settings
+from srcs.logger import logger
 
 # Mute Gemini "ALTS creds ignored. Not running on GCP and untrusted ALTS is not enabled."
 os.environ['GRPC_VERBOSITY'] = 'NONE'
-
-# Configure logging
-logger = logging.getLogger(__name__)
 
 # Type aliases
 MessagesType = str | dict[str, Any] | BaseMessage | list[str | dict[str, Any] | BaseMessage] | None
@@ -381,24 +378,36 @@ class RotatingLLM:
             return [RotatingLLM._normalize_message(i) for i in messages]
         raise ValueError(f"Unsupported message type: {type(messages)}")
 
-    @staticmethod
-    def _log_request(messages: list[BaseMessage]) -> None:
-        """Log the request messages at debug level.
-
-        Args:
-            messages: List of messages to log.
-        """
-        if not get_settings().DEBUG:
-            return
-
-        logger.debug("\n[ROTATING_LLM] === SENDING REQUEST ===")
+    def _log_request(self, messages: list[BaseMessage]) -> None:
+        """Log the request messages if DEBUG is enabled."""
+        logger.debug("[RotatingLLM] === SENDING REQUEST ===")
         for idx, msg in enumerate(messages):
             content: str = str(msg.content)
             if len(content) > 500:
-                content = f"{content[:250]}\n... [TRUNCATED] ...\n{content[-250:]}"
+                prefix = content[:250]
+                suffix = content[-250:]
+                content = f"{prefix}\n... [TRUNCATED {len(content)-500} chars] ...\n{suffix}"
 
             role: str = getattr(msg, 'type', 'unknown')
-            logger.debug("[ROTATING_LLM] %s [%d]: %s", role.capitalize(), idx, content)
+            logger.debug("[RotatingLLM] %s [%d]: %s", role.capitalize(), idx, content)
+
+    def _log_health(self) -> None:
+        """Log a formatted health summary of all API keys."""
+        counts = list(self._call_counts.values())
+        min_count = min(counts)
+        threshold = max(min_count + 10, min_count * 1.5)
+
+        logger.info("[ROTATING_LLM] ⚖️ KEY USAGE SUMMARY:")
+        for config in self.llm_configs:
+            count = self._call_counts[config.api_key]
+            is_min = count == min_count
+            is_penalized = count > threshold
+            
+            icon = "[->]" if is_min else ("[KO]" if is_penalized else "[OK]")
+            status = " (PREFERRED)" if is_min else (" (PENALIZED)" if is_penalized else "")
+            
+            logger.info("  %s %-7s (..%s) : [ %-6d ]%s", 
+                        icon, config.provider, config.api_key[-4:], count, status)
 
     async def _invoke_core(
             self,
@@ -428,12 +437,16 @@ class RotatingLLM:
             config: LLMConfig = await self._pick_config()
             runnable: Runnable = config.create_runnable(temperature=temperature, model=model)
 
+            logger.info("[RotatingLLM] Calling %s attempt=%d/%d key=...%s",
+                        config.provider, attempt + 1, self.MAX_RETRIES + 1, config.api_key[-4:])
+
             try:
                 result: AIMessage = await runnable.ainvoke(messages, **kwargs)
                 async with self._lock:
                     self._call_counts[config.api_key] += self._PENALTIES[_Outcome.SUCCESS]
-                logger.info("[RotatingLLM] OK key=...%s | count=%d",
-                            config.api_key[-6:], self._call_counts[config.api_key])
+                
+                logger.info("[RotatingLLM] OK key=...%s", config.api_key[-4:])
+                self._log_health()
                 return result, config
 
             except Exception as exc:
@@ -443,10 +456,9 @@ class RotatingLLM:
                     async with self._lock:
                         self._call_counts[config.api_key] += penalty
 
-                logger.warning("[RotatingLLM] %d/%d %s: %s | key=...%s | count=%d",
-                               attempt + 1, self.MAX_RETRIES + 1, outcome.value,
-                               type(exc).__name__, config.api_key[-6:],
-                               self._call_counts[config.api_key])
+                logger.warning("[RotatingLLM] FAIL %s: %s | key=...%s",
+                               outcome.value, type(exc).__name__, config.api_key[-4:])
+                self._log_health()
                 last_exc = exc
 
         raise last_exc

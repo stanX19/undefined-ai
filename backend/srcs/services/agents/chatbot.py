@@ -4,6 +4,7 @@ Chatbot agent — LangGraph ReAct agent with tool calling.
 Uses the rotating LLM pool and exposes a single ``ask()`` entry-point
 for the rest of the application.
 """
+import sys
 import traceback
 from typing import Awaitable, Callable
 
@@ -12,6 +13,7 @@ from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, Base
 from langchain.agents import create_agent
 
 from srcs.config import get_settings
+from srcs.logger import logger
 from srcs.services.agents.rotating_llm import rotating_llm
 from srcs.services.agents.prompts.main_chatbot import SYSTEM_PROMPT
 from srcs.services.agents.tools import (
@@ -66,7 +68,7 @@ class Chatbot:
         initial_msg_count = len(messages)
 
         settings = get_settings()
-        print(f"\n[CHATBOT] === USER PROMPT ===\n{user_prompt}\n")
+        logger.debug("[CHATBOT] === USER PROMPT ===\n%s", user_prompt)
 
         try:
             llm = await rotating_llm.get_runnable(temperature=0.4)
@@ -86,17 +88,17 @@ class Chatbot:
                     output = event.get("data", {}).get("output")
                     if isinstance(output, AIMessage):
                         if output.tool_calls:
-                            print(f"[CHATBOT] AI Tool Calls: {output.tool_calls}")
+                            logger.debug("[CHATBOT] AI Tool Calls: %s", output.tool_calls)
                             if on_tool_call:
                                 for tc in output.tool_calls:
                                     await on_tool_call(tc["name"], tc.get("args", {}))
                         else:
-                            print(f"[CHATBOT] AI Response: {output.content}")
+                            logger.debug("[CHATBOT] AI Response: %s", output.content)
 
                 if kind == "on_tool_end":
                     tool_name = event.get("name", "unknown")
                     tool_output = event.get("data", {}).get("output")
-                    print(f"[CHATBOT] Tool Result ({tool_name}): {str(tool_output)[:500]}...")
+                    logger.debug("[CHATBOT] Tool Result (%s): %s...", tool_name, str(tool_output)[:500])
 
                 # Track the final AI message from the agent
                 if kind == "on_chain_end" and event.get("name") == "LangGraph":
