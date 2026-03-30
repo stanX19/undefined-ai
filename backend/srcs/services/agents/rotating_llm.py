@@ -34,8 +34,7 @@ class _Outcome(enum.Enum):
     """Outcomes of an LLM call for error classification and penalization."""
     SUCCESS = "success"
     RATE_LIMIT = "rate_limit"
-    ACCESS_DENIED = "access_denied"
-    UNKNOWN_ERROR = "unknown_error"
+    ERROR = "unknown_error"
 
 
 # -----------------------------------------------------------------------------
@@ -317,9 +316,8 @@ class RotatingLLM:
 
     _PENALTIES: dict[_Outcome, int] = {
         _Outcome.SUCCESS: 1,
-        _Outcome.RATE_LIMIT: 30,
-        _Outcome.ACCESS_DENIED: 10000,
-        _Outcome.UNKNOWN_ERROR: 10,
+        _Outcome.RATE_LIMIT: 20,
+        _Outcome.ERROR: 1000,
     }
 
     def __init__(
@@ -395,16 +393,18 @@ class RotatingLLM:
         """Log a formatted health summary of all API keys."""
         counts: list[int] = list(self._call_counts.values())
         min_count: int = min(counts)
-        threshold: int = 10
+        threshold_error: int = RotatingLLM._PENALTIES[_Outcome.ERROR]
+        threshold_limit: int = int(RotatingLLM._PENALTIES[_Outcome.RATE_LIMIT] * 0.8)
 
-        logger.info("[ROTATING_LLM] ⚖️ KEY USAGE SUMMARY:")
+        logger.info("[ROTATING_LLM] USAGE SUMMARY:")
         for config in self.llm_configs:
             count: int = self._call_counts[config.api_key]
             is_min: bool = count == min_count
             diff: int = count - min_count
-            is_penalized: bool = diff > threshold
+            is_penalized: bool = diff >= threshold_error
+            is_limited: bool = diff >= threshold_limit
             
-            icon: str = "❌" if is_penalized else "✅"
+            icon: str = "❌" if is_penalized else "⚠️" if is_limited else "✅"
             status: str = " (PENALIZED)" if is_penalized else ""
             
             logger.info("  %s %-7s (..%s) : [ %-6d ]%s", 
@@ -446,7 +446,7 @@ class RotatingLLM:
                 async with self._lock:
                     self._call_counts[config.api_key] += self._PENALTIES[_Outcome.SUCCESS]
                 
-                logger.info("[RotatingLLM] OK key=...%s", config.api_key[-4:])
+                logger.info("[RotatingLLM] OK key=...%s\n%s", config.api_key[-4:], result.text)
                 self._log_health()
                 return result, config
 
@@ -478,16 +478,10 @@ class RotatingLLM:
             return _Outcome.RATE_LIMIT
 
         status: int = getattr(getattr(exc, 'response', None), 'status_code', 0)
-        if status == 429:
+        if status == 429 or "429" in str(exc):
             return _Outcome.RATE_LIMIT
-        if status in (401, 403):
-            return _Outcome.ACCESS_DENIED
 
-        msg: str = str(exc)
-        if "API key not valid" in msg or "PERMISSION_DENIED" in msg:
-            return _Outcome.ACCESS_DENIED
-
-        return _Outcome.UNKNOWN_ERROR
+        return _Outcome.ERROR
 
     async def _pick_config(self) -> LLMConfig:
         """Pick the configuration with the lowest call count.
