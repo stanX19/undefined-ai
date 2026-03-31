@@ -1,8 +1,7 @@
-"""Recommendation routes — LLM-powered topic suggestions."""
+"""Recommendation routes - LLM-powered topic suggestions."""
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from srcs.config import get_settings
 from srcs.database import get_db
 from srcs.schemas.recommendation_dto import (
     RecommendationsResponse,
@@ -12,34 +11,12 @@ from srcs.schemas.recommendation_dto import (
 )
 from srcs.services.recommendation_service import RecommendationService
 from srcs.services.topic_service import TopicService
-from srcs.services.usage_service import UsageService
 from srcs.dependencies import get_current_user
 from srcs.models.user import User
 
 router: APIRouter = APIRouter(
     prefix="/api/v1/recommendations", tags=["recommendations"],
 )
-
-
-async def _get_billable_recommendations(
-    db: AsyncSession,
-    current_user: User,
-    fetch_fn,
-) -> list[dict]:
-    """Consume recommendation units only for non-empty successful results."""
-    settings = get_settings()
-    await UsageService.check_and_consume_units(db, current_user, settings.UNIT_COST_RECOMMENDATIONS)
-    try:
-        results = await fetch_fn()
-    except Exception:
-        await UsageService.safe_refund_units(db, current_user, settings.UNIT_COST_RECOMMENDATIONS)
-        raise
-
-    if not results:
-        await UsageService.safe_refund_units(db, current_user, settings.UNIT_COST_RECOMMENDATIONS)
-        return []
-
-    return results
 
 
 @router.get("/default", response_model=RecommendationsResponse)
@@ -49,11 +26,7 @@ async def get_default_recommendations(
     db: AsyncSession = Depends(get_db),
 ) -> RecommendationsResponse:
     """Return 3 introductory suggested topics based on education level."""
-    results = await _get_billable_recommendations(
-        db,
-        current_user,
-        lambda: RecommendationService.get_default_recommendations(education_level),
-    )
+    results = await RecommendationService.get_default_recommendations(education_level)
 
     return RecommendationsResponse(
         topic_id=None,
@@ -73,12 +46,7 @@ async def get_latest_recommendations(
         raise HTTPException(status_code=404, detail="User has no topics")
 
     latest_topic = topics[0]
-
-    results = await _get_billable_recommendations(
-        db,
-        current_user,
-        lambda: RecommendationService.get_recommendations(current_user.user_id, latest_topic.topic_id),
-    )
+    results = await RecommendationService.get_recommendations(current_user.user_id, latest_topic.topic_id)
 
     return RecommendationsResponse(
         topic_id=latest_topic.topic_id,
@@ -98,11 +66,7 @@ async def get_recommendations(
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
 
-    results = await _get_billable_recommendations(
-        db,
-        current_user,
-        lambda: RecommendationService.get_recommendations(current_user.user_id, topic_id),
-    )
+    results = await RecommendationService.get_recommendations(current_user.user_id, topic_id)
 
     return RecommendationsResponse(
         topic_id=topic_id,

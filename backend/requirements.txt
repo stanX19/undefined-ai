@@ -12,6 +12,7 @@ langgraph
 sse-starlette
 python-multipart
 PyMuPDF
+python-docx
 exa-py
 elevenlabs
 requests

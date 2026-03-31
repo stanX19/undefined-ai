@@ -50,9 +50,14 @@ class Settings(BaseSettings):
     }
     UNIT_COST_CHAT: int = 1
     UNIT_COST_INGESTION: int = 3
-    UNIT_COST_RECOMMENDATIONS: int = 1
-    UNIT_COST_SPEECH: int = 1
+    UNIT_COST_RECOMMENDATIONS: int = 0
+    UNIT_COST_SPEECH: int = 0
     UNIT_COST_UI: int = 1
+    INGEST_MIN_UNITS: int = 3
+    INGEST_WORDS_PER_UNIT: int = 1000
+    UI_MIN_UNITS: int = 2
+    UI_WORDS_PER_UNIT: int = 500
+    MAX_DOC_UPLOAD_BYTES: int = 50 * 1024 * 1024
     MAX_AUDIO_UPLOAD_BYTES: int = 25 * 1024 * 1024
 
     # Application Settings

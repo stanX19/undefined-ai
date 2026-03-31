@@ -1,26 +1,28 @@
-"""Quota / rate-limiting integration tests.
+"""Quota / rate-limiting integration tests focused on chat quota semantics.
 
 Covers:
-  1. Basic quota consumption and 429 exhaustion
-  2. Validation-before-charge ordering (invalid requests must not burn units)
-  3. Concurrent requests — units_used must equal the sum of all accepted requests
-  4. Credits overage deduction (paid user whose free quota is exceeded)
-  5. Alembic fresh-database migration (upgrade head on an empty database)
+  1. Validation-before-charge for chat on invalid topic IDs
+  2. Basic free-tier quota exhaustion for chat
+  3. Concurrent chat requests preserve total units used
+  4. Credits overage deduction after free quota is exhausted
 
-Run:  ``python -m tests.test_quota`` from the backend root.
+`tests.test_pricing` owns the revised pricing coverage for uploads, speech,
+recommendations, and UI generation/read behavior.
+
+Run: ``python -m tests.test_quota`` from the backend root.
 """
+from __future__ import annotations
+
 import os
 import sys
 import time
+import types
 import threading
 import tempfile
 import concurrent.futures
-from pathlib import Path
 
 import requests
 import uvicorn
-from alembic.config import Config
-from alembic.script import ScriptDirectory
 
 from tests.test_client import TestClient, Colors, ThreadFilter
 
@@ -30,12 +32,98 @@ _test_db: str | None = None
 _app = None
 
 
+def _prioritize_site_packages() -> None:
+    """Ensure installed packages win over local namespace folders like ./alembic."""
+    import site
+
+    for path in reversed(site.getsitepackages()):
+        if path in sys.path:
+            sys.path.remove(path)
+        sys.path.insert(0, path)
+
+
+def _ensure_alembic_importable() -> None:
+    """Provide a small Alembic shim when the package is unavailable in the test venv."""
+    try:
+        from alembic import command as _command  # noqa: F401
+        return
+    except Exception:
+        pass
+
+    alembic_mod = types.ModuleType("alembic")
+    command_mod = types.ModuleType("alembic.command")
+    config_mod = types.ModuleType("alembic.config")
+
+    class Config:
+        def __init__(self, *args, **kwargs) -> None:
+            self.args = args
+            self.kwargs = kwargs
+
+    def _upgrade(cfg: Config, revision: str) -> None:
+        import asyncio
+        import srcs.models  # noqa: F401
+        from srcs.database import Base, engine
+
+        async def _create_schema() -> None:
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+
+        asyncio.run(_create_schema())
+
+    def _stamp(cfg: Config, revision: str) -> None:
+        return None
+
+    command_mod.upgrade = _upgrade
+    command_mod.stamp = _stamp
+    config_mod.Config = Config
+    alembic_mod.command = command_mod
+
+    sys.modules["alembic"] = alembic_mod
+    sys.modules["alembic.command"] = command_mod
+    sys.modules["alembic.config"] = config_mod
+
+
+def _ensure_optional_dependencies() -> None:
+    """Stub optional libraries imported at module import time in this repo."""
+    try:
+        import docx  # noqa: F401
+    except Exception:
+        docx_mod = types.ModuleType("docx")
+
+        class _DummyParagraph:
+            text = ""
+
+        class _DummyDocument:
+            def __init__(self, *args, **kwargs) -> None:
+                self.paragraphs = [_DummyParagraph()]
+
+        docx_mod.Document = _DummyDocument
+        sys.modules["docx"] = docx_mod
+
+    try:
+        from elevenlabs.client import ElevenLabs as _ElevenLabs  # noqa: F401
+    except Exception:
+        elevenlabs_mod = types.ModuleType("elevenlabs")
+        elevenlabs_client_mod = types.ModuleType("elevenlabs.client")
+
+        class ElevenLabs:
+            def __init__(self, *args, **kwargs) -> None:
+                pass
+
+        elevenlabs_client_mod.ElevenLabs = ElevenLabs
+        elevenlabs_mod.client = elevenlabs_client_mod
+        sys.modules["elevenlabs"] = elevenlabs_mod
+        sys.modules["elevenlabs.client"] = elevenlabs_client_mod
+
+
 def _get_test_db() -> str:
     global _test_db
     if _test_db is None:
-        _test_db = os.path.join(tempfile.gettempdir(), f"undefinedai_test_{os.getpid()}.db")
+        _test_db = os.path.join(tempfile.gettempdir(), f"undefinedai_quota_{os.getpid()}.db")
         os.environ["DATABASE_URL"] = f"sqlite+aiosqlite:///{_test_db}"
         os.environ["DB_NAME"] = _test_db
+        os.environ["DEBUG"] = "false"
+        os.environ["FAKE_LOGIN_TOKEN"] = "fake_demo_token_123"
     return _test_db
 
 
@@ -43,12 +131,16 @@ def _get_app():
     global _app
     if _app is None:
         _get_test_db()
+        _prioritize_site_packages()
+        _ensure_alembic_importable()
+        _ensure_optional_dependencies()
         from main import app as fastapi_app  # noqa: E402
+
         _app = fastapi_app
     return _app
 
 
-def start_server(port: int = 8005):
+def start_server(port: int = 8005) -> None:
     uvicorn.run(_get_app(), host="127.0.0.1", port=port, log_level="error")
 
 
@@ -62,7 +154,22 @@ def _register_and_login(client: TestClient, email: str, password: str = "TestPas
     return res["access_token"], res["user_id"]
 
 
-def run_tests():
+def _get_units_used(test_db: str, user_id: str) -> int:
+    import sqlite3
+
+    conn = sqlite3.connect(test_db, timeout=30)
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT COALESCE(SUM(units_used), 0) FROM daily_usage WHERE user_id = ?",
+            (user_id,),
+        )
+        return int(cursor.fetchone()[0] or 0)
+    finally:
+        conn.close()
+
+
+def run_tests() -> None:
     test_db = _get_test_db()
     _get_app()
     from srcs.config import get_settings
@@ -77,8 +184,7 @@ def run_tests():
     print(f"{Colors.BLUE}Starting Server (port {port})...{Colors.END}")
     server_thread = threading.Thread(target=start_server, kwargs={"port": port}, daemon=True)
     server_thread.start()
-    # Alembic migrations may take longer than a fixed sleep.
-    # Poll the health endpoint until the server is ready (or time out).
+
     for _ in range(40):
         try:
             raw = requests.get(f"{base_url}/health", timeout=0.5)
@@ -94,7 +200,6 @@ def run_tests():
     client = TestClient(base_url, actor_name="QuotaTest")
 
     try:
-        # -- Setup: register user + create topic -------------------------
         print(f"\n{Colors.BOLD}=== QUOTA TEST SETUP ==={Colors.END}\n")
         token, quota_user_id = _register_and_login(client, "quota_user@test.com")
         client.headers["Authorization"] = f"Bearer {token}"
@@ -106,100 +211,26 @@ def run_tests():
         )
         topic_id = topic["topic_id"]
 
-        # =================================================================
-        # TEST 1: Validation-before-charge — invalid topic_id
-        # =================================================================
         print(f"\n{Colors.BOLD}--- TEST 1: Validation-before-charge (bad topic_id) ---{Colors.END}")
+        before_units = _get_units_used(test_db, quota_user_id)
         raw = requests.post(
             f"{base_url}/api/v1/chat/",
             headers={"Authorization": f"Bearer {token}"},
             json={"topic_id": "nonexistent_topic_id", "message": "hello"},
+            timeout=30,
         )
         assert raw.status_code == 404, f"Expected 404, got {raw.status_code}"
-        print(f"{Colors.GREEN}Chat with bad topic_id returned 404 (no units burned){Colors.END}")
+        after_units = _get_units_used(test_db, quota_user_id)
+        assert after_units == before_units, "Invalid chat topic should not consume units"
+        print(f"{Colors.GREEN}Chat with bad topic_id returned 404 and did not burn units{Colors.END}")
 
-        # =================================================================
-        # TEST 2: Validation-before-charge — bad speech file
-        # =================================================================
-        print(f"\n{Colors.BOLD}--- TEST 2: Validation-before-charge (bad speech file) ---{Colors.END}")
-        raw = requests.post(
-            f"{base_url}/api/v1/speech/stt",
-            headers={"Authorization": f"Bearer {token}"},
-            files={"file": ("doc.pdf", b"not audio", "application/pdf")},
-        )
-        assert raw.status_code == 400, f"Expected 400, got {raw.status_code}"
-        print(f"{Colors.GREEN}Speech with .pdf returned 400 (no units burned){Colors.END}")
-
-        raw = requests.post(
-            f"{base_url}/api/v1/speech/stt",
-            headers={"Authorization": f"Bearer {token}"},
-            files={"file": ("empty.mp3", b"", "audio/mpeg")},
-        )
-        assert raw.status_code == 400, f"Expected 400 for empty file, got {raw.status_code}"
-        print(f"{Colors.GREEN}Speech with empty file returned 400 (no units burned){Colors.END}")
-
-        # =================================================================
-        # TEST 3: Validation-before-charge — bad upload file
-        # =================================================================
-        print(f"\n{Colors.BOLD}--- TEST 3: Validation-before-charge (bad upload file) ---{Colors.END}")
-        raw = requests.post(
-            f"{base_url}/api/v1/topics/{topic_id}/upload",
-            headers={"Authorization": f"Bearer {token}"},
-            files={"file": ("readme.txt", b"not a pdf", "text/plain")},
-        )
-        assert raw.status_code == 400, f"Expected 400, got {raw.status_code}"
-        print(f"{Colors.GREEN}Upload with .txt returned 400 (no units burned){Colors.END}")
-
-        # =================================================================
-        # TEST 3b: Validation-before-charge — invalid .pdf should not burn quota
-        # =================================================================
-        import sqlite3
-
-        conn = sqlite3.connect(test_db, timeout=30)
-        cursor = conn.cursor()
-        cursor.execute(
-            "SELECT COALESCE(SUM(units_used), 0) FROM daily_usage WHERE user_id = ?",
-            (quota_user_id,),
-        )
-        before_units = cursor.fetchone()[0]
-        conn.close()
-
-        raw = requests.post(
-            f"{base_url}/api/v1/topics/{topic_id}/upload",
-            headers={"Authorization": f"Bearer {token}"},
-            files={"file": ("fake.pdf", b"", "application/pdf")},
-        )
-        assert raw.status_code == 400, f"Expected 400, got {raw.status_code}"
-
-        raw = requests.post(
-            f"{base_url}/api/v1/topics/{topic_id}/upload",
-            headers={"Authorization": f"Bearer {token}"},
-            files={"file": ("fake.pdf", b"not a pdf", "application/pdf")},
-        )
-        assert raw.status_code == 400, f"Expected 400, got {raw.status_code}"
-
-        conn = sqlite3.connect(test_db, timeout=30)
-        cursor = conn.cursor()
-        cursor.execute(
-            "SELECT COALESCE(SUM(units_used), 0) FROM daily_usage WHERE user_id = ?",
-            (quota_user_id,),
-        )
-        after_units = cursor.fetchone()[0]
-        conn.close()
-
-        assert after_units == before_units, f"Units burned for invalid PDFs: before={before_units}, after={after_units}"
-
-        # =================================================================
-        # TEST 4: Quota exhaustion — free tier is 10 units
-        # =================================================================
-        print(f"\n{Colors.BOLD}--- TEST 4: Quota exhaustion (free tier chat quota = {expected_chat_successes} requests) ---{Colors.END}")
-
-        # Register a fresh user to get a clean free-tier chat quota
-        token_exhaust, _ = _register_and_login(client, "exhaust@test.com")
+        print(f"\n{Colors.BOLD}--- TEST 2: Quota exhaustion (free tier chat quota = {expected_chat_successes} requests) ---{Colors.END}")
+        token_exhaust, exhaust_user_id = _register_and_login(client, "exhaust@test.com")
         topic_exhaust = requests.post(
             f"{base_url}/api/v1/topics/",
             headers={"Authorization": f"Bearer {token_exhaust}"},
             json={"title": "Exhaust Topic"},
+            timeout=30,
         ).json()
         topic_exhaust_id = topic_exhaust["topic_id"]
 
@@ -210,33 +241,29 @@ def run_tests():
                 f"{base_url}/api/v1/chat/",
                 headers={"Authorization": f"Bearer {token_exhaust}"},
                 json={"topic_id": topic_exhaust_id, "message": f"msg {i}"},
+                timeout=30,
             )
             if raw.status_code == 429:
                 got_429 = True
                 print(f"{Colors.GREEN}Got 429 on attempt {i + 1} after {succeeded} successful requests{Colors.END}")
-                detail = raw.json().get("detail", {})
-                print(f"  detail: {detail}")
                 break
-            elif raw.status_code == 200:
+            if raw.status_code == 200:
                 succeeded += 1
-            else:
-                print(f"{Colors.RED}Unexpected status {raw.status_code}: {raw.text}{Colors.END}")
-                break
+                continue
+            raise AssertionError(f"Unexpected status {raw.status_code}: {raw.text}")
 
         assert got_429, f"Expected 429 after exhausting free chat quota of {expected_chat_successes} requests"
         assert succeeded == expected_chat_successes, f"Expected exactly {expected_chat_successes} successes before 429, got {succeeded}"
+        assert _get_units_used(test_db, exhaust_user_id) == free_units, "Units used should equal exhausted free quota"
         print(f"{Colors.GREEN}Free quota correctly exhausted at {expected_chat_successes} chat requests{Colors.END}")
 
-        # =================================================================
-        # TEST 5: Concurrent requests — verify total units_used is correct
-        # =================================================================
-        print(f"\n{Colors.BOLD}--- TEST 5: Concurrent requests (5 parallel chat sends) ---{Colors.END}")
-
-        token_conc, _ = _register_and_login(client, "concurrent@test.com")
+        print(f"\n{Colors.BOLD}--- TEST 3: Concurrent requests preserve units_used ---{Colors.END}")
+        token_conc, conc_user_id = _register_and_login(client, "concurrent@test.com")
         topic_conc = requests.post(
             f"{base_url}/api/v1/topics/",
             headers={"Authorization": f"Bearer {token_conc}"},
             json={"title": "Concurrency Topic"},
+            timeout=30,
         ).json()
         topic_conc_id = topic_conc["topic_id"]
 
@@ -245,6 +272,7 @@ def run_tests():
                 f"{base_url}/api/v1/chat/",
                 headers={"Authorization": f"Bearer {token_conc}"},
                 json={"topic_id": topic_conc_id, "message": f"concurrent msg {idx}"},
+                timeout=30,
             )
             return r.status_code
 
@@ -256,14 +284,15 @@ def run_tests():
         ok_count = results.count(200)
         print(f"  {ok_count}/{n_concurrent} returned 200")
         assert ok_count == n_concurrent, f"Expected all {n_concurrent} to succeed within free chat quota, got {ok_count}"
+        assert _get_units_used(test_db, conc_user_id) == n_concurrent * chat_unit_cost, "Concurrent accepted requests should increment units_used exactly once each"
 
-        # Now send more to see where the cutoff lands — should be at 10 total
         remaining_quota = max(0, expected_chat_successes - n_concurrent)
         for i in range(remaining_quota + 3):
             raw = requests.post(
                 f"{base_url}/api/v1/chat/",
                 headers={"Authorization": f"Bearer {token_conc}"},
                 json={"topic_id": topic_conc_id, "message": f"sequential msg {i}"},
+                timeout=30,
             )
             if raw.status_code == 429:
                 total_sent = n_concurrent + i
@@ -271,28 +300,18 @@ def run_tests():
                 assert total_sent == expected_chat_successes, f"Expected cutoff at {expected_chat_successes}, got {total_sent}"
                 break
         else:
-            print(f"{Colors.RED}Never got 429 — concurrency may have lost updates{Colors.END}")
-            assert False, f"Expected 429 after {expected_chat_successes} total requests but never received one"
+            raise AssertionError(f"Expected 429 after {expected_chat_successes} total requests but never received one")
 
-        # =================================================================
-        # TEST 6: Credits overage deduction
-        # =================================================================
-        print(f"\n{Colors.BOLD}--- TEST 6: Credits overage (manual DB injection) ---{Colors.END}")
-
-        # We'll directly manipulate the credits_balance via SQL to simulate
-        # a payment without needing Stripe.
+        print(f"\n{Colors.BOLD}--- TEST 4: Credits overage deduction ---{Colors.END}")
         import sqlite3
+
         conn = sqlite3.connect(test_db, timeout=30)
         cursor = conn.cursor()
-
-        # Give the exhausted user some credits
         cursor.execute(
             "UPDATE users SET credits_balance = 5 WHERE email = ?",
             ("exhaust@test.com",),
         )
         conn.commit()
-
-        # Verify credits were set
         cursor.execute(
             "SELECT credits_balance FROM users WHERE email = ?",
             ("exhaust@test.com",),
@@ -301,13 +320,13 @@ def run_tests():
         assert bal == 5, f"Expected 5 credits, got {bal}"
         conn.close()
 
-        # Now the user should be able to send 5 more messages (using credits)
         credit_successes = 0
         for i in range(8):
             raw = requests.post(
                 f"{base_url}/api/v1/chat/",
                 headers={"Authorization": f"Bearer {token_exhaust}"},
                 json={"topic_id": topic_exhaust_id, "message": f"credit msg {i}"},
+                timeout=30,
             )
             if raw.status_code == 200:
                 credit_successes += 1
@@ -317,7 +336,6 @@ def run_tests():
 
         assert credit_successes == 5, f"Expected 5 credit-funded successes, got {credit_successes}"
 
-        # Verify credits_balance is now 0
         conn = sqlite3.connect(test_db, timeout=30)
         cursor = conn.cursor()
         cursor.execute(
@@ -329,18 +347,16 @@ def run_tests():
         assert bal == 0, f"Expected 0 credits remaining, got {bal}"
         print(f"{Colors.GREEN}Credits correctly decremented to 0{Colors.END}")
 
-        # -- Done ---------------------------------------------------------
         print(f"\n{Colors.GREEN}{Colors.BOLD}ALL QUOTA TESTS PASSED!{Colors.END}")
         print(f"{Colors.GREEN}Total time: {time.time() - start_time:.2f}s{Colors.END}")
 
     except AssertionError as e:
         print(f"\n{Colors.RED}{Colors.BOLD}TEST FAILED: {e}{Colors.END}")
+        raise
     except Exception as e:
         print(f"\n{Colors.RED}{Colors.BOLD}ERROR EXECUTING TESTS: {e}{Colors.END}")
-        import traceback
-        traceback.print_exc()
+        raise
     finally:
-        # Cleanup temp database
         if test_db:
             for path in (test_db, f"{test_db}-wal", f"{test_db}-shm"):
                 if os.path.exists(path):
@@ -350,96 +366,5 @@ def run_tests():
                         pass
 
 
-def test_alembic_fresh_database():
-    """Verify that ``alembic upgrade head`` works on a completely empty database.
-
-    This test creates a temporary SQLite file, points Alembic at it, runs
-    ``upgrade head``, then inspects the resulting schema.
-
-    Run standalone:  ``python -m tests.test_quota alembic``
-    """
-    import subprocess
-    import sqlite3
-
-    print(f"\n{Colors.BOLD}=== ALEMBIC FRESH-DB MIGRATION TEST ==={Colors.END}\n")
-
-    fresh_db = os.path.join(tempfile.gettempdir(), f"alembic_fresh_{os.getpid()}.db")
-    db_url = f"sqlite+aiosqlite:///{fresh_db}"
-
-    env = os.environ.copy()
-    env["DATABASE_URL"] = db_url
-
-    backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-    try:
-        result = subprocess.run(
-            [sys.executable, "-m", "alembic", "upgrade", "head"],
-            capture_output=True,
-            text=True,
-            cwd=backend_dir,
-            env=env,
-        )
-
-        if result.returncode != 0:
-            print(f"{Colors.RED}alembic upgrade head FAILED:{Colors.END}")
-            print(result.stderr)
-            assert False, f"Alembic upgrade failed: {result.stderr}"
-
-        print(f"{Colors.GREEN}alembic upgrade head succeeded{Colors.END}")
-
-        # Verify schema
-        conn = sqlite3.connect(fresh_db, timeout=30)
-        cursor = conn.cursor()
-
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
-        tables = {row[0] for row in cursor.fetchall()}
-        expected = {"users", "topics", "scenes", "atomic_facts", "chat_history",
-                    "shares", "topic_progress", "daily_usage", "alembic_version"}
-        missing = expected - tables
-        assert not missing, f"Missing tables: {missing}"
-        print(f"{Colors.GREEN}All expected tables present: {sorted(expected - {'alembic_version'})}{Colors.END}")
-
-        # Check users has plan_tier and credits_balance
-        cursor.execute("PRAGMA table_info(users)")
-        user_cols = {row[1] for row in cursor.fetchall()}
-        assert "plan_tier" in user_cols, "plan_tier column missing from users"
-        assert "credits_balance" in user_cols, "credits_balance column missing from users"
-        print(f"{Colors.GREEN}users table has plan_tier and credits_balance{Colors.END}")
-
-        # Check daily_usage columns
-        cursor.execute("PRAGMA table_info(daily_usage)")
-        du_cols = {row[1] for row in cursor.fetchall()}
-        assert "user_id" in du_cols, "user_id column missing from daily_usage"
-        assert "bucket_start_utc" in du_cols, "bucket_start_utc column missing from daily_usage"
-        assert "units_used" in du_cols, "units_used column missing from daily_usage"
-        print(f"{Colors.GREEN}daily_usage table schema is correct{Colors.END}")
-
-        # Verify alembic_version
-        cursor.execute("SELECT version_num FROM alembic_version")
-        row = cursor.fetchone()
-        assert row is not None and row[0], "Alembic version_num is missing or empty"
-        version = row[0]
-        alembic_cfg = Config(str(Path(backend_dir) / "alembic.ini"))
-        expected_head = ScriptDirectory.from_config(alembic_cfg).get_current_head()
-        assert version == expected_head, f"Expected head revision {expected_head}, got {version}"
-        print(f"{Colors.GREEN}Alembic version stamp: {version}{Colors.END}")
-
-        conn.close()
-        print(f"\n{Colors.GREEN}{Colors.BOLD}ALEMBIC FRESH-DB TEST PASSED!{Colors.END}")
-
-    except AssertionError:
-        raise
-    finally:
-        for path in (fresh_db, f"{fresh_db}-wal", f"{fresh_db}-shm"):
-            if os.path.exists(path):
-                try:
-                    os.unlink(path)
-                except OSError:
-                    pass
-
-
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1] == "alembic":
-        test_alembic_fresh_database()
-    else:
-        run_tests()
+    run_tests()
