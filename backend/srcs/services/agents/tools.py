@@ -189,6 +189,13 @@ async def edit_ui(topic_id: str, description: str, header_name: str | None = Non
     if fact_ids:
         try:
             resolved_fact_ids: list[str] = [mapper.resolve(fid) for fid in fact_ids]
+            
+            # Diagnostic: warn if LLM is hallucinating IDs that don't exist in our map
+            unresolved = [fid for fid in fact_ids if mapper.resolve(fid) == fid and fid not in mapper._to_short]
+            if unresolved:
+                from srcs.logger import logger
+                logger.warning("[TOOLS] LLM passed hallucinated or un-resolvable fact IDs: %s", unresolved)
+
             async with AsyncSessionLocal() as db:
                 facts = await RetrievalService.get_facts_by_ids(db, resolved_fact_ids)
             

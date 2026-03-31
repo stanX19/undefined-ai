@@ -44,7 +44,7 @@ class Settings(BaseSettings):
 
     # Rate Limiting / Quota
     RATE_LIMIT_FREE_UNITS_BY_PLAN: dict[str, int] = {
-        "free": 10,
+        "free": 25,
         "pro": 100,
         "enterprise": 1000,
     }

@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Introduction to Pragmatics\",\n    \"difficulty\": 4,\n    \"reason\": \"This topic directly explores how simple utterances like 'hi' function in context and convey meaning beyond their literal words.\"\n  },\n  {\n    \"title\": \"Conversation Analysis\",\n    \"difficulty\": 5,\n    \"reason\": \"This graduate-level topic provides a rigorous methodology for studying the detailed structure and social organization of everyday interactions, including how greetings initiate and shape conversations.\"\n  },\n  {\n    \"title\": \"Research in Cross-Cultural Communication and Politeness Theory\",\n    \"difficulty\": 6,\n    \"reason\": \"This PhD-level topic involves empirical research into the complex and culturally-specific ways greetings and politeness strategies are enacted and interpreted globally.\"\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...UcyXMAY5Vs}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Introduction to Pragmatics",
+      "difficulty": 4,
+      "reason": "This topic directly explores how simple utterances like 'hi' function in context and convey meaning beyond their literal words."
+    },
+    {
+      "title": "Conversation Analysis",
+      "difficulty": 5,
+      "reason": "This graduate-level topic provides a rigorous methodology for studying the detailed structure and social organization of everyday interactions, including how greetings initiate and shape conversations."
+    },
+    {
+      "title": "Research in Cross-Cultural Communication and Politeness Theory",
+      "difficulty": 6,
+      "reason": "This PhD-level topic involves empirical research into the complex and culturally-specific ways greetings and politeness strategies are enacted and interpreted globally."
+    }
+  ]
+}

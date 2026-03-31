@@ -79,7 +79,7 @@ class UIAgent:
                 SystemMessage(content=UI_PLANNER_PROMPT),
                 HumanMessage(content=(
                     f"Topic ID: {current_mapper().shorten(topic_id, prefix='T')}\n\n"
-                    f"--- CURRENT FULL UI STATE ---\n{current_ui}\n--- END UI STATE ---\n\n"
+                    f"=== CURRENT FULL UI STATE ===\n{current_ui}\n=== END UI STATE ===\n\n"
                     f"Instruction: {prompt}"
                 )),
             ]
@@ -88,9 +88,9 @@ class UIAgent:
 
             augmented_prompt = (
                 f"{prompt}\n\n"
-                f"--- UI ARCHITECT PLAN ---\n"
+                f"=== UI ARCHITECT PLAN ===\n"
                 f"{plan_content}\n"
-                f"--- END PLAN ---\n\n"
+                f"=== END PLAN ===\n\n"
                 f"CRITICAL: The Scene name and ALL link ids **MUST** follow the provided plan to ensure its ACTUALLY CONNECTED\n"
                 f"Please generate the full MarkGraph document strictly following the logic and structure defined in the plan above."
             )
@@ -140,7 +140,7 @@ class UIAgent:
             SystemMessage(content=self.system_prompt),
             HumanMessage(content=(
                 f"Topic ID: {current_mapper().shorten(topic_id, prefix='T')}\n\n"
-                f"--- {context_label} ---\n{ui_to_edit}\n--- END UI STATE ---\n\n"
+                f"=== {context_label} ===\n{ui_to_edit}\n=== END UI STATE ===\n\n"
                 f"Instruction: {prompt}"
             )),
         ]

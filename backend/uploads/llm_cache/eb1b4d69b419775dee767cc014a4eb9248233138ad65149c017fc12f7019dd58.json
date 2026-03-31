@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Computational Models of Memory and Learning\",\n    \"difficulty\": 4,\n    \"reason\": \"This topic delves into specific cognitive functions that are fundamental components of any cognitive architecture, like ACT-R's memory modules.\"\n  },\n  {\n    \"title\": \"Neurocomputational Models of Decision Making\",\n    \"difficulty\": 5,\n    \"reason\": \"This topic integrates cognitive modeling with neuroscience, requiring a deeper understanding of how brain mechanisms underpin complex cognitive processes often modeled by architectures.\"\n  },\n  {\n    \"title\": \"Integrating Neuro-Symbolic AI with Cognitive Architectures for Explainable Reasoning\",\n    \"difficulty\": 6,\n    \"reason\": \"This topic explores advanced research at the intersection of different AI paradigms and cognitive modeling to address the grand challenge of explainable general intelligence.\"\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...iy3qGnKTBg}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Computational Models of Memory and Learning",
+      "difficulty": 4,
+      "reason": "This topic delves into specific cognitive functions that are fundamental components of any cognitive architecture, like ACT-R's memory modules."
+    },
+    {
+      "title": "Neurocomputational Models of Decision Making",
+      "difficulty": 5,
+      "reason": "This topic integrates cognitive modeling with neuroscience, requiring a deeper understanding of how brain mechanisms underpin complex cognitive processes often modeled by architectures."
+    },
+    {
+      "title": "Integrating Neuro-Symbolic AI with Cognitive Architectures for Explainable Reasoning",
+      "difficulty": 6,
+      "reason": "This topic explores advanced research at the intersection of different AI paradigms and cognitive modeling to address the grand challenge of explainable general intelligence."
+    }
+  ]
+}

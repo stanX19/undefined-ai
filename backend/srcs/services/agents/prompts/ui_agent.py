@@ -26,7 +26,7 @@ Do not output anything else but the raw markdown document. DO NOT wrap it in mar
 ## Visual-first: minimise plain text
 - **Prefer components over paragraphs.** Use :::graph, :::quiz, :::checkbox, :::progress, tables (GFM), :::input instead of long text blocks.
 - ALWAYS use **:::graph** for concepts, relationships, flows, hierarchies — never explain structure in prose when a graph can show it.
-- ALWAYS use **tables** (GFM markdown) for comparisons, specs, lists of features — avoid raw texts whenever tabular format fits.
+- ALWAYS use **tables** (GFM markdown) for comparisons, specs, lists of features — avoid raw texts whenever tabular format fits. Use exactly three dashes (`|---|`) for table headers regardless of content length.
 - ALWAYS use **:::quiz** for testing understanding; **:::checkbox** for checklists; **:::progress** for completion tracking.
 
 ## Additional constraints
@@ -89,7 +89,7 @@ You will NOT output MarkGraph syntax. Instead, output a high level linking bluep
   - #light-dependent: F3, F4
   - #light-independent: F5, F6
   - #quiz-summary: F7
----
+===
 
 Keep the blueprint professional, structured, and focused on layout logic.
 """

@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Computational Models of Specific Cognitive Functions\",\n    \"difficulty\": 4,\n    \"reason\": \"This topic delves into the computational modeling of individual cognitive processes that form the building blocks of larger cognitive architectures.\"\n  },\n  {\n    \"title\": \"Neuro-Symbolic AI\",\n    \"difficulty\": 5,\n    \"reason\": \"This advanced area directly tackles the integration of symbolic reasoning with neural networks, building on the challenges discussed in hybrid architectures and deep learning comparisons.\"\n  },\n  {\n    \"title\": \"Architectures for Artificial General Intelligence (AGI)\",\n    \"difficulty\": 6,\n    \"reason\": \"This represents the cutting edge of cognitive architecture research, focusing on developing comprehensive systems capable of broad, human-like intelligence.\"\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...BAIGYJcV1U}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Computational Models of Specific Cognitive Functions",
+      "difficulty": 4,
+      "reason": "This topic delves into the computational modeling of individual cognitive processes that form the building blocks of larger cognitive architectures."
+    },
+    {
+      "title": "Neuro-Symbolic AI",
+      "difficulty": 5,
+      "reason": "This advanced area directly tackles the integration of symbolic reasoning with neural networks, building on the challenges discussed in hybrid architectures and deep learning comparisons."
+    },
+    {
+      "title": "Architectures for Artificial General Intelligence (AGI)",
+      "difficulty": 6,
+      "reason": "This represents the cutting edge of cognitive architecture research, focusing on developing comprehensive systems capable of broad, human-like intelligence."
+    }
+  ]
+}
