@@ -34,12 +34,20 @@ def run_interactive_chat():
 
     try:
         # Setup: register + set bearer token
-        res = client.post(
-            "/api/v1/auth/register",
-            description="Register",
-            json={"email": "interactive_chat@test.com", "password": "ChatPass1", "username": "chat_user"},
-        )
-        client.headers["Authorization"] = f"Bearer {res['access_token']}"
+        try:
+            res = client.post(
+                "/api/v1/auth/register",
+                description="Register",
+                json={"email": "interactive_chat@test.com", "password": "ChatPass1", "username": "chat_user"},
+            )
+            client.headers["Authorization"] = f"Bearer {res['access_token']}"
+        except Exception as exc:
+            res = client.post(
+                "/api/v1/auth/login",
+                description="Login",
+                json={"email": "interactive_chat@test.com", "password": "ChatPass1"},
+            )
+            client.headers["Authorization"] = f"Bearer {res['access_token']}"
 
         res = client.post(
             "/api/v1/topics/",

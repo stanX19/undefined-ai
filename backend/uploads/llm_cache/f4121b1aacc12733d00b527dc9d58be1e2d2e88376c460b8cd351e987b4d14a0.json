@@ -1,0 +1,30 @@
+{
+  "text": "```json\n[\n  \"The document outlines Individual Task 2 for WID2003 Cognitive Science.\",\n  \"The task for Week 3 focuses on Cognitive Architecture.\",\n  \"Lectures and tutorials for the task are scheduled for March 19, 2026, and March 24, 2026.\",\n  \"A written report of findings is required for Parts 1, 2, 4, and 5.\",\n  \"The written report must not exceed 5 pages.\",\n  \"Submission of the report is via the Assignments feature in MS Teams.\",\n  \"This is an individual task.\",\n  \"The submission deadline is March 30, 2026.\",\n  \"Learning outcomes include explaining key ideas from cognitive science and AI foundations.\",\n  \"Students should be able to reflect on their own thinking and learning processes.\",\n  \"Students should be able to connect theoretical concepts to real-world experiences.\",\n  \"Part 1 involves listening to lectures and videos, including one by Marvin Minsky.\",\n  \"Students must specify the main theme and key concepts from Marvin Minsky's lecture.\",\n  \"Part 1 also requires relating lecture content to personal experience and stating one takeaway message.\",\n  \"Part 2 introduces cognitive architecture, covering its definition, purpose, and symbolic, subsymbolic, and hybrid models.\",\n  \"Part 3 is for exploration, and no written report is required for it.\",\n  \"Part 3 involves identifying the purpose and structure of ACT-R as a computational tool.\",\n  \"Part 4 requires a summary of one application of cognitive architecture.\",\n  \"Applications of cognitive architecture include Intelligent Tutoring Systems, Human-Robot Interaction, and Cognitive Agents in Games.\",\n  \"Part 5 compares cognitive architecture and AI systems, focusing on differences between rule-based and deep learning systems.\",\n  \"Part 5 also addresses the strengths, limitations, and Explainable AI (XAI) aspects of cognitive architectures.\",\n  \"The document provides a list of recommended readings and videos.\",\n  \"Other examples of cognitive architectures mentioned are SOAR, CLARION, LIDA, EPIC, NARS, ICARUS, and Sigma.\"\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...-U1uZvzmeU}",
+  "status": "ok",
+  "json_data": [
+    "The document outlines Individual Task 2 for WID2003 Cognitive Science.",
+    "The task for Week 3 focuses on Cognitive Architecture.",
+    "Lectures and tutorials for the task are scheduled for March 19, 2026, and March 24, 2026.",
+    "A written report of findings is required for Parts 1, 2, 4, and 5.",
+    "The written report must not exceed 5 pages.",
+    "Submission of the report is via the Assignments feature in MS Teams.",
+    "This is an individual task.",
+    "The submission deadline is March 30, 2026.",
+    "Learning outcomes include explaining key ideas from cognitive science and AI foundations.",
+    "Students should be able to reflect on their own thinking and learning processes.",
+    "Students should be able to connect theoretical concepts to real-world experiences.",
+    "Part 1 involves listening to lectures and videos, including one by Marvin Minsky.",
+    "Students must specify the main theme and key concepts from Marvin Minsky's lecture.",
+    "Part 1 also requires relating lecture content to personal experience and stating one takeaway message.",
+    "Part 2 introduces cognitive architecture, covering its definition, purpose, and symbolic, subsymbolic, and hybrid models.",
+    "Part 3 is for exploration, and no written report is required for it.",
+    "Part 3 involves identifying the purpose and structure of ACT-R as a computational tool.",
+    "Part 4 requires a summary of one application of cognitive architecture.",
+    "Applications of cognitive architecture include Intelligent Tutoring Systems, Human-Robot Interaction, and Cognitive Agents in Games.",
+    "Part 5 compares cognitive architecture and AI systems, focusing on differences between rule-based and deep learning systems.",
+    "Part 5 also addresses the strengths, limitations, and Explainable AI (XAI) aspects of cognitive architectures.",
+    "The document provides a list of recommended readings and videos.",
+    "Other examples of cognitive architectures mentioned are SOAR, CLARION, LIDA, EPIC, NARS, ICARUS, and Sigma."
+  ]
+}

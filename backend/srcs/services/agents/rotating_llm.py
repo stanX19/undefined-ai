@@ -1,10 +1,11 @@
+import enum
 import traceback
 import os
 import asyncio
 import random
 import json
 import re
-from typing import Optional
+from typing import Optional, Any
 
 import requests
 from dotenv import load_dotenv
@@ -18,13 +19,22 @@ from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, Base
 from langchain_core.outputs import ChatGeneration, ChatResult
 from google.api_core.exceptions import ResourceExhausted
 from langchain_google_genai import ChatGoogleGenerativeAI
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from srcs.config import get_settings
+from srcs.logger import logger
 
 # Mute Gemini "ALTS creds ignored. Not running on GCP and untrusted ALTS is not enabled."
 os.environ['GRPC_VERBOSITY'] = 'NONE'
 
-MessagesType = None | str | dict | BaseMessage | list[str | dict | BaseMessage]
+# Type aliases
+MessagesType = str | dict[str, Any] | BaseMessage | list[str | dict[str, Any] | BaseMessage] | None
+
+
+class _Outcome(enum.Enum):
+    """Outcomes of an LLM call for error classification and penalization."""
+    SUCCESS = "success"
+    RATE_LIMIT = "rate_limit"
+    ERROR = "unknown_error"
 
 
 # -----------------------------------------------------------------------------
@@ -48,7 +58,7 @@ class ChatMinimax(BaseChatModel):
     def _llm_type(self) -> str:
         return "minimax"
 
-    def bind_tools(self, tools: any, **kwargs: any) -> Runnable:
+    def bind_tools(self, tools: Any, **kwargs: Any) -> Runnable:
         """Bind tools to the model."""
         from langchain_core.utils.function_calling import convert_to_openai_tool
         formatted_tools = [convert_to_openai_tool(tool) for tool in tools]
@@ -64,7 +74,7 @@ class ChatMinimax(BaseChatModel):
             elif isinstance(msg, HumanMessage):
                 result.append({"role": "user", "content": msg.content})
             elif isinstance(msg, AIMessage):
-                d: dict[str, any] = {"role": "assistant", "content": msg.content or ""}
+                d: dict[str, Any] = {"role": "assistant", "content": msg.content or ""}
                 if msg.tool_calls:
                     d["tool_calls"] = [
                         {
@@ -131,8 +141,8 @@ class ChatMinimax(BaseChatModel):
             "Content-Type": "application/json",
         }
 
-    def _build_payload(self, messages: list[BaseMessage], **kwargs: any) -> dict[str, any]:
-        payload: dict[str, any] = {
+    def _build_payload(self, messages: list[BaseMessage], **kwargs: Any) -> dict[str, Any]:
+        payload: dict[str, Any] = {
             "model": self.model,
             "messages": self._convert_messages(messages),
             "temperature": self.temperature,
@@ -166,7 +176,7 @@ class ChatMinimax(BaseChatModel):
         messages: list[BaseMessage],
         stop: Optional[list[str]] = None,
         run_manager: Optional[CallbackManagerForLLMRun] = None,
-        **kwargs: any,
+        **kwargs: Any,
     ) -> ChatResult:
         payload = self._build_payload(messages, **kwargs)
         if stop:
@@ -187,7 +197,7 @@ class ChatMinimax(BaseChatModel):
         messages: list[BaseMessage],
         stop: Optional[list[str]] = None,
         run_manager: Optional[AsyncCallbackManagerForLLMRun] = None,
-        **kwargs: any,
+        **kwargs: Any,
     ) -> ChatResult:
         return await asyncio.to_thread(
             self._generate, messages, stop, None, **kwargs
@@ -199,22 +209,38 @@ class ChatMinimax(BaseChatModel):
 # -----------------------------------------------------------------------------
 
 class LLMResponse(BaseModel):
+    """Container for the response from an LLM."""
     text: str
     model: str
     status: str
-    json_data: dict | list | None = None
+    json_data: dict[str, Any] | list[Any] | None = None
+
 
 class LLMConfig:
-    """Stores configuration for creating an LLM instance"""
+    """Stores configuration for creating an LLM instance."""
 
-    def __init__(self, provider: str, api_key: str, model: str):
-        self.provider = provider
-        self.api_key = api_key
-        self.model = model
+    def __init__(self, provider: str, api_key: str, model: str) -> None:
+        self.provider: str = provider
+        self.api_key: str = api_key
+        self.model: str = model
 
-    def create_runnable(self, temperature: float = 0.7, model: str | None = None, **kwargs) -> Runnable:
-        """Create a runnable with specified parameters"""
-        use_model = model if model else self.model
+    def create_runnable(
+            self,
+            temperature: float = 0.7,
+            model: str | None = None,
+            **kwargs: Any
+    ) -> Runnable:
+        """Create a runnable with specified parameters.
+
+        Args:
+            temperature: Sampling temperature.
+            model: Model name override.
+            **kwargs: Extra parameters for the LLM.
+
+        Returns:
+            A LangChain Runnable.
+        """
+        use_model: str = model if model else self.model
         if self.provider == "gemini":
             return ChatGoogleGenerativeAI(
                 model=use_model,
@@ -222,139 +248,321 @@ class LLMConfig:
                 temperature=temperature,
                 **kwargs
             )
-        elif self.provider == "minimax":
+        if self.provider == "minimax":
             return ChatMinimax(
                 model=use_model,
                 api_key=self.api_key,
                 temperature=temperature,
                 **kwargs
             )
-        else:
-            raise ValueError(f"Unknown provider: {self.provider}")
+        raise ValueError(f"Unknown provider: {self.provider}")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.provider.capitalize()} ({self.model}) {{api=...{self.api_key[-10:]}}}"
+
+
+class RotatingRunnable(BaseChatModel):
+    """Proxy chat model that delegates calls to RotatingLLM._invoke_core.
+
+    This ensures all calls (including those from LangGraph agents) pass through
+    the rotation, counting, and retry logic.
+    """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    rotating_llm: Any
+    temperature: float = 0.7
+    model: str | None = None
+    extra_kwargs: dict[str, Any] = {}
+
+    @property
+    def _llm_type(self) -> str:
+        return "rotating_proxy"
+
+    def _generate(
+            self,
+            messages: list[BaseMessage],
+            stop: list[str] | None = None,
+            run_manager: CallbackManagerForLLMRun | None = None,
+            **kwargs: Any
+    ) -> ChatResult:
+        raise NotImplementedError("Use async interface (_agenerate)")
+
+    async def _agenerate(
+            self,
+            messages: list[BaseMessage],
+            stop: list[str] | None = None,
+            run_manager: AsyncCallbackManagerForLLMRun | None = None,
+            **kwargs: Any
+    ) -> ChatResult:
+        merged: dict[str, Any] = {**self.extra_kwargs, **kwargs}
+        if stop:
+            merged["stop"] = stop
+
+        result, _ = await self.rotating_llm._invoke_core(
+            messages, self.temperature, self.model, **merged
+        )
+        return ChatResult(generations=[ChatGeneration(message=result)])
+
+    def bind_tools(self, tools: Any, **kwargs: Any) -> Runnable:
+        """Bind tools to the proxy model."""
+        from langchain_core.utils.function_calling import convert_to_openai_tool
+        formatted: list[dict[str, Any]] = [convert_to_openai_tool(t) for t in tools]
+        return self.bind(tools=formatted, **kwargs)
 
 
 class RotatingLLM:
     MAX_RETRIES = 2
 
-    def __init__(self, llm_configs: list[LLMConfig], cooldown_seconds: int = 60):
+    _PENALTIES: dict[_Outcome, int] = {
+        _Outcome.SUCCESS: 1,
+        _Outcome.RATE_LIMIT: 20,
+        _Outcome.ERROR: 1000,
+    }
+
+    def __init__(
+            self,
+            llm_configs: list[LLMConfig],
+            cooldown_seconds: int = 60
+    ) -> None:
+        """Initialize RotatingLLM with a pool of configurations.
+
+        Args:
+            llm_configs: List of LLM configurations to rotate.
+            cooldown_seconds: Wait time (seconds) after rate limit (not used in current logic).
+        """
         self.llm_configs: list[LLMConfig] = llm_configs
-        self.cooldown_seconds = cooldown_seconds
-        self._rotation_index = 0
-        self._lock = asyncio.Lock()
+        self.cooldown_seconds: int = cooldown_seconds
+        self._lock: asyncio.Lock = asyncio.Lock()
+        self._call_counts: dict[str, int] = {c.api_key: 0 for c in llm_configs}
         random.shuffle(self.llm_configs)
 
     @staticmethod
-    def _normalize_message(messages: str | dict | BaseMessage) -> BaseMessage:
+    def _normalize_message(messages: str | dict[str, Any] | BaseMessage) -> BaseMessage:
+        """Convert various message formats to LangChain BaseMessage.
+
+        Args:
+            messages: Input message in str, dict, or BaseMessage format.
+
+        Returns:
+            The normalized BaseMessage.
+
+        Raises:
+            ValueError: If input message type is unsupported.
+        """
         if isinstance(messages, str):
             return HumanMessage(content=messages)
         elif isinstance(messages, dict):
-            role = messages.get("role", "user")
-            text = messages.get("text", "")
-            mappings = {
+            role: str = messages.get("role", "user")
+            text: str = messages.get("text", "")
+            mapping: dict[str, type[BaseMessage]] = {
                 "system": SystemMessage,
                 "assistant": AIMessage,
                 "tool": ToolMessage
             }
-            return mappings.get(role, HumanMessage)(content=text)
+            return mapping.get(role, HumanMessage)(content=text)
         elif isinstance(messages, BaseMessage):
             return messages
         raise ValueError(f"Unsupported message type: {type(messages)}")
 
     @staticmethod
-    def format_messages(
-            messages: MessagesType
-    ) -> list[BaseMessage] | None:
+    def format_messages(messages: MessagesType) -> list[BaseMessage] | None:
+        """Format input into a list of LangChain BaseMessages."""
         if messages is None:
             return None
-        if isinstance(messages, str | dict | BaseMessage):
+        if isinstance(messages, (str, dict, BaseMessage)):
             return [RotatingLLM._normalize_message(messages)]
         elif isinstance(messages, list):
             return [RotatingLLM._normalize_message(i) for i in messages]
         raise ValueError(f"Unsupported message type: {type(messages)}")
 
-    async def _rotate(self) -> list[LLMConfig]:
-        async with self._lock:
-            self.llm_configs = self.llm_configs[1:] + self.llm_configs[:1]
-            return self.llm_configs
+    def _log_request(self, messages: list[BaseMessage]) -> None:
+        """Log the request messages if DEBUG is enabled."""
+        logger.debug("[RotatingLLM] === SENDING REQUEST ===")
+        for idx, msg in enumerate(messages):
+            content: str = str(msg.content)
+            if len(content) > 500:
+                prefix = content[:250]
+                suffix = content[-250:]
+                content = f"{prefix}\n... [TRUNCATED {len(content)-500} chars] ...\n{suffix}"
 
-    async def get_runnable(self, temperature: float = 0.7, model: str | None = None, **kwargs: any) -> RunnableWithFallbacks:
-        """Get a runnable with fallbacks, creating LLM instances with specified parameters.
+            role: str = getattr(msg, 'type', 'unknown')
+            logger.debug("[RotatingLLM] %s [%d]: %s", role.capitalize(), idx, content)
+
+    def _log_health(self) -> None:
+        """Log a formatted health summary of all API keys."""
+        counts: list[int] = list(self._call_counts.values())
+        min_count: int = min(counts)
+        threshold_error: int = RotatingLLM._PENALTIES[_Outcome.ERROR]
+        threshold_limit: int = int(RotatingLLM._PENALTIES[_Outcome.RATE_LIMIT] * 0.8)
+
+        logger.info("[ROTATING_LLM] USAGE SUMMARY:")
+        for config in self.llm_configs:
+            count: int = self._call_counts[config.api_key]
+            is_min: bool = count == min_count
+            diff: int = count - min_count
+            is_penalized: bool = diff >= threshold_error
+            is_limited: bool = diff >= threshold_limit
+            
+            icon: str = "❌" if is_penalized else "⚠️" if is_limited else "✅"
+            status: str = " (PENALIZED)" if is_penalized else ""
+            
+            logger.info("  %s %-7s (..%s) : [ %-6d ]%s", 
+                        icon, config.provider, config.api_key[-4:], count, status)
+
+    async def _invoke_core(
+            self,
+            messages: list[BaseMessage],
+            temperature: float,
+            model: str | None,
+            **kwargs: Any
+    ) -> tuple[AIMessage, LLMConfig]:
+        """Single chokepoint for picking key, calling LLM, and recording outcome.
 
         Args:
-            temperature: Temperature for LLM generation. Defaults to 0.7.
-            model: Specific model to use, overriding default config.
-            **kwargs: Additional arguments to pass to LLM constructors.
+            messages: List of messages to send.
+            temperature: Sampling temperature.
+            model: Model name override.
+            **kwargs: Additional LLM parameters.
 
         Returns:
-            RunnableWithFallbacks: A chain that automatically rotates to fallbacks on error.
-        
-        Raises:
-            ValueError: If no LLMs are configured.
-        """
-        ordered: list[LLMConfig] = await self._rotate()
-        ordered = ordered[:RotatingLLM.MAX_RETRIES + 1]  # +1 for main
-        runnables: list[Runnable] = [config.create_runnable(temperature=temperature, model=model, **kwargs) for config in ordered]
-        
-        if not runnables:
-            raise ValueError("no llm configured")
-            
-        primary: Runnable = runnables[0]
-        fallbacks: list[Runnable] = runnables[1:]
-        
-        return RunnableWithFallbacks(
-            runnable=primary, 
-            fallbacks=fallbacks,
-            exceptions_to_handle=(ResourceExhausted, Exception)
-        )
+            Tuple of (AI response message, config used).
 
-    async def get_runnable_with_tools(self, tools: list[any], temperature: float = 0.7, model: str | None = None, **kwargs: any) -> RunnableWithFallbacks:
-        """Get a runnable with fallbacks, where each LLM instance has tools bound.
+        Raises:
+            Exception: The last exception encountered if all retries fail.
+        """
+        last_exc: Exception | None = None
+        self._log_request(messages)
+
+        for attempt in range(self.MAX_RETRIES + 1):
+            config: LLMConfig = await self._pick_config()
+            runnable: Runnable = config.create_runnable(temperature=temperature, model=model)
+
+            logger.info("[RotatingLLM] Calling %s attempt=%d/%d key=...%s",
+                        config.provider, attempt + 1, self.MAX_RETRIES + 1, config.api_key[-4:])
+
+            try:
+                result: AIMessage = await runnable.ainvoke(messages, **kwargs)
+                async with self._lock:
+                    self._call_counts[config.api_key] += self._PENALTIES[_Outcome.SUCCESS]
+                
+                logger.info("[RotatingLLM] OK key=...%s\n%s", config.api_key[-4:], result.text)
+                self._log_health()
+                return result, config
+
+            except Exception as exc:
+                outcome: _Outcome = self._classify_error(exc)
+                penalty: int = self._PENALTIES[outcome]
+                if penalty > 0:
+                    async with self._lock:
+                        self._call_counts[config.api_key] += penalty
+
+                logger.warning("[RotatingLLM] FAIL %s: %s | key=...%s",
+                               outcome.value, type(exc).__name__, config.api_key[-4:])
+                self._log_health()
+                last_exc = exc
+
+        raise last_exc
+
+    @staticmethod
+    def _classify_error(exc: Exception) -> _Outcome:
+        """Classify exceptions into rate limit, access denied, or unknown error.
 
         Args:
-            tools: The list of tools to bind to the LLM instances.
-            temperature: Temperature for LLM generation. Defaults to 0.7.
-            model: Specific model to use, overriding default config.
-            **kwargs: Additional arguments to pass to LLM constructors.
+            exc: Exception to classify.
 
         Returns:
-            RunnableWithFallbacks: A chain that automatically rotates to fallbacks on error.
-
-        Raises:
-            ValueError: If no LLMs are configured.
+            The classified outcome.
         """
-        ordered: list[LLMConfig] = await self._rotate()
-        runnables: list[Runnable] = [
-            config.create_runnable(temperature=temperature, model=model, **kwargs).bind_tools(tools) 
-            for config in ordered
-        ]
-        
-        if not runnables:
-            raise ValueError("no llm configured")
-            
-        primary: Runnable = runnables[0]
-        fallbacks: list[Runnable] = runnables[1:]
-        
-        return RunnableWithFallbacks(
-            runnable=primary, 
-            fallbacks=fallbacks,
-            exceptions_to_handle=(ResourceExhausted, Exception)
-        )
+        if isinstance(exc, ResourceExhausted):
+            return _Outcome.RATE_LIMIT
 
-    async def get_next_api_key(self, provider: str = "minimax") -> str:
-        """
-        Get the next API key for the specified provider.
+        status: int = getattr(getattr(exc, 'response', None), 'status_code', 0)
+        if status == 429 or "429" in str(exc):
+            return _Outcome.RATE_LIMIT
 
-        :param provider: The provider to get the API key for
-        :return: The next API key for the specified provider
+        return _Outcome.ERROR
+
+    async def _pick_config(self) -> LLMConfig:
+        """Pick the configuration with the lowest call count.
+
+        Returns:
+            The LLM configuration with the lowest count.
         """
         async with self._lock:
-            key_list = list(filter(lambda x: x.provider == provider, await self._rotate()))
-            if not key_list:
-                raise ValueError(f"No API key found for provider: {provider}")
-            return key_list[0].api_key
+            return min(self.llm_configs, key=lambda c: self._call_counts[c.api_key])
+
+    @staticmethod
+    def _extract_text(content: str | list[str | dict[str, Any]]) -> str:
+        """Extract text from various content formats.
+
+        Args:
+            content: Raw content string or list of content blocks.
+
+        Returns:
+            The extracted text.
+        """
+        if isinstance(content, str):
+            return content
+        if not isinstance(content, list):
+            return str(content)
+
+        parts: list[str] = []
+        for block in content:
+            if isinstance(block, str):
+                parts.append(block)
+                continue
+            if isinstance(block, dict) and block.get("type") == "text":
+                parts.append(block.get("text", ""))
+
+        return "".join(parts) if parts else str(content)
+
+    async def get_runnable(
+            self,
+            temperature: float = 0.7,
+            model: str | None = None,
+            **kwargs: Any
+    ) -> Runnable:
+        """Get a proxy runnable that routes calls through the rotation pool.
+
+        Args:
+            temperature: Sampling temperature.
+            model: Model name override.
+            **kwargs: Extra parameters for the LLM.
+
+        Returns:
+            A RotatingRunnable instance.
+        """
+        return RotatingRunnable(
+            rotating_llm=self,
+            temperature=temperature,
+            model=model,
+            extra_kwargs=kwargs
+        )
+
+    async def get_runnable_with_tools(
+            self,
+            tools: list[Any],
+            temperature: float = 0.7,
+            model: str | None = None,
+            **kwargs: Any
+    ) -> Runnable:
+        """Get a proxy runnable with tools bound.
+
+        Args:
+            tools: List of tools to bind.
+            temperature: Sampling temperature.
+            model: Model name override.
+            **kwargs: Extra parameters for the LLM.
+
+        Returns:
+            A bound proxy runnable.
+        """
+        runnable: Runnable = await self.get_runnable(
+            temperature=temperature, model=model, **kwargs
+        )
+        return runnable.bind_tools(tools)
+
 
     @staticmethod
     def strip_code_block(text: str):
@@ -374,108 +582,80 @@ class RotatingLLM:
 
     async def send_message_get_json(
             self,
-            messages: str | list[BaseMessage] | dict[str, str],
-            config: dict | None = None,
+            messages: MessagesType,
+            config: dict[str, Any] | None = None,
             retry: int = 3,
             temperature: float = 0.0,
             model: str | None = None,
-            **llm_kwargs
+            **llm_kwargs: Any
     ) -> LLMResponse:
         """
         Sends a message to the rotating LLM pool and gets the result with parsed json
 
-        :param messages: the messages to send
-        :param config: ainvoke's config
-        :param retry: number of retries
-        :param temperature: Temperature for LLM generation
-        :param model: Specific model to use, overriding config
-        :param llm_kwargs: Additional arguments to pass to LLM constructors
-        :return: LLMResponse
-        """
-        result = None
+        Args:
+            messages: Input messages.
+            config: LangChain config (e.g. callbacks).
+            retry: Number of JSON parsing retries.
+            temperature: Temperature for LLM generation
+            model: Specific model to use, overriding config
+            **llm_kwargs: Extra LLM parameters.
 
-        for i in range(retry):
-            result = await self.send_message(messages, config, temperature=temperature, model=model, **llm_kwargs)
-            parsed = RotatingLLM.try_get_json(result.text)
-            if parsed is None:
-                continue
-            result.json_data = parsed
-            return result
+        Returns:
+            The LLMResponse with json_data populated if successful.
+
+        Raises:
+            RuntimeError: If all retries fail or parsing fails.
+        """
+        result: LLMResponse | None = None
+        for _ in range(retry):
+            result = await self.send_message(
+                messages, config, temperature=temperature, model=model, **llm_kwargs
+            )
+            parsed: Any = RotatingLLM.try_get_json(result.text)
+            if parsed is not None:
+                result.json_data = parsed
+                return result
 
         if result is None:
             raise RuntimeError("Failed to get response from LLM")
-            
-        raise RuntimeError(f"Failed to parse json from LLM {result.model_dump_json()}")
+
+        raise RuntimeError(f"Failed to parse JSON from LLM: {result.model_dump_json()}")
 
     async def send_message(
             self,
-            messages: str | list[BaseMessage] | dict[str, str],
-            config: dict | None = None,
+            messages: MessagesType,
+            config: dict[str, Any] | None = None,
             temperature: float = 0.0,
             model: str | None = None,
-            **llm_kwargs
+            **llm_kwargs: Any
     ) -> LLMResponse:
         """
         Sends a message to the rotating LLM pool and gets the result
 
-        :param messages: the messages to send
-        :param config: ainvoke's config
-        :param temperature: Temperature for LLM generation
-        :param model: Specific model to use, overriding config
-        :param llm_kwargs: Additional arguments to pass to LLM constructors
-        :return: LLMResponse
+        Args:
+            messages: Input messages.
+            config: ainvoke's config
+            temperature: Temperature for LLM generation
+            model: Specific model to use, overriding config
+            **llm_kwargs: Extra LLM parameters.
+
+        Returns:
+            The LLMResponse object.
         """
-        msgs = self.format_messages(messages)
-        runnable: Runnable = await self.get_runnable(temperature=temperature, model=model, **llm_kwargs)
+        msgs: list[BaseMessage] | None = self.format_messages(messages)
+        if msgs is None:
+            return LLMResponse(text="", model="", status="fail")
 
-        settings = get_settings()
-        if settings.DEBUG:
-            print(f"\n[ROTATING_LLM] === SENDING REQUEST ===")
-            for idx, m in enumerate(msgs):
-                content_str: str = str(m.content)
-                if len(content_str) > 500:
-                    content_str = content_str[:250] + "\n... [TRUNCATED] ...\n" + content_str[-250:]
+        try:
+            result, used_config = await self._invoke_core(
+                msgs, temperature, model, **llm_kwargs
+            )
+            text: str = self._extract_text(result.content)
+            return LLMResponse(text=text, model=str(used_config), status="ok")
 
-                if type(m) == HumanMessage:
-                    print(f"[ROTATING_LLM] Human [{idx}]: {content_str}")
-                elif type(m) == SystemMessage:
-                    print(f"[ROTATING_LLM] System [{idx}]: {content_str}")
-                elif type(m) == AIMessage:
-                    print(f"[ROTATING_LLM] AI [{idx}]: {content_str}")
-                else:
-                    print(f"[ROTATING_LLM] {m.type} [{idx}]: {content_str}")
-
-        for attempt in range(self.MAX_RETRIES):
-            try:
-                result = await runnable.ainvoke(msgs, config=config)
-                content = result.content if hasattr(result, "content") else str(result)
-                if isinstance(content, list):
-                    text = "".join(
-                        block["text"] for block in content
-                        if isinstance(block, dict) and block.get("type") == "text"
-                    )
-                else:
-                    text = content
-
-                if settings.DEBUG:
-                    text_out: str = text
-                    if len(text_out) > 500:
-                        text_out = text_out[:250] + "\n... [TRUNCATED] ...\n" + text_out[-250:]
-
-                    print(f"\n[ROTATING_LLM] === RESPONSE ===")
-                    print(f"[ROTATING_LLM] {text_out}\n")
-
-                return LLMResponse(
-                    text=text,
-                    model=RotatingLLM._format_runnable(runnable),
-                    status="ok"
-                )
-
-            except Exception as e:
-                traceback.print_exc()
-                if attempt == self.MAX_RETRIES - 1:
-                    return LLMResponse(text=str(e), model="", status="fail")
-                continue
+        except Exception as exc:
+            logger.error("[RotatingLLM] All retries exhausted: \n%s", traceback.format_exc())
+            return LLMResponse(text=str(exc), model="", status="fail")
 
     @staticmethod
     def create_instance_with_env():
@@ -533,19 +713,20 @@ if __name__ == "__main__":
         )
         print("Custom temperature:", result2)
 
-        # Example with additional parameters
+        # Example with exception
         result3 = await rotating_llm.send_message(
             "Say hello",
-            temperature=1.0,
-            max_tokens=50
+            temperature="Error"
         )
-        print("With max_tokens:", result3)
+        print("With error key:", result3)
+
+        runnable = await rotating_llm.get_runnable()
+        result4 = await runnable.ainvoke("Say hello")
+        print("With runnable:", result4)
 
 
-    # import sys
-    #
-    # if sys.platform.startswith("win") and sys.version_info < (3, 14):
-    #     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-    # asyncio.run(main())
+    import sys
 
-    print(rotating_llm.strip_code_block("```markdown\nhi\nhi\naa```"))
+    if sys.platform.startswith("win") and sys.version_info < (3, 14):
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    asyncio.run(main())

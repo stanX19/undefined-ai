@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Computational Models of Human Memory\",\n    \"difficulty\": 4,\n    \"reason\": \"This topic delves deeper into a core component of cognitive architectures, exploring how memory systems like working memory, semantic memory, and episodic memory are represented and interact within computational frameworks.\"\n  },\n  {\n    \"title\": \"Neuro-symbolic AI Architectures\",\n    \"difficulty\": 5,\n    \"reason\": \"Building on the comparison between symbolic and deep learning AI, this topic explores advanced hybrid architectures that integrate both approaches to overcome limitations and enhance cognitive modeling capabilities.\"\n  },\n  {\n    \"title\": \"Architectural Principles for Artificial General Intelligence (AGI)\",\n    \"difficulty\": 6,\n    \"reason\": \"This topic investigates the fundamental design challenges and theoretical frameworks required to build cognitive architectures capable of achieving human-level general intelligence, extending the ambitions of current models.\"\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...UcyXMAY5Vs}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Computational Models of Human Memory",
+      "difficulty": 4,
+      "reason": "This topic delves deeper into a core component of cognitive architectures, exploring how memory systems like working memory, semantic memory, and episodic memory are represented and interact within computational frameworks."
+    },
+    {
+      "title": "Neuro-symbolic AI Architectures",
+      "difficulty": 5,
+      "reason": "Building on the comparison between symbolic and deep learning AI, this topic explores advanced hybrid architectures that integrate both approaches to overcome limitations and enhance cognitive modeling capabilities."
+    },
+    {
+      "title": "Architectural Principles for Artificial General Intelligence (AGI)",
+      "difficulty": 6,
+      "reason": "This topic investigates the fundamental design challenges and theoretical frameworks required to build cognitive architectures capable of achieving human-level general intelligence, extending the ambitions of current models."
+    }
+  ]
+}
