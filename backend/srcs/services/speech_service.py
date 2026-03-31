@@ -1,12 +1,10 @@
 import os
 import uuid
 import asyncio
-import traceback
 
 from elevenlabs.client import ElevenLabs
 
 from srcs.config import get_settings
-from srcs.database import settings
 
 # -- ElevenLabs client (lazy singleton) ----------------------------------------
 
@@ -37,18 +35,16 @@ class SpeechService:
         model_id: str | None = None,
         language_code: str | None = None,
     ) -> str | None:
-        """Generate speech from text using ElevenLabs."""
+        """Generate speech from text, preferring free gTTS by default."""
+        try:
+            return await SpeechService._tts_gtts(text, language_code=language_code)
+        except Exception as exc:
+            print(f"gTTS TTS Error: {exc}. Falling back to ElevenLabs.")
+
         try:
             return await SpeechService._tts_elevenlabs(text, voice_id=voice_id, model_id=model_id)
         except Exception as exc:
-            # traceback.print_exc()
-            print(f"ElevenLabs TTS Error: {exc}. Falling back to gTTS.")
-
-        try:
-            return await SpeechService._tts_gtts(text)
-        except Exception as exc:
-            # traceback.print_exc()
-            print(f"gTTS Fallback Error: {exc}")
+            print(f"ElevenLabs TTS Fallback Error: {exc}")
 
         return None
 
@@ -161,18 +157,36 @@ class SpeechService:
     # -- Fallback implementations ----------------------------------------------
 
     @staticmethod
-    async def _tts_gtts(text: str) -> str | None:
-        """Fallback TTS using gTTS when ElevenLabs is unavailable."""
+    async def _tts_gtts(
+        text: str,
+        language_code: str | None = None,
+    ) -> str | None:
+        """Default TTS implementation using free gTTS."""
         filename = SpeechService._create_tts_filename()
         filepath = SpeechService._get_tts_filename_full_path(filename)
         from gtts import gTTS
 
+        language = SpeechService._normalize_gtts_language(language_code)
+
         def _call() -> None:
-            tts = gTTS(text=text, lang="en")
+            tts = gTTS(text=text, lang=language)
             tts.save(filepath)
 
         await asyncio.to_thread(_call)
         return f"/media/tts/{filename}"
+
+    @staticmethod
+    def _normalize_gtts_language(language_code: str | None) -> str:
+        """Map incoming language codes to gTTS-supported short codes."""
+        if not language_code:
+            return SpeechService.DEFAULT_LANG
+
+        normalized = language_code.lower().strip()
+        if normalized.startswith("en"):
+            return SpeechService.LANG_ENGLISH
+        if normalized.startswith("ms"):
+            return SpeechService.LANG_MALAY
+        return SpeechService.DEFAULT_LANG
 
     @staticmethod
     async def _stt_gemini(audio_data: bytes) -> str | None:
