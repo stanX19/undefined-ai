@@ -1,4 +1,4 @@
-"""Recommendation routes — LLM-powered topic suggestions."""
+"""Recommendation routes - LLM-powered topic suggestions."""
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -43,7 +43,7 @@ async def get_latest_recommendations(
     topics = await TopicService.get_user_topics(db, current_user.user_id)
     if not topics:
         raise HTTPException(status_code=404, detail="User has no topics")
-        
+
     latest_topic = topics[0]
     results = await RecommendationService.get_recommendations(current_user.user_id, latest_topic.topic_id)
 
@@ -61,7 +61,7 @@ async def get_recommendations(
     db: AsyncSession = Depends(get_db),
 ) -> RecommendationsResponse:
     """Return 3 suggested topics: same level, +1, +2 harder."""
-    topic = await TopicService.get_topic(db, topic_id)
+    topic = await TopicService.get_user_topic(db, topic_id, current_user.user_id)
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
 
@@ -82,7 +82,7 @@ async def update_progress(
     db: AsyncSession = Depends(get_db),
 ) -> TopicProgressResponse:
     """Record the user's latest progress on a topic."""
-    topic = await TopicService.get_topic(db, topic_id)
+    topic = await TopicService.get_user_topic(db, topic_id, current_user.user_id)
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
 

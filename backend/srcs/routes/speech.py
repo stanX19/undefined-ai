@@ -1,11 +1,20 @@
 """Speech route for audio transcription (STT)."""
+import os
+
 from fastapi import APIRouter, File, UploadFile, HTTPException, Depends
 
+from srcs.config import get_settings
 from srcs.services.speech_service import SpeechService
 from srcs.dependencies import get_current_user
 from srcs.models.user import User
 
 router: APIRouter = APIRouter(prefix="/api/v1/speech", tags=["speech"])
+
+_ALLOWED_AUDIO_EXTENSIONS = {
+    ".mp3", ".mp4", ".mpeg", ".mpga", ".m4a",
+    ".wav", ".webm", ".ogg", ".flac",
+}
+_AUDIO_READ_CHUNK_SIZE = 1024 * 1024
 
 
 @router.post("/stt")
@@ -13,14 +22,37 @@ async def speech_to_text(
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_user),
 ) -> dict[str, str]:
-    """Transcribe an uploaded audio file to text using ElevenLabs Scribe."""
+    """Transcribe an uploaded audio file to text."""
     if not file.filename:
         raise HTTPException(status_code=400, detail="No file provided")
 
-    content: bytes = await file.read()
-    transcript: str | None = await SpeechService.transcribe_audio(content)
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in _ALLOWED_AUDIO_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported audio format '{ext}'. Accepted: {', '.join(sorted(_ALLOWED_AUDIO_EXTENSIONS))}",
+        )
 
+    settings = get_settings()
+    max_bytes = settings.MAX_AUDIO_UPLOAD_BYTES
+
+    content_bytes = bytearray()
+    while True:
+        remaining = max_bytes + 1 - len(content_bytes)
+        if remaining <= 0:
+            raise HTTPException(status_code=413, detail="Uploaded audio file is too large")
+
+        chunk = await file.read(min(_AUDIO_READ_CHUNK_SIZE, remaining))
+        if not chunk:
+            break
+        content_bytes.extend(chunk)
+
+    content: bytes = bytes(content_bytes)
+    if len(content) == 0:
+        raise HTTPException(status_code=400, detail="Uploaded audio file is empty")
+
+    transcript: str | None = await SpeechService.transcribe_audio(content)
     if transcript is None:
-        raise HTTPException(status_code=500, detail="Speech-to-text processing failed or returned no text")
+        raise HTTPException(status_code=502, detail="Speech-to-text processing failed or returned no text")
 
     return {"text": transcript}
