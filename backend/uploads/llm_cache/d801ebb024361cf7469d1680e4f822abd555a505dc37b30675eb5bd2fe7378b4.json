@@ -1,0 +1,9 @@
+{
+  "text": "```json\n[\n  \"Individual Task 2 for WID2003 Cognitive Science, an assignment on Cognitive Architecture, is due March 30, 2026, via MS Teams, requiring a written report (max 5 pages) for most parts, supported by lectures on March 19 and 24, 2026, and aims to develop students' ability to explain key cognitive science and AI foundations.\",\n  \"The task involves engaging with foundational cognitive science concepts, defining and exploring various cognitive architecture models (e.g., symbolic, subsymbolic, hybrid), an exploratory section on ACT-R and other architectures (Part 3, no report required), summarizing an application like Intelligent Tutoring Systems, and comparing cognitive architectures with rule-based and deep learning AI systems regarding their strengths, limitations, and Explainable AI aspects.\"\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...KSOpQszPw0}",
+  "status": "ok",
+  "json_data": [
+    "Individual Task 2 for WID2003 Cognitive Science, an assignment on Cognitive Architecture, is due March 30, 2026, via MS Teams, requiring a written report (max 5 pages) for most parts, supported by lectures on March 19 and 24, 2026, and aims to develop students' ability to explain key cognitive science and AI foundations.",
+    "The task involves engaging with foundational cognitive science concepts, defining and exploring various cognitive architecture models (e.g., symbolic, subsymbolic, hybrid), an exploratory section on ACT-R and other architectures (Part 3, no report required), summarizing an application like Intelligent Tutoring Systems, and comparing cognitive architectures with rule-based and deep learning AI systems regarding their strengths, limitations, and Explainable AI aspects."
+  ]
+}
