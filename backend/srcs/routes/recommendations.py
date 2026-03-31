@@ -23,7 +23,6 @@ router: APIRouter = APIRouter(
 async def get_default_recommendations(
     education_level: str = Query(..., description="The user's selected education level"),
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
 ) -> RecommendationsResponse:
     """Return 3 introductory suggested topics based on education level."""
     results = await RecommendationService.get_default_recommendations(education_level)

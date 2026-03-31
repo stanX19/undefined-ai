@@ -14,6 +14,7 @@ from srcs.models.user import User
 from srcs.utils.text import count_words
 
 router: APIRouter = APIRouter(prefix="/api/v1/topics", tags=["topics"])
+_DOC_READ_CHUNK_SIZE = 1024 * 1024
 
 
 @router.post("/", response_model=TopicResponse)
@@ -75,13 +76,23 @@ async def upload_document(
     if not topic:
         raise HTTPException(status_code=404, detail="Topic not found")
 
-    content: bytes = await file.read()
+    settings = get_settings()
+    max_bytes = settings.MAX_DOC_UPLOAD_BYTES
+
+    content_bytes = bytearray()
+    while True:
+        remaining = max_bytes + 1 - len(content_bytes)
+        if remaining <= 0:
+            raise HTTPException(status_code=413, detail="Uploaded document is too large")
+
+        chunk = await file.read(min(_DOC_READ_CHUNK_SIZE, remaining))
+        if not chunk:
+            break
+        content_bytes.extend(chunk)
+
+    content: bytes = bytes(content_bytes)
     if not content:
         raise HTTPException(status_code=400, detail="Uploaded file is empty")
-
-    settings = get_settings()
-    if len(content) > settings.MAX_DOC_UPLOAD_BYTES:
-        raise HTTPException(status_code=413, detail="Uploaded document is too large")
 
     # Cheap file signature checks before consuming quota.
     # Many invalid inputs will fail quickly here, avoiding extraction work and quota spend.
