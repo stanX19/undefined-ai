@@ -12,6 +12,7 @@ langgraph
 sse-starlette
 python-multipart
 PyMuPDF
+python-docx
 exa-py
 elevenlabs
 requests
@@ -19,3 +20,5 @@ gTTS
 python-jose[cryptography]
 bcrypt
 slowapi
+alembic
+asyncpg

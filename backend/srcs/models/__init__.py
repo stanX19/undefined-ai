@@ -5,5 +5,10 @@ from srcs.models.chat_message import ChatMessage
 from srcs.models.atomic_fact import AtomicFact
 from srcs.models.scene import Scene
 from srcs.models.share import Share
+from srcs.models.topic_progress import TopicProgress
+from srcs.models.daily_usage import DailyUsage
 
-__all__ = ["User", "Topic", "ChatMessage", "AtomicFact", "Scene", "Share"]
+__all__ = [
+    "User", "Topic", "ChatMessage", "AtomicFact",
+    "Scene", "Share", "TopicProgress", "DailyUsage",
+]

@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Cache Memory (CPU Caching)\",\n    \"difficulty\": 4,\n    \"reason\": \"This topic expands on the performance optimization concepts introduced with associative memory (TLB) by exploring how CPU caches further accelerate memory access.\"\n  },\n  {\n    \"title\": \"Memory Consistency Models\",\n    \"difficulty\": 5,\n    \"reason\": \"This explores how shared memory updates are observed across multiple processors, a critical challenge in modern systems that build upon the concept of shared memory and virtual memory.\"\n  },\n  {\n    \"title\": \"Operating System Design for Non-Volatile Memory (NVM)\",\n    \"difficulty\": 6,\n    \"reason\": \"This explores the fundamental changes required in OS memory allocation and management to effectively utilize emerging non-volatile memory technologies, a highly active research area.\"\n  }\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...UcyXMAY5Vs}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Cache Memory (CPU Caching)",
+      "difficulty": 4,
+      "reason": "This topic expands on the performance optimization concepts introduced with associative memory (TLB) by exploring how CPU caches further accelerate memory access."
+    },
+    {
+      "title": "Memory Consistency Models",
+      "difficulty": 5,
+      "reason": "This explores how shared memory updates are observed across multiple processors, a critical challenge in modern systems that build upon the concept of shared memory and virtual memory."
+    },
+    {
+      "title": "Operating System Design for Non-Volatile Memory (NVM)",
+      "difficulty": 6,
+      "reason": "This explores the fundamental changes required in OS memory allocation and management to effectively utilize emerging non-volatile memory technologies, a highly active research area."
+    }
+  ]
+}

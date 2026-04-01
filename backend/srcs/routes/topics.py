@@ -1,4 +1,4 @@
-"""Topic routes — CRUD + PDF upload."""
+"""Topic routes - CRUD + PDF/DOCX upload."""
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,9 +9,12 @@ from srcs.services.topic_service import TopicService
 from srcs.services.document_service import DocumentService
 from srcs.services.ingestion_service import IngestionService
 from srcs.dependencies import get_current_user
+from srcs.services.usage_service import UsageService
 from srcs.models.user import User
+from srcs.utils.text import count_words
 
 router: APIRouter = APIRouter(prefix="/api/v1/topics", tags=["topics"])
+_DOC_READ_CHUNK_SIZE = 1024 * 1024
 
 
 @router.post("/", response_model=TopicResponse)
@@ -55,15 +58,18 @@ async def upload_document(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> TopicDetailResponse:
-    """Upload a PDF, extract its text, and store it on the topic.
+    """Upload a PDF/DOCX, extract its text, and store it on the topic.
 
-    Only PDF files are accepted.
+    Only PDF and DOCX files are accepted.
     Automatically triggers the ingestion pipeline in the background.
     """
-    if not file.filename or not file.filename.lower().endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Only PDF files are accepted")
-
-    content: bytes = await file.read()
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Missing filename")
+    filename_lower = file.filename.lower()
+    is_pdf = filename_lower.endswith(".pdf")
+    is_docx = filename_lower.endswith(".docx")
+    if not (is_pdf or is_docx):
+        raise HTTPException(status_code=400, detail="Only PDF or DOCX files are accepted")
 
     # Verify ownership
     topic = await TopicService.get_user_topic(db, topic_id, current_user.user_id)
@@ -71,10 +77,60 @@ async def upload_document(
         raise HTTPException(status_code=404, detail="Topic not found")
 
     settings = get_settings()
-    file_path: str = DocumentService.save_pdf(content, file.filename, settings.UPLOAD_DIR)
-    extracted: str = DocumentService.extract_text(file_path)
+    max_bytes = settings.MAX_DOC_UPLOAD_BYTES
 
-    topic = await TopicService.set_document_text(db, topic_id, extracted)
+    content_bytes = bytearray()
+    while True:
+        remaining = max_bytes + 1 - len(content_bytes)
+        if remaining <= 0:
+            raise HTTPException(status_code=413, detail="Uploaded document is too large")
+
+        chunk = await file.read(min(_DOC_READ_CHUNK_SIZE, remaining))
+        if not chunk:
+            break
+        content_bytes.extend(chunk)
+
+    content: bytes = bytes(content_bytes)
+    if not content:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty")
+
+    # Cheap file signature checks before consuming quota.
+    # Many invalid inputs will fail quickly here, avoiding extraction work and quota spend.
+    header_prefix = content[:4096].lstrip()
+    if is_pdf and not header_prefix.startswith(b"%PDF-"):
+        raise HTTPException(status_code=400, detail="Invalid PDF file")
+    if is_docx and not header_prefix.startswith(b"PK"):
+        raise HTTPException(status_code=400, detail="Invalid DOCX file")
+
+    file_path: str | None = None
+    units_to_charge = settings.INGEST_MIN_UNITS
+    try:
+        file_path = DocumentService.save_document(content, file.filename, settings.UPLOAD_DIR)
+        extracted: str = DocumentService.extract_text(file_path)
+        word_count = count_words(extracted)
+        units_to_charge = max(
+            settings.INGEST_MIN_UNITS,
+            word_count // settings.INGEST_WORDS_PER_UNIT,
+        )
+        await UsageService.check_and_consume_units(db, current_user, units_to_charge)
+    except HTTPException:
+        DocumentService.delete_document(file_path)
+        raise
+    except RuntimeError as exc:
+        DocumentService.delete_document(file_path)
+        raise HTTPException(status_code=400, detail="Failed to process document file") from exc
+    except Exception:
+        DocumentService.delete_document(file_path)
+        raise
+
+    # Persist extracted content (non-blocking ingestion is triggered after persistence).
+    try:
+        topic = await TopicService.set_document_text(db, topic_id, extracted)
+    except Exception:
+        await db.rollback()
+        DocumentService.delete_document(file_path)
+        await UsageService.safe_refund_units(db, current_user, units_to_charge)
+        raise
 
     # Auto-trigger ingestion pipeline in background (non-blocking)
     IngestionService.trigger_ingestion(topic_id, extracted)

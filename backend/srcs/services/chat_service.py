@@ -274,7 +274,7 @@ class ChatService:
                 if max_level is not None and max_level >= 1:
                     top_facts = await RetrievalService.get_facts_by_level(db, topic_id, level=max_level)
                     if top_facts:
-                        concepts: list[str] = [f"- {f.content}" for f in top_facts]
+                        concepts: list[str] = [f"- [{mapper.shorten(f.fact_id, prefix='F')}] {f.content}" for f in top_facts]
                         context_text = (
                             "[DOCUMENT HAS BEEN INGESTED TO KNOWLEDGE BASE]\n"
                             f"TOPIC KNOWLEDGE (max_level={max_level}, levels 0-{max_level} available).\n"

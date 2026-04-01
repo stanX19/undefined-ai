@@ -44,6 +44,8 @@ async def register(
         email=user.email,
         username=user.username,
         education_level=user.education_level,
+        plan_tier=user.plan_tier,
+        credits_balance=user.credits_balance,
     )
 
 
@@ -70,6 +72,8 @@ async def login(
         email=user.email,
         username=user.username,
         education_level=user.education_level,
+        plan_tier=user.plan_tier,
+        credits_balance=user.credits_balance,
     )
 
 
@@ -83,6 +87,8 @@ async def get_profile(
         email=current_user.email,
         username=current_user.username,
         education_level=current_user.education_level,
+        plan_tier=current_user.plan_tier,
+        credits_balance=current_user.credits_balance,
     )
 
 
@@ -104,4 +110,6 @@ async def update_profile(
         email=user.email,
         username=user.username,
         education_level=user.education_level,
+        plan_tier=user.plan_tier,
+        credits_balance=user.credits_balance,
     )

@@ -227,7 +227,7 @@ def parse_inline(text: str) -> tuple[list[Any], dict[str, str]]:
 # block sub-parsers
 RE_GRAPH_VERTEX_DEF  = re.compile(r'^\[([^\]]+)\]\(#([^)]+)\)\s*::\s*(.+)$')  # [id](#nav) :: text
 RE_GRAPH_VERTEX_BARE = re.compile(r'^([A-Za-z0-9_-]+)\s*::\s*(.+)$')           # id :: text
-RE_GRAPH_EDGE        = re.compile(r'^(.+?)\s*(->|<-|--|<->)\s*(.+)$')  # src and dst may contain spaces to match vertex ids
+RE_GRAPH_EDGE        = re.compile(r'^(.+?)\s*(<-+>|<-+|-+>|--+)\s*(.+)$')  # flexible arrow lengths, normalized in parse_graph_block
 
 RE_QUIZ_ANSWER       = re.compile(r'^-\s+(.+?)(\s+\*)?\s*$')
 RE_QUIZ_EXPL         = re.compile(r'^>\s+(.+)$')
@@ -374,13 +374,48 @@ def parse_graph_block(block_lines: list[str], lineno: int, diags: list[Diagnosti
 
         m = RE_GRAPH_EDGE.match(line)
         if m:
-            src, op, dst = m.group(1).strip(), m.group(2), m.group(3).strip()
-            # auto-create implicit vertices
-            if src not in vertices:
-                vertices[src] = GraphVertex(id=src, display=src)
-            if dst not in vertices:
-                vertices[dst] = GraphVertex(id=dst, display=dst)
-            edges.append(GraphEdge(src=src, op=op, dst=dst))
+            src_raw, raw_op, dst_raw = m.group(1).strip(), m.group(2), m.group(3).strip()
+            
+            # Normalize to canonical arrows: -> | <- | -- | <->
+            if '<' in raw_op and '>' in raw_op:
+                op = "<->"
+            elif '<' in raw_op:
+                op = "<-"
+            elif '>' in raw_op:
+                op = "->"
+            else:
+                op = "--"
+            
+            # Helper to parse vertex reference (e.g. "[id](#nav) :: text" or "id :: text")
+            def parse_ref(ref: str) -> tuple[str, str | None, str | None]:
+                display_text = None
+                nav_target    = None
+                
+                # 1. Handle :: delimiter for display text
+                if "::" in ref:
+                    ref, display_text = [p.strip() for p in ref.split("::", 1)]
+                
+                # 2. Handle [id](#nav) for navigation links
+                # We reuse the same logic as the main vertex patterns but on the extracted ref
+                m_nav = re.match(r'^\[([^\]]+)\]\(#([^)]+)\)$', ref)
+                if m_nav:
+                    return m_nav.group(1), display_text, m_nav.group(2)
+                
+                return ref, display_text, None
+
+            src_id, src_disp, src_nav = parse_ref(src_raw)
+            dst_id, dst_disp, dst_nav = parse_ref(dst_raw)
+
+            # auto-create/update implicit vertices
+            for vid, vdisp, vnav in [(src_id, src_disp, src_nav), (dst_id, dst_disp, dst_nav)]:
+                if vid not in vertices:
+                    vertices[vid] = GraphVertex(id=vid, display=vdisp or vid, nav_target=vnav)
+                else:
+                    # Update existing vertices if compact syntax provides more details
+                    if vdisp: vertices[vid].display = vdisp
+                    if vnav:  vertices[vid].nav_target = vnav
+            
+            edges.append(GraphEdge(src=src_id, op=op, dst=dst_id))
             continue
 
         diags.append(Diagnostic("warning",

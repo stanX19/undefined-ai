@@ -1,0 +1,18 @@
+{
+  "text": "```json\n[\n  \"Individual Task 2 for WID2003 Cognitive Science, an individual assignment, focuses on Cognitive Architecture for Week 3.\",\n  \"Lectures and tutorials for the task are scheduled for March 19 and 24, 2026, with a submission deadline of March 30, 2026, via MS Teams Assignments.\",\n  \"A written report, not exceeding 5 pages, is required for Parts 1, 2, 4, and 5 of the task.\",\n  \"Learning outcomes include explaining key ideas from cognitive science and AI foundations, reflecting on personal thinking, and connecting theoretical concepts to real-world experiences.\",\n  \"Part 1 requires students to engage with lectures and videos, including one by Marvin Minsky, to specify its main theme and key concepts, relate content to personal experience, and state a takeaway message.\",\n  \"Part 2 introduces cognitive architecture, covering its definition, purpose, and models such as symbolic, subsymbolic, and hybrid.\",\n  \"Part 3 is an exploratory section, for which no written report is required, focusing on identifying the purpose and structure of ACT-R as a computational tool.\",\n  \"Part 4 requires a summary of one application of cognitive architecture, with examples including Intelligent Tutoring Systems, Human-Robot Interaction, and Cognitive Agents in Games.\",\n  \"Part 5 involves comparing cognitive architecture with AI systems, specifically rule-based and deep learning, and discussing their strengths, limitations, and Explainable AI (XAI) aspects.\",\n  \"Other examples of cognitive architectures mentioned are SOAR, CLARION, LIDA, EPIC, NARS, ICARUS, and Sigma.\",\n  \"The document also provides a list of recommended readings and videos.\"\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...jkA_v4rcjA}",
+  "status": "ok",
+  "json_data": [
+    "Individual Task 2 for WID2003 Cognitive Science, an individual assignment, focuses on Cognitive Architecture for Week 3.",
+    "Lectures and tutorials for the task are scheduled for March 19 and 24, 2026, with a submission deadline of March 30, 2026, via MS Teams Assignments.",
+    "A written report, not exceeding 5 pages, is required for Parts 1, 2, 4, and 5 of the task.",
+    "Learning outcomes include explaining key ideas from cognitive science and AI foundations, reflecting on personal thinking, and connecting theoretical concepts to real-world experiences.",
+    "Part 1 requires students to engage with lectures and videos, including one by Marvin Minsky, to specify its main theme and key concepts, relate content to personal experience, and state a takeaway message.",
+    "Part 2 introduces cognitive architecture, covering its definition, purpose, and models such as symbolic, subsymbolic, and hybrid.",
+    "Part 3 is an exploratory section, for which no written report is required, focusing on identifying the purpose and structure of ACT-R as a computational tool.",
+    "Part 4 requires a summary of one application of cognitive architecture, with examples including Intelligent Tutoring Systems, Human-Robot Interaction, and Cognitive Agents in Games.",
+    "Part 5 involves comparing cognitive architecture with AI systems, specifically rule-based and deep learning, and discussing their strengths, limitations, and Explainable AI (XAI) aspects.",
+    "Other examples of cognitive architectures mentioned are SOAR, CLARION, LIDA, EPIC, NARS, ICARUS, and Sigma.",
+    "The document also provides a list of recommended readings and videos."
+  ]
+}
