@@ -1,0 +1,8 @@
+{
+  "text": "```json\n{\"difficulty\": 3}\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...F-_QjMhS4A}",
+  "status": "ok",
+  "json_data": {
+    "difficulty": 3
+  }
+}

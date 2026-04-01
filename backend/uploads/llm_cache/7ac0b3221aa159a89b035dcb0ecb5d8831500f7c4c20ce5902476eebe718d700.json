@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Computer Architecture\",\n    \"difficulty\": 4,\n    \"reason\": \"It provides the essential understanding of the underlying hardware components that an operating system manages and interacts with.\"\n  },\n  {\n    \"title\": \"Distributed Systems\",\n    \"difficulty\": 5,\n    \"reason\": \"It extends fundamental operating system concepts like resource management, concurrency, and fault tolerance to a network of interconnected machines.\"\n  },\n  {\n    \"title\": \"Formal Verification of Operating Systems\",\n    \"difficulty\": 6,\n    \"reason\": \"This research-level topic involves applying rigorous mathematical methods to prove the correctness and security properties of operating system kernels.\"\n  }\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...2QpdOtfUUs}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Computer Architecture",
+      "difficulty": 4,
+      "reason": "It provides the essential understanding of the underlying hardware components that an operating system manages and interacts with."
+    },
+    {
+      "title": "Distributed Systems",
+      "difficulty": 5,
+      "reason": "It extends fundamental operating system concepts like resource management, concurrency, and fault tolerance to a network of interconnected machines."
+    },
+    {
+      "title": "Formal Verification of Operating Systems",
+      "difficulty": 6,
+      "reason": "This research-level topic involves applying rigorous mathematical methods to prove the correctness and security properties of operating system kernels."
+    }
+  ]
+}
