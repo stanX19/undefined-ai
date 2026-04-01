@@ -24,7 +24,10 @@ export const metadata: Metadata = {
     "A new kind of learning platform where AI doesn't just answer questions, it builds the entire interface around your knowledge.",
   generator: "v0.app",
   icons: {
-    icon: "/logo_white.png",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/logo_white.png" },
+    ],
     apple: "/logo_white.png",
   },
 }

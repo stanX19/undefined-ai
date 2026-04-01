@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="75 80 220 210" role="img" aria-label="undefined ai">
+  <style>
+    .ic { stroke: #000000; fill: none; }
+    .ic-fill { fill: #000000; stroke: none; }
+    @media (prefers-color-scheme: dark) {
+      .ic { stroke: #ffffff; }
+      .ic-fill { fill: #ffffff; }
+    }
+  </style>
+  <g class="ic" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 210,120 C 150,105 90,140 90,200 C 90,250 130,270 160,260 C 185,250 190,225 180,215 C 170,205 145,210 145,225 C 145,235 155,240 160,235" />
+    <path d="M 205,120 L 210,95 L 280,140 L 250,165 L 220,150" />
+    <path d="M 220,150 L 235,175 L 270,165 L 245,185 L 180,205" />
+    <path d="M 195,160 L 215,165 L 200,180 Z" />
+    <circle cx="240" cy="130" r="7" />
+  </g>
+  <circle class="ic-fill" cx="240" cy="130" r="2" />
+</svg>
