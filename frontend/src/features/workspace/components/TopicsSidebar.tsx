@@ -105,6 +105,8 @@ export function TopicsSidebar() {
             const chatStore = useChatStore.getState();
             chatStore.clear();
             useSurfaceStore.getState().clearAll();
+            useUIStore.getState().clear();
+            useMarkGraphStore.getState().clear();
             chatStore.setTopicId(topicId);
             loadChatHistory(topicId);
             navigate(`/workspace?topic=${topicId}`, { replace: true });
