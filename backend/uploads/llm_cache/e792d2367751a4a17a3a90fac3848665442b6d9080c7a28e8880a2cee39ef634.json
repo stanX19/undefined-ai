@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Shortest Job Next (SJN) and Shortest Remaining Time First (SRTF) CPU Scheduling\",\n    \"difficulty\": 4,\n    \"reason\": \"This topic introduces more efficient non-preemptive and preemptive scheduling strategies that directly address the performance limitations of FCFS.\"\n  },\n  {\n    \"title\": \"Real-Time CPU Scheduling Algorithms\",\n    \"difficulty\": 5,\n    \"reason\": \"This explores scheduling algorithms designed for systems with strict timing constraints, a significant step up from general-purpose scheduling in terms of complexity and criticality.\"\n  },\n  {\n    \"title\": \"Adaptive and Predictive CPU Scheduling using Machine Learning\",\n    \"difficulty\": 6,\n    \"reason\": \"This involves designing intelligent scheduling policies that dynamically adapt to changing workloads and system conditions, an active area of research leveraging advanced computational techniques.\"\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...x94X6_VZWM}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Shortest Job Next (SJN) and Shortest Remaining Time First (SRTF) CPU Scheduling",
+      "difficulty": 4,
+      "reason": "This topic introduces more efficient non-preemptive and preemptive scheduling strategies that directly address the performance limitations of FCFS."
+    },
+    {
+      "title": "Real-Time CPU Scheduling Algorithms",
+      "difficulty": 5,
+      "reason": "This explores scheduling algorithms designed for systems with strict timing constraints, a significant step up from general-purpose scheduling in terms of complexity and criticality."
+    },
+    {
+      "title": "Adaptive and Predictive CPU Scheduling using Machine Learning",
+      "difficulty": 6,
+      "reason": "This involves designing intelligent scheduling policies that dynamically adapt to changing workloads and system conditions, an active area of research leveraging advanced computational techniques."
+    }
+  ]
+}

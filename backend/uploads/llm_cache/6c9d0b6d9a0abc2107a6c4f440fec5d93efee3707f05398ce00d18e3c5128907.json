@@ -1,0 +1,29 @@
+{
+  "text": "```json\n[\n  {\n    \"summary\": \"The WIF2002 Software Requirement Engineering group project, taught by Dr. Hema Subramaniam and Dr. Nazean for Semester 2, Session 2025/2026, involves 10 students per group, runs from Week 1 to Week 14, is assessed via a report and pre-recorded presentation, and is worth a total of 40 marks allocated across its five processes and presentation/collaboration.\",\n    \"source_indices\": [1, 2, 6]\n  },\n  {\n    \"summary\": \"The project focuses on five core Software Requirements Engineering (SRE) processes—Requirement Elicitation, Requirement Documentation, Requirement Management, Requirement Validation, and Requirement Negotiations—and provides 10 realistic, agile-friendly project ideas that encourage these processes through lightweight artifacts and require specific deliverables for each stage, such as interview scripts, vision documents, and prototypes.\",\n    \"source_indices\": [3, 4, 5]\n  },\n  {\n    \"summary\": \"Students are permitted limited AI usage (Level 2) for refining wording, improving clarity, and brainstorming ideas for this project, but are strictly prohibited from using it to generate requirements, submit AI-generated content as original work, or for analysis, conclusions, or technical details.\",\n    \"source_indices\": [0]\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...x94X6_VZWM}",
+  "status": "ok",
+  "json_data": [
+    {
+      "summary": "The WIF2002 Software Requirement Engineering group project, taught by Dr. Hema Subramaniam and Dr. Nazean for Semester 2, Session 2025/2026, involves 10 students per group, runs from Week 1 to Week 14, is assessed via a report and pre-recorded presentation, and is worth a total of 40 marks allocated across its five processes and presentation/collaboration.",
+      "source_indices": [
+        1,
+        2,
+        6
+      ]
+    },
+    {
+      "summary": "The project focuses on five core Software Requirements Engineering (SRE) processes—Requirement Elicitation, Requirement Documentation, Requirement Management, Requirement Validation, and Requirement Negotiations—and provides 10 realistic, agile-friendly project ideas that encourage these processes through lightweight artifacts and require specific deliverables for each stage, such as interview scripts, vision documents, and prototypes.",
+      "source_indices": [
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "summary": "Students are permitted limited AI usage (Level 2) for refining wording, improving clarity, and brainstorming ideas for this project, but are strictly prohibited from using it to generate requirements, submit AI-generated content as original work, or for analysis, conclusions, or technical details.",
+      "source_indices": [
+        0
+      ]
+    }
+  ]
+}

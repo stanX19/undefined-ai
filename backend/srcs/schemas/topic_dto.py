@@ -15,6 +15,7 @@ class TopicResponse(BaseModel):
     user_id: str
     title: str
     difficulty_level: int | None = None
+    document_filename: str | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

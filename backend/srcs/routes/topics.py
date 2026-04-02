@@ -125,7 +125,7 @@ async def upload_document(
 
     # Persist extracted content (non-blocking ingestion is triggered after persistence).
     try:
-        topic = await TopicService.set_document_text(db, topic_id, extracted)
+        topic = await TopicService.set_document_text(db, topic_id, extracted, filename=file.filename)
     except Exception:
         await db.rollback()
         DocumentService.delete_document(file_path)

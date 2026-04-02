@@ -56,9 +56,9 @@ class TopicService:
 
     @staticmethod
     async def set_document_text(
-        db: AsyncSession, topic_id: str, text: str
+        db: AsyncSession, topic_id: str, text: str, filename: str | None = None
     ) -> Topic:
-        """Store extracted document text on a topic.
+        """Store extracted document text (and optional filename) on a topic.
 
         Retries on OperationalError (e.g. database locked) to handle SQLite
         contention under concurrent load.
@@ -73,6 +73,8 @@ class TopicService:
         for attempt in range(_MAX_DB_RETRIES):
             try:
                 topic.document_text = text
+                if filename is not None:
+                    topic.document_filename = filename
                 await db.commit()
                 await db.refresh(topic)
                 return topic

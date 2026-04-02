@@ -1,0 +1,31 @@
+{
+  "text": "```json\n[\n  \"This document is a Lab 1 Report for the WIA2004 Operating System course.\",\n  \"The report focuses on CPU Scheduling Algorithms.\",\n  \"The tutorial group for this report is OCC 4.\",\n  \"The lab group for this report is Group 7.\",\n  \"The team members are RAKIN RAHMAN, MAH QING FUNG, SYEDA ADIBA MAHDIYA, CHENG TZE XUAN, ANNABEL IKHUORIA, and CHIANG CHENG HAN.\",\n  \"The report includes sections on Introduction to Algorithm, Flowchart, Pseudocode, Coding, Sample Output, and References.\",\n  \"FCFS (First-Come, First-Served) is one of the simplest CPU scheduling algorithms used in operating systems.\",\n  \"In FCFS, the process that arrives first in the ready queue is allocated to the CPU first.\",\n  \"FCFS follows the FIFO (First In, First Out) principle.\",\n  \"FCFS is a non-preemptive scheduling algorithm.\",\n  \"Once a process starts execution in FCFS, it cannot be interrupted until it finishes.\",\n  \"If multiple processes arrive at the same time, FCFS executes them according to their order in the queue.\",\n  \"FCFS is easy to understand and implement.\",\n  \"FCFS may result in poor performance, leading to long waiting and turnaround times, especially when shorter processes wait for longer ones.\",\n  \"A process with burst time 0 does not require CPU execution time.\",\n  \"In FCFS, a process with burst time 0 completes immediately once it reaches the CPU.\",\n  \"For a process with burst time 0, its turnaround time will be equal to its waiting time.\",\n  \"No priority is given to any process in FCFS.\",\n  \"Turnaround Time (TAT) is calculated as Completion Time minus Arrival Time.\",\n  \"Waiting Time (WT) is calculated as Turnaround Time minus Burst Time.\",\n  \"The report provides pseudocode for calculating waiting and turnaround times in FCFS.\",\n  \"The report includes Java code for implementing the FCFS algorithm.\",\n  \"A sample output demonstrates the FCFS algorithm's execution for three processes.\",\n  \"The report references a YouTube video by Gate Smashers on FCFS scheduling.\"\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...x94X6_VZWM}",
+  "status": "ok",
+  "json_data": [
+    "This document is a Lab 1 Report for the WIA2004 Operating System course.",
+    "The report focuses on CPU Scheduling Algorithms.",
+    "The tutorial group for this report is OCC 4.",
+    "The lab group for this report is Group 7.",
+    "The team members are RAKIN RAHMAN, MAH QING FUNG, SYEDA ADIBA MAHDIYA, CHENG TZE XUAN, ANNABEL IKHUORIA, and CHIANG CHENG HAN.",
+    "The report includes sections on Introduction to Algorithm, Flowchart, Pseudocode, Coding, Sample Output, and References.",
+    "FCFS (First-Come, First-Served) is one of the simplest CPU scheduling algorithms used in operating systems.",
+    "In FCFS, the process that arrives first in the ready queue is allocated to the CPU first.",
+    "FCFS follows the FIFO (First In, First Out) principle.",
+    "FCFS is a non-preemptive scheduling algorithm.",
+    "Once a process starts execution in FCFS, it cannot be interrupted until it finishes.",
+    "If multiple processes arrive at the same time, FCFS executes them according to their order in the queue.",
+    "FCFS is easy to understand and implement.",
+    "FCFS may result in poor performance, leading to long waiting and turnaround times, especially when shorter processes wait for longer ones.",
+    "A process with burst time 0 does not require CPU execution time.",
+    "In FCFS, a process with burst time 0 completes immediately once it reaches the CPU.",
+    "For a process with burst time 0, its turnaround time will be equal to its waiting time.",
+    "No priority is given to any process in FCFS.",
+    "Turnaround Time (TAT) is calculated as Completion Time minus Arrival Time.",
+    "Waiting Time (WT) is calculated as Turnaround Time minus Burst Time.",
+    "The report provides pseudocode for calculating waiting and turnaround times in FCFS.",
+    "The report includes Java code for implementing the FCFS algorithm.",
+    "A sample output demonstrates the FCFS algorithm's execution for three processes.",
+    "The report references a YouTube video by Gate Smashers on FCFS scheduling."
+  ]
+}

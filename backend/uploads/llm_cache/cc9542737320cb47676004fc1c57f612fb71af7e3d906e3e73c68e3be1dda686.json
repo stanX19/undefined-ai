@@ -1,0 +1,56 @@
+{
+  "text": "```json\n[\n  {\n    \"summary\": \"This Lab 1 Report for the WIA2004 Operating System course, prepared by Group 7 (tutorial group OCC 4) and its team members, focuses on CPU Scheduling Algorithms.\",\n    \"source_indices\": [0, 1, 2, 3, 4]\n  },\n  {\n    \"summary\": \"The report details the FCFS algorithm through sections on its introduction, flowchart, pseudocode, Java coding, and sample output, also providing pseudocode for time calculations and referencing an external video.\",\n    \"source_indices\": [5, 20, 21, 22, 23]\n  },\n  {\n    \"summary\": \"FCFS is a simple, non-preemptive CPU scheduling algorithm that follows the FIFO principle, allocating the CPU to the first arriving process, which then executes without interruption; it is easy to understand and implement and gives no priority to any process, executing simultaneously arriving processes based on their queue order.\",\n    \"source_indices\": [6, 7, 8, 9, 10, 11, 12, 17]\n  },\n  {\n    \"summary\": \"While FCFS is easy to implement, it can lead to poor performance with long waiting and turnaround times, especially when shorter processes are delayed, though processes with a burst time of 0 complete immediately, resulting in equal turnaround and waiting times.\",\n    \"source_indices\": [13, 14, 15, 16]\n  },\n  {\n    \"summary\": \"Turnaround Time is calculated as Completion Time minus Arrival Time, while Waiting Time is Turnaround Time minus Burst Time.\",\n    \"source_indices\": [18, 19]\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...G8WEhvr498}",
+  "status": "ok",
+  "json_data": [
+    {
+      "summary": "This Lab 1 Report for the WIA2004 Operating System course, prepared by Group 7 (tutorial group OCC 4) and its team members, focuses on CPU Scheduling Algorithms.",
+      "source_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "summary": "The report details the FCFS algorithm through sections on its introduction, flowchart, pseudocode, Java coding, and sample output, also providing pseudocode for time calculations and referencing an external video.",
+      "source_indices": [
+        5,
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    {
+      "summary": "FCFS is a simple, non-preemptive CPU scheduling algorithm that follows the FIFO principle, allocating the CPU to the first arriving process, which then executes without interruption; it is easy to understand and implement and gives no priority to any process, executing simultaneously arriving processes based on their queue order.",
+      "source_indices": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        17
+      ]
+    },
+    {
+      "summary": "While FCFS is easy to implement, it can lead to poor performance with long waiting and turnaround times, especially when shorter processes are delayed, though processes with a burst time of 0 complete immediately, resulting in equal turnaround and waiting times.",
+      "source_indices": [
+        13,
+        14,
+        15,
+        16
+      ]
+    },
+    {
+      "summary": "Turnaround Time is calculated as Completion Time minus Arrival Time, while Waiting Time is Turnaround Time minus Burst Time.",
+      "source_indices": [
+        18,
+        19
+      ]
+    }
+  ]
+}
