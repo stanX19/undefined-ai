@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Programming Language Semantics\",\n    \"difficulty\": 4,\n    \"reason\": \"Understanding formal semantics provides the rigorous foundation necessary to specify and reason about program behavior, complementing the application of formal verification to operating systems.\"\n  },\n  {\n    \"title\": \"Verified Compilers\",\n    \"difficulty\": 5,\n    \"reason\": \"This topic applies formal verification to another critical system component, a compiler, requiring deeper understanding of program transformation and proof engineering at a higher level of complexity than an OS component.\"\n  },\n  {\n    \"title\": \"Foundational Certified Software Stacks\",\n    \"difficulty\": 6,\n    \"reason\": \"This cutting-edge research area aims to build an entire software ecosystem with end-to-end formal correctness guarantees, extending OS verification to encompass all layers from hardware to applications.\"\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...x94X6_VZWM}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Programming Language Semantics",
+      "difficulty": 4,
+      "reason": "Understanding formal semantics provides the rigorous foundation necessary to specify and reason about program behavior, complementing the application of formal verification to operating systems."
+    },
+    {
+      "title": "Verified Compilers",
+      "difficulty": 5,
+      "reason": "This topic applies formal verification to another critical system component, a compiler, requiring deeper understanding of program transformation and proof engineering at a higher level of complexity than an OS component."
+    },
+    {
+      "title": "Foundational Certified Software Stacks",
+      "difficulty": 6,
+      "reason": "This cutting-edge research area aims to build an entire software ecosystem with end-to-end formal correctness guarantees, extending OS verification to encompass all layers from hardware to applications."
+    }
+  ]
+}

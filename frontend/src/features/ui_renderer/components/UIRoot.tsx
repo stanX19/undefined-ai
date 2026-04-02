@@ -11,7 +11,7 @@ export function UIRoot() {
             <div className="flex h-full w-full items-center justify-center p-8">
                 <div className="flex flex-col items-center gap-4">
                     <div className="h-8 w-8 animate-spin rounded-full border-4 border-(--a2ui-primary,var(--color-primary)) border-t-transparent" />
-                    <p className="text-sm font-medium text-[var(--color-text-muted)]">Loading workspace...</p>
+                    <p className="text-sm font-medium text-text-muted">Loading workspace...</p>
                 </div>
             </div>
         );
@@ -31,7 +31,7 @@ export function UIRoot() {
     if (!uiJson) {
         return (
             <div className="flex h-full w-full items-center justify-center p-8">
-                <p className="text-[var(--color-text-muted)]">No Active Scene</p>
+                <p className="text-text-muted">No Active Scene</p>
             </div>
         );
     }

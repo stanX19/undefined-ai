@@ -123,6 +123,7 @@ export function useForceLayout(initialNodes: NodeData[], initialEdges: EdgeData[
   const [nodes, setNodes] = useState<NodeData[]>([]);
   const [alpha, setAlpha] = useState(1);
   const simulationRef = useRef<d3.Simulation<NodeData, EdgeData> | null>(null);
+  const lastUpdateRef = useRef<number>(0);
 
   useEffect(() => {
     // 1. Pre-calculate positions using Sugiyama to prevent tangling
@@ -149,10 +150,19 @@ export function useForceLayout(initialNodes: NodeData[], initialEdges: EdgeData[
         .distance(150) 
         .strength(0.7)
       )
-      .alphaDecay(0.03) 
+      .alphaDecay(0.03)
       .on("tick", () => {
-        setNodes([...simulation.nodes()]);
-        setAlpha(simulation.alpha());
+        const now = performance.now();
+        // Throttle updates to at most ~30fps to avoid
+        // overwhelming React/ReactFlow with re-renders
+        if (now - lastUpdateRef.current < 33) return;
+        lastUpdateRef.current = now;
+
+        const currentNodes = simulation.nodes();
+        const currentAlpha = simulation.alpha();
+
+        setNodes(currentNodes.slice());
+        setAlpha(currentAlpha);
       });
 
     simulationRef.current = simulation;
@@ -186,8 +196,11 @@ export function useForceLayout(initialNodes: NodeData[], initialEdges: EdgeData[
     if (!simulationRef.current) return;
     const d3Node = simulationRef.current.nodes().find(n => n.id === node.id);
     if (d3Node) {
-       d3Node.fx = node.position.x;
-       d3Node.fy = node.position.y;
+      // Release the pin so future force ticks can move this node again.
+      // Without this, any node dragged once stays permanently fixed and
+      // won't respond when other nodes (e.g. root) are moved.
+      d3Node.fx = null;
+      d3Node.fy = null;
     }
     simulationRef.current.alphaTarget(0);
   };
