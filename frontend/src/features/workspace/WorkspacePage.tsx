@@ -259,7 +259,7 @@ export function WorkspacePage() {
                                 {v.description}
                               </div>
                               <div className="text-[11px] text-[#605A57]">
-                                {new Date(v.created_at).toLocaleString()}
+                                {new Date(v.created_at.endsWith("Z") || v.created_at.includes("+") ? v.created_at : v.created_at + "Z").toLocaleString()}
                               </div>
                             </button>
                           ))

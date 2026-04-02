@@ -1,0 +1,8 @@
+{
+  "text": "```json\n{\n  \"difficulty\": 4\n}\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...G8WEhvr498}",
+  "status": "ok",
+  "json_data": {
+    "difficulty": 4
+  }
+}

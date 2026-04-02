@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { Plus, MessageSquare, LogOut, PanelLeft, PanelLeftClose, Home, Network, Menu, Pin, MoreVertical, Trash2 } from "lucide-react";
+import { Plus, MessageSquare, LogOut, PanelLeft, PanelLeftClose, Home, Menu, Pin, MoreVertical, Trash2 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
     useTopicListStore,
@@ -239,12 +239,6 @@ export function TopicsSidebar() {
                         >
                             <Home size={18} />
                             Home
-                        </button>
-                        <button
-                            className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-4 py-2.5 text-[14px] font-medium text-[#605A57] transition-colors hover:bg-orange-50 hover:text-[#37322F]"
-                        >
-                            <Network size={18} />
-                            Knowledge Graph
                         </button>
                     </div>
 

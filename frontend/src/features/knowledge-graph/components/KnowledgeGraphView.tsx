@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   ReactFlow,
@@ -50,15 +50,36 @@ function CircleNode({
   fullContent: string;
 }) {
   const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
+  const rafRef = useRef<number | null>(null);
   const maxChars = Math.floor(size / 6.5);
   const display = label.length > maxChars ? label.slice(0, maxChars).trimEnd() + "…" : label;
+
+  // Throttle tooltip repositioning to one update per animation frame so that
+  // 100+ node instances don't each trigger a React re-render on every mousemove.
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const x = e.clientX;
+    const y = e.clientY;
+    if (rafRef.current !== null) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      setMousePos({ x, y });
+    });
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    setMousePos(null);
+  }, []);
 
   return (
     <div
       style={{ position: "relative", width: size, height: size }}
-      onMouseEnter={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
-      onMouseMove={(e) => setMousePos({ x: e.clientX, y: e.clientY })}
-      onMouseLeave={() => setMousePos(null)}
+      onMouseEnter={handleMouseMove}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
     >
       {/* Circle */}
       <div
@@ -360,25 +381,24 @@ export function KnowledgeGraphView({ topicId, topicTitle, onClose }: KnowledgeGr
   }, [reactFlowEdges, setEdges]);
 
   // Sync D3 node positions into React Flow on every simulation tick.
+  // Uses a Map for O(1) lookups — the naive find() approach was O(n²) per tick.
   useEffect(() => {
     setNodes((nds) => {
       if (nds.length === 0 && reactFlowNodes.length > 0) return reactFlowNodes;
+      // Build id→position map once (O(n)) instead of find() per node (O(n²))
+      const posMap = new Map(reactFlowNodes.map(n => [n.id, n.position]));
       let changed = false;
       const next = nds.map((node) => {
-        const d3 = animatedNodes.find((a) => a.id === node.id);
-        if (d3) {
-          const nx = d3.x ?? 0;
-          const ny = d3.y ?? 0;
-          if (node.position.x !== nx || node.position.y !== ny) {
-            changed = true;
-            return { ...node, position: { x: nx, y: ny } };
-          }
+        const pos = posMap.get(node.id);
+        if (pos && (node.position.x !== pos.x || node.position.y !== pos.y)) {
+          changed = true;
+          return { ...node, position: pos };
         }
         return node;
       });
       return changed ? next : nds;
     });
-  }, [animatedNodes, reactFlowNodes, setNodes]);
+  }, [reactFlowNodes, setNodes]);
 
   const nodeCount = kgNodes.length;
   const edgeCount = kgEdges.length;

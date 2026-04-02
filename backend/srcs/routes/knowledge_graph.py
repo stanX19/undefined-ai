@@ -44,12 +44,19 @@ async def get_knowledge_graph(
 ):
     """Return the knowledge graph for a topic as nodes + edges.
 
-    Graph structure
-    ---------------
+    Graph structure (top-down tree)
+    --------------------------------
     - Virtual root node  : the topic title (level -1), placed at centre by D3
     - Level-2 nodes      : compressed summaries — middle ring
     - Level-1 nodes      : atomic facts          — outer ring
-    - Edges              : root→L2 and L2→L1 (or root→L1 when no L2 parent found)
+
+    Edge strategy
+    -------------
+    1. root → every level-2 summary
+    2. level-2 → level-1: use parent_fact_id when set; otherwise distribute
+       level-1 facts round-robin across level-2 summaries so the graph is
+       always a proper tree rather than a flat star.
+    3. When no level-2 summaries exist: root → all level-1 facts directly.
     """
     topic = await TopicService.get_user_topic(db, topic_id, current_user.user_id)
     if not topic:
@@ -73,9 +80,6 @@ async def get_knowledge_graph(
     if not facts:
         return KnowledgeGraphResponse(topic_id=topic_id, nodes=[root], edges=[])
 
-    fact_id_set = {f.fact_id for f in facts}
-    level2_ids = {f.fact_id for f in facts if f.level == 2}
-
     nodes: list[KGNode] = [root]
     for f in facts:
         nodes.append(
@@ -87,23 +91,35 @@ async def get_knowledge_graph(
             )
         )
 
+    level2_facts = [f for f in facts if f.level == 2]
+    level1_facts = [f for f in facts if f.level == 1]
+    level2_id_set = {f.fact_id for f in level2_facts}
+
     edges: list[KGEdge] = []
-    connected_to_root: set[str] = set()
 
-    for f in facts:
-        if f.parent_fact_id and f.parent_fact_id in fact_id_set:
-            # Level-1 → its level-2 parent that is also in our result set
-            edges.append(KGEdge(source=f.parent_fact_id, target=f.fact_id))
-        elif f.level == 2:
-            # Level-2 with no in-set parent → connect to root
-            edges.append(KGEdge(source="root", target=f.fact_id))
-            connected_to_root.add(f.fact_id)
+    if level2_facts:
+        # root → every level-2 summary
+        for l2 in level2_facts:
+            edges.append(KGEdge(source="root", target=l2.fact_id))
 
-    # Any level-1 fact whose parent was a level-0 raw chunk (not in fact_id_set)
-    # gets connected to root so the graph stays connected
-    targeted = {e.target for e in edges}
-    for f in facts:
-        if f.fact_id not in targeted:
-            edges.append(KGEdge(source="root", target=f.fact_id))
+        # level-2 → level-1
+        # Prefer explicit parent_fact_id relationship when the ingestion pipeline
+        # has set it (future-proof). Fall back to round-robin for existing data
+        # where parent_fact_id is null on all facts.
+        assigned: set[str] = set()
+        for l1 in level1_facts:
+            if l1.parent_fact_id and l1.parent_fact_id in level2_id_set:
+                edges.append(KGEdge(source=l1.parent_fact_id, target=l1.fact_id))
+                assigned.add(l1.fact_id)
+
+        # Round-robin: distribute any unassigned level-1 facts across level-2 nodes
+        unassigned = [f for f in level1_facts if f.fact_id not in assigned]
+        for i, l1 in enumerate(unassigned):
+            parent = level2_facts[i % len(level2_facts)]
+            edges.append(KGEdge(source=parent.fact_id, target=l1.fact_id))
+    else:
+        # No summaries yet — flat: root → all level-1 facts
+        for l1 in level1_facts:
+            edges.append(KGEdge(source="root", target=l1.fact_id))
 
     return KnowledgeGraphResponse(topic_id=topic_id, nodes=nodes, edges=edges)
