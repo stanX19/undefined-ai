@@ -1,0 +1,23 @@
+{
+  "text": "```json\n[\n  {\n    \"summary\": \"Sorting algorithms are fundamental instructions used to arrange data into a specific order for optimized searching and presentation, and are classified by properties such as in-place, stable, adaptive, or online, with the most appropriate algorithm selected based on the characteristics of the input data.\",\n    \"source_indices\": [1, 2, 5]\n  },\n  {\n    \"summary\": \"WIA2005 Algorithm Design and Analysis Lecture 3, delivered by Dr. Asmiza A. Sani, focuses on Sorting Algorithms, with learning objectives including Bubble, Counting, Radix, Bucket, and Shell sort, and references like \\\"Introduction to Algorithms, 3rd edition\\\"; these include the inefficient Θ(n²) Bubble sort, Shell sort (a generalization of Insertion sort with Θ(n log n) to Θ(n²) complexity), and non-comparative algorithms like Counting sort (Θ(n+k)), Radix sort (Θ(d(n+k))), and Bucket sort (Θ(n) for uniform distribution).\",\n    \"source_indices\": [0, 3, 4]\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...PdFR2Equ6U}",
+  "status": "ok",
+  "json_data": [
+    {
+      "summary": "Sorting algorithms are fundamental instructions used to arrange data into a specific order for optimized searching and presentation, and are classified by properties such as in-place, stable, adaptive, or online, with the most appropriate algorithm selected based on the characteristics of the input data.",
+      "source_indices": [
+        1,
+        2,
+        5
+      ]
+    },
+    {
+      "summary": "WIA2005 Algorithm Design and Analysis Lecture 3, delivered by Dr. Asmiza A. Sani, focuses on Sorting Algorithms, with learning objectives including Bubble, Counting, Radix, Bucket, and Shell sort, and references like \"Introduction to Algorithms, 3rd edition\"; these include the inefficient Θ(n²) Bubble sort, Shell sort (a generalization of Insertion sort with Θ(n log n) to Θ(n²) complexity), and non-comparative algorithms like Counting sort (Θ(n+k)), Radix sort (Θ(d(n+k))), and Bucket sort (Θ(n) for uniform distribution).",
+      "source_indices": [
+        0,
+        3,
+        4
+      ]
+    }
+  ]
+}

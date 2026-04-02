@@ -1,0 +1,167 @@
+{
+  "text": "```json\n[\n  {\n    \"summary\": \"WIA2005 Algorithm Design and Analysis Lecture 3, delivered by Dr. Asmiza A. Sani in Semester 2, Session 2025/26, focuses on Sorting Algorithms, with Lecture 4 covering String Matching Algorithms, and references including \\\"Introduction to Algorithms, 3rd edition\\\" and \\\"Algorithm, 5th Edition\\\".\",\n    \"source_indices\": [0, 1, 2, 62, 63, 64]\n  },\n  {\n    \"summary\": \"Sorting algorithms are a fundamental set of instructions used to arrange data, typically stored in arrays or lists, into a particular numerical or lexicographical order, which is crucial for optimized searching, readable presentation, and various application needs.\",\n    \"source_indices\": [4, 5, 6, 7, 8, 9, 10, 11]\n  },\n  {\n    \"summary\": \"The lecture's learning objectives include understanding Bubble sort, Counting sort, Radix sort, Bucket sort, and Shell sort.\",\n    \"source_indices\": [3]\n  },\n  {\n    \"summary\": \"Data can be sorted in increasing (each element greater than the previous), non-decreasing (greater than or equal), decreasing (smaller than the previous), or non-increasing (smaller than or equal) order.\",\n    \"source_indices\": [27, 28, 29, 30]\n  },\n  {\n    \"summary\": \"Sorting algorithms are classified based on properties such as In-place vs. Not-In-Place, Stable vs. Not Stable, Adaptive vs. Non-Adaptive, and Online vs. Offline.\",\n    \"source_indices\": [12]\n  },\n  {\n    \"summary\": \"In-place sorting algorithms arrange data without additional storage (e.g., Insertion sort), while not-in-place algorithms require extra space for comparison or temporary storage (e.g., Merge sort).\",\n    \"source_indices\": [13, 15, 14, 16]\n  },\n  {\n    \"summary\": \"A stable sorting algorithm preserves the original sequence of input, particularly for tuples, whereas a not-stable algorithm does not maintain this sequence.\",\n    \"source_indices\": [17, 18, 19]\n  },\n  {\n    \"summary\": \"Adaptive sorting algorithms, like Insertion Sort, can leverage pre-sorted input for efficiency, unlike non-adaptive algorithms.\",\n    \"source_indices\": [20, 21, 22]\n  },\n  {\n    \"summary\": \"Online sorting algorithms, such as Insertion sort, can process data incrementally without needing the entire input initially, while offline algorithms like Selection sort require all input to be available beforehand.\",\n    \"source_indices\": [23, 25, 24, 26]\n  },\n  {\n    \"summary\": \"Selecting the most appropriate sorting algorithm depends on the characteristics of the input data.\",\n    \"source_indices\": [31]\n  },\n  {\n    \"summary\": \"Bubble sort is an inefficient but popular algorithm that repeatedly swaps adjacent out-of-order elements, with a time complexity of \\u0398(n\\u00b2).\",\n    \"source_indices\": [32, 33, 34]\n  },\n  {\n    \"summary\": \"Counting sort sorts elements based on numeric keys within a specific range without comparisons, often used as a subroutine in other algorithms, and has a time complexity of \\u0398(n+k).\",\n    \"source_indices\": [35, 36, 37, 38]\n  },\n  {\n    \"summary\": \"Radix sort is a non-comparative integer sorting algorithm that groups keys by individual digits, treating each digit as a key and using a stable sorting method like counting sort, starting from the least significant digit, with a time complexity of \\u0398(d(n+k)).\",\n    \"source_indices\": [39, 40, 41, 42, 43]\n  },\n  {\n    \"summary\": \"Bucket sort creates buckets, distributes elements into them, sorts elements within each bucket using another algorithm (e.g., Insertion sort), and then joins them to produce the sorted result, assuming a uniform distribution of input numbers in the range [0,1), with a time complexity of \\u0398(n).\",\n    \"source_indices\": [44, 45, 46, 47, 48]\n  },\n  {\n    \"summary\": \"Shell sort, a generalization of Insertion sort, compares distant elements and progressively reduces the gap value until it becomes 1, at which point it performs like Insertion sort, with a time complexity ranging from slightly worse than \\u0398(n log n) to \\u0398(n\\u00b2) depending on the gap sequence.\",\n    \"source_indices\": [49, 50, 51, 52, 53]\n  },\n  {\n    \"summary\": \"For nearly sorted data, such as `[1, 2, 3, 4, 6, 5, 7, 8, 9, 10]`, Insertion Sort is the most suitable algorithm.\",\n    \"source_indices\": [54, 55]\n  },\n  {\n    \"summary\": \"Merge Sort or Heap Sort are best suited for completely reverse ordered data, exemplified by `[100, 90, 80, 70, 60, 50, 40, 30, 20, 10]`.\",\n    \"source_indices\": [56, 57]\n  },\n  {\n    \"summary\": \"Counting Sort or Stable Sorts are ideal for data containing many repeated values, such as `[5, 1, 5, 3, 5, 2, 1, 3, 5, 2]`.\",\n    \"source_indices\": [58, 59]\n  },\n  {\n    \"summary\": \"Quick Sort and Merge Sort are best suited for random unsorted integers within a wide range, like `[42, 7, 89, 3, 105, 64, 32, 19, 91, 58]`.\",\n    \"source_indices\": [60, 61]\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...KhTLlUNXso}",
+  "status": "ok",
+  "json_data": [
+    {
+      "summary": "WIA2005 Algorithm Design and Analysis Lecture 3, delivered by Dr. Asmiza A. Sani in Semester 2, Session 2025/26, focuses on Sorting Algorithms, with Lecture 4 covering String Matching Algorithms, and references including \"Introduction to Algorithms, 3rd edition\" and \"Algorithm, 5th Edition\".",
+      "source_indices": [
+        0,
+        1,
+        2,
+        62,
+        63,
+        64
+      ]
+    },
+    {
+      "summary": "Sorting algorithms are a fundamental set of instructions used to arrange data, typically stored in arrays or lists, into a particular numerical or lexicographical order, which is crucial for optimized searching, readable presentation, and various application needs.",
+      "source_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "summary": "The lecture's learning objectives include understanding Bubble sort, Counting sort, Radix sort, Bucket sort, and Shell sort.",
+      "source_indices": [
+        3
+      ]
+    },
+    {
+      "summary": "Data can be sorted in increasing (each element greater than the previous), non-decreasing (greater than or equal), decreasing (smaller than the previous), or non-increasing (smaller than or equal) order.",
+      "source_indices": [
+        27,
+        28,
+        29,
+        30
+      ]
+    },
+    {
+      "summary": "Sorting algorithms are classified based on properties such as In-place vs. Not-In-Place, Stable vs. Not Stable, Adaptive vs. Non-Adaptive, and Online vs. Offline.",
+      "source_indices": [
+        12
+      ]
+    },
+    {
+      "summary": "In-place sorting algorithms arrange data without additional storage (e.g., Insertion sort), while not-in-place algorithms require extra space for comparison or temporary storage (e.g., Merge sort).",
+      "source_indices": [
+        13,
+        15,
+        14,
+        16
+      ]
+    },
+    {
+      "summary": "A stable sorting algorithm preserves the original sequence of input, particularly for tuples, whereas a not-stable algorithm does not maintain this sequence.",
+      "source_indices": [
+        17,
+        18,
+        19
+      ]
+    },
+    {
+      "summary": "Adaptive sorting algorithms, like Insertion Sort, can leverage pre-sorted input for efficiency, unlike non-adaptive algorithms.",
+      "source_indices": [
+        20,
+        21,
+        22
+      ]
+    },
+    {
+      "summary": "Online sorting algorithms, such as Insertion sort, can process data incrementally without needing the entire input initially, while offline algorithms like Selection sort require all input to be available beforehand.",
+      "source_indices": [
+        23,
+        25,
+        24,
+        26
+      ]
+    },
+    {
+      "summary": "Selecting the most appropriate sorting algorithm depends on the characteristics of the input data.",
+      "source_indices": [
+        31
+      ]
+    },
+    {
+      "summary": "Bubble sort is an inefficient but popular algorithm that repeatedly swaps adjacent out-of-order elements, with a time complexity of Θ(n²).",
+      "source_indices": [
+        32,
+        33,
+        34
+      ]
+    },
+    {
+      "summary": "Counting sort sorts elements based on numeric keys within a specific range without comparisons, often used as a subroutine in other algorithms, and has a time complexity of Θ(n+k).",
+      "source_indices": [
+        35,
+        36,
+        37,
+        38
+      ]
+    },
+    {
+      "summary": "Radix sort is a non-comparative integer sorting algorithm that groups keys by individual digits, treating each digit as a key and using a stable sorting method like counting sort, starting from the least significant digit, with a time complexity of Θ(d(n+k)).",
+      "source_indices": [
+        39,
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    {
+      "summary": "Bucket sort creates buckets, distributes elements into them, sorts elements within each bucket using another algorithm (e.g., Insertion sort), and then joins them to produce the sorted result, assuming a uniform distribution of input numbers in the range [0,1), with a time complexity of Θ(n).",
+      "source_indices": [
+        44,
+        45,
+        46,
+        47,
+        48
+      ]
+    },
+    {
+      "summary": "Shell sort, a generalization of Insertion sort, compares distant elements and progressively reduces the gap value until it becomes 1, at which point it performs like Insertion sort, with a time complexity ranging from slightly worse than Θ(n log n) to Θ(n²) depending on the gap sequence.",
+      "source_indices": [
+        49,
+        50,
+        51,
+        52,
+        53
+      ]
+    },
+    {
+      "summary": "For nearly sorted data, such as `[1, 2, 3, 4, 6, 5, 7, 8, 9, 10]`, Insertion Sort is the most suitable algorithm.",
+      "source_indices": [
+        54,
+        55
+      ]
+    },
+    {
+      "summary": "Merge Sort or Heap Sort are best suited for completely reverse ordered data, exemplified by `[100, 90, 80, 70, 60, 50, 40, 30, 20, 10]`.",
+      "source_indices": [
+        56,
+        57
+      ]
+    },
+    {
+      "summary": "Counting Sort or Stable Sorts are ideal for data containing many repeated values, such as `[5, 1, 5, 3, 5, 2, 1, 3, 5, 2]`.",
+      "source_indices": [
+        58,
+        59
+      ]
+    },
+    {
+      "summary": "Quick Sort and Merge Sort are best suited for random unsorted integers within a wide range, like `[42, 7, 89, 3, 105, 64, 32, 19, 91, 58]`.",
+      "source_indices": [
+        60,
+        61
+      ]
+    }
+  ]
+}

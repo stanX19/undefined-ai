@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { PanelLeft, Home, FolderOpen, Pin, MoreHorizontal, Bot, FileDown, History, Share2, Copy, Check, X } from "lucide-react";
+import { PanelLeft, Home, FolderOpen, Pin, MoreHorizontal, Bot, FileDown, History, Share2, Copy, Check, X, GitBranch } from "lucide-react";
 import { UIRoot } from "../ui_renderer/components/UIRoot.tsx";
 import { useUIStore } from "../ui_renderer/store.ts";
 import { useMarkGraphStore, fetchMarkGraphUI } from "../markgraph/store.ts";
@@ -11,6 +11,7 @@ import { HomeChatView } from "../home/components/HomeChatView.tsx";
 import { useChatStore, sendChatMessage, loadChatHistory } from "../chat/hooks/useChat.ts";
 import { useWorkspaceLayoutStore } from "./layoutStore.ts";
 import { useTopicListStore } from "./hooks/useTopicList.ts";
+import { KnowledgeGraphView } from "../knowledge-graph/components/KnowledgeGraphView.tsx";
 
 export function WorkspacePage() {
   const { topicId: chatTopicId, clear: clearChat } = useChatStore();
@@ -18,6 +19,7 @@ export function WorkspacePage() {
   const { ast: markGraphAst, markdown: storedMarkdown, sceneId: currentSceneId } = useMarkGraphStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [showKnowledgeGraph, setShowKnowledgeGraph] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
@@ -43,6 +45,12 @@ export function WorkspacePage() {
   const activeTopic = topics.find((t) => t.topic_id === chatTopicId);
   const initialized = useRef(false);
   const restoredFromUrl = useRef(false);
+
+  // Close knowledge graph whenever the active chat topic changes so that
+  // it is rebuilt fresh for the new conversation when reopened.
+  useEffect(() => {
+    setShowKnowledgeGraph(false);
+  }, [chatTopicId]);
 
   // Load UI when topic changes
   useEffect(() => {
@@ -251,7 +259,7 @@ export function WorkspacePage() {
                                 {v.description}
                               </div>
                               <div className="text-[11px] text-[#605A57]">
-                                {new Date(v.created_at).toLocaleString()}
+                                {new Date(v.created_at.endsWith("Z") || v.created_at.includes("+") ? v.created_at : v.created_at + "Z").toLocaleString()}
                               </div>
                             </button>
                           ))
@@ -259,7 +267,20 @@ export function WorkspacePage() {
                       </div>
                     )}
                   </div>
-                  <button 
+                  <button
+                    onClick={() => setShowKnowledgeGraph((v) => !v)}
+                    disabled={!chatTopicId}
+                    className={`rounded-lg p-1.5 transition-colors cursor-pointer disabled:opacity-40 ${
+                      showKnowledgeGraph
+                        ? "text-[#37322F] bg-[rgba(55,50,47,0.10)] hover:bg-[rgba(55,50,47,0.14)]"
+                        : "text-[#605A57] hover:bg-[rgba(55,50,47,0.08)] hover:text-[#37322F]"
+                    }`}
+                    title="Knowledge Graph"
+                  >
+                    <GitBranch size={18} />
+                  </button>
+
+                  <button
                     onClick={() => chatTopicId && togglePin(chatTopicId)}
                     className={`rounded-lg p-1.5 transition-colors cursor-pointer ${
                       chatTopicId && pinnedTopicIds.includes(chatTopicId)
@@ -278,11 +299,11 @@ export function WorkspacePage() {
                       <MoreHorizontal size={18} />
                     </button>
                     {menuOpen && (
-                      <div className="absolute right-0 top-full mt-1 py-0.5 bg-[#FAF9F8] border border-[#E0DEDB] rounded-lg shadow-lg z-50">
+                      <div className="absolute right-0 top-full mt-1 bg-[#FAF9F8] border border-[#E0DEDB] rounded-lg shadow-lg z-50 overflow-hidden">
                         <button
                           onClick={handleExportMarkdown}
                           disabled={!storedMarkdown}
-                          className="flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-[13px] text-[#49423D] hover:bg-[rgba(55,50,47,0.06)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap font-sans"
+                          className="flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-[13px] text-[#49423D] hover:bg-[rgba(55,50,47,0.06)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap font-sans rounded-lg"
                         >
                           <FileDown size={14} />
                           Export to markdown
@@ -305,22 +326,30 @@ export function WorkspacePage() {
                 </div>
               </div>
 
-              <main className="flex flex-1 flex-col overflow-y-auto workspace-scrollbar p-6">
-                {!chatTopicId ? (
-                  <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-                    <h2 className="text-2xl font-semibold text-[#49423D] font-sans">
-                      Workspace
-                    </h2>
-                    <p className="max-w-md text-[#605A57] font-sans">
-                      Start a conversation in the chat panel to generate a custom UI.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 pb-20 h-full relative">
-                    {markGraphAst ? <MarkGraphRoot /> : (a2uiJson ? <UIRoot /> : null)}
-                  </div>
-                )}
-              </main>
+              {showKnowledgeGraph && chatTopicId ? (
+                <KnowledgeGraphView
+                  topicId={chatTopicId}
+                  topicTitle={activeTopic?.title ?? ""}
+                  onClose={() => setShowKnowledgeGraph(false)}
+                />
+              ) : (
+                <main className="flex flex-1 flex-col overflow-y-auto workspace-scrollbar p-6">
+                  {!chatTopicId ? (
+                    <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
+                      <h2 className="text-2xl font-semibold text-[#49423D] font-sans">
+                        Workspace
+                      </h2>
+                      <p className="max-w-md text-[#605A57] font-sans">
+                        Start a conversation in the chat panel to generate a custom UI.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 pb-20 h-full relative">
+                      {markGraphAst ? <MarkGraphRoot /> : (a2uiJson ? <UIRoot /> : null)}
+                    </div>
+                  )}
+                </main>
+              )}
             </div>
 
             {/* Right — Chat Panel */}
@@ -341,7 +370,7 @@ export function WorkspacePage() {
 
       {/* Share Modal */}
       {shareUrl && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
           <div 
             className="absolute inset-0 bg-black/20 backdrop-blur-sm animate-in fade-in duration-300"
             onClick={() => setShareUrl(null)}

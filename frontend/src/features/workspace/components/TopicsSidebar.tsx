@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { Plus, MessageSquare, LogOut, PanelLeft, PanelLeftClose, Home, Network, Menu, Pin, MoreVertical, Trash2 } from "lucide-react";
+import { Plus, MessageSquare, LogOut, PanelLeft, PanelLeftClose, Home, Menu, Pin, MoreVertical, Trash2 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
     useTopicListStore,
@@ -11,6 +11,7 @@ import { useAuthStore } from "../../auth/hooks/useAuthStore";
 import { useSurfaceStore } from "../../a2ui/store";
 import { useUIStore } from "../../ui_renderer/store";
 import { useMarkGraphStore } from "../../markgraph/store";
+import { useKnowledgeGraphStore } from "../../knowledge-graph/store";
 import { useWorkspaceLayoutStore } from "../layoutStore";
 import { ConfirmDialog } from "../../../components/ui/ConfirmDialog";
 
@@ -105,6 +106,9 @@ export function TopicsSidebar() {
             const chatStore = useChatStore.getState();
             chatStore.clear();
             useSurfaceStore.getState().clearAll();
+            useUIStore.getState().clear();
+            useMarkGraphStore.getState().clear();
+            useKnowledgeGraphStore.getState().clear();
             chatStore.setTopicId(topicId);
             loadChatHistory(topicId);
             navigate(`/workspace?topic=${topicId}`, { replace: true });
@@ -236,12 +240,6 @@ export function TopicsSidebar() {
                             <Home size={18} />
                             Home
                         </button>
-                        <button
-                            className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-4 py-2.5 text-[14px] font-medium text-[#605A57] transition-colors hover:bg-orange-50 hover:text-[#37322F]"
-                        >
-                            <Network size={18} />
-                            Knowledge Graph
-                        </button>
                     </div>
 
                     {/* Topics Header — pr-6 aligns Plus with collapse icon column */}
@@ -305,7 +303,7 @@ export function TopicsSidebar() {
                                             {isMenuOpen && (
                                                 <div
                                                     ref={menuRef}
-                                                    className="absolute right-2 top-full z-50 mt-1 min-w-[100px] rounded-lg border border-[#E0DEDB] bg-white py-1 shadow-lg"
+                                                    className="absolute right-2 top-full z-50 mt-1 min-w-[100px] rounded-lg border border-[#E0DEDB] bg-white shadow-lg overflow-hidden px-1.5 py-1"
                                                     role="menu"
                                                 >
                                                     <button
@@ -316,7 +314,7 @@ export function TopicsSidebar() {
                                                             setTopicToDelete(topic.topic_id);
                                                             setOpenMenuTopicId(null);
                                                         }}
-                                                        className="flex w-[calc(100%-10px)] items-center gap-1.5 rounded-md px-2.5 py-1.5 ml-1 mr-2 text-[12px] text-red-600 transition-colors hover:bg-red-50"
+                                                        className="flex w-full items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] text-red-600 transition-colors hover:bg-red-50 justify-start"
                                                     >
                                                         <Trash2 size={12} />
                                                         Delete

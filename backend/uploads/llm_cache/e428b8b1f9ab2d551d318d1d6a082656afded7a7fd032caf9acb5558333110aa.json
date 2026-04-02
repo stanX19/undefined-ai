@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Concurrency Theory (e.g., using process calculi like CSP or CCS)\",\n    \"difficulty\": 4,\n    \"reason\": \"It provides a foundational understanding of formal models for concurrent behavior, which is critical in OS design and verification.\"\n  },\n  {\n    \"title\": \"Certified Compilers\",\n    \"difficulty\": 5,\n    \"reason\": \"This topic applies advanced formal methods to verify the correctness of a crucial piece of system software, often using sophisticated proof assistants.\"\n  },\n  {\n    \"title\": \"Formal Synthesis of Verified Systems\",\n    \"difficulty\": 6,\n    \"reason\": \"This research-level topic explores automatically generating software systems that are correct by construction, extending verification to system design itself.\"\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...2QpdOtfUUs}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Concurrency Theory (e.g., using process calculi like CSP or CCS)",
+      "difficulty": 4,
+      "reason": "It provides a foundational understanding of formal models for concurrent behavior, which is critical in OS design and verification."
+    },
+    {
+      "title": "Certified Compilers",
+      "difficulty": 5,
+      "reason": "This topic applies advanced formal methods to verify the correctness of a crucial piece of system software, often using sophisticated proof assistants."
+    },
+    {
+      "title": "Formal Synthesis of Verified Systems",
+      "difficulty": 6,
+      "reason": "This research-level topic explores automatically generating software systems that are correct by construction, extending verification to system design itself."
+    }
+  ]
+}

@@ -11,6 +11,7 @@ import asyncio
 import traceback
 
 from google.api_core.exceptions import ResourceExhausted
+from sqlalchemy import update
 
 from srcs.models.atomic_fact import AtomicFact
 from srcs.models.topic import Topic
@@ -62,22 +63,26 @@ Return JSON:
 _COMPRESS_FACTS_PROMPT = """\
 You are a knowledge compression engine.
 
-Given the following list of facts, merge and compress them into fewer, \
+Given the following numbered list of facts, merge and compress them into fewer, \
 higher-level summary facts. Combine related facts, remove redundancy, \
 and preserve the most important information.
 
 Rules:
-- Each output fact must be a complete, standalone sentence.
-- The output MUST have strictly fewer facts than the input.
+- Each output summary must be a complete, standalone sentence.
+- The output MUST have strictly fewer summaries than the input facts.
 - Aim to roughly halve the number of facts.
 - Do NOT add information not present in the input facts.
-- Return ONLY a JSON array of strings.
+- Every input fact must be covered by exactly one output summary.
+- Return ONLY a JSON array of objects, each with "summary" and "source_indices".
 
-Input facts:
+Input facts (0-indexed):
 {facts_json}
 
 Return JSON:
-["compressed fact 1", "compressed fact 2", ...]
+[
+  {{"summary": "summary text", "source_indices": [0, 2, 5]}},
+  {{"summary": "another summary", "source_indices": [1, 3, 4]}}
+]
 """
 
 
@@ -313,20 +318,46 @@ class IngestionService:
         target_level: int,
         source_facts: list[AtomicFact],
     ) -> list[AtomicFact]:
-        """Compress a list of facts into fewer higher-level facts."""
+        """Compress a list of facts into fewer higher-level facts.
+
+        The LLM returns structured objects so we know exactly which source facts
+        each summary covers. We use that mapping to set parent_fact_id on the
+        source facts, building the correct tree hierarchy in the DB.
+        """
         from srcs.database import AsyncSessionLocal
         import json
 
-        facts_json = json.dumps([f.content for f in source_facts], indent=2)
+        # Number the facts so the LLM can reference them by index
+        facts_json = json.dumps(
+            [{"index": i, "fact": f.content} for i, f in enumerate(source_facts)],
+            indent=2,
+        )
         prompt = _COMPRESS_FACTS_PROMPT.format(facts_json=facts_json)
         response = await rotating_llm.send_message_get_json(
             prompt, temperature=0.0,
         )
-        compressed: list[str] = response.json_data if isinstance(response.json_data, list) else []
+        raw = response.json_data if isinstance(response.json_data, list) else []
+
+        # Parse structured items — tolerate plain strings from older cached responses
+        structured: list[dict] = []
+        for item in raw:
+            if isinstance(item, dict) and "summary" in item:
+                structured.append(item)
+            elif isinstance(item, str) and item.strip():
+                # Graceful fallback: treat as a summary with no index mapping
+                structured.append({"summary": item.strip(), "source_indices": []})
+
+        if not structured:
+            return []
 
         new_facts: list[AtomicFact] = []
+        # source_index → index into new_facts, built from the LLM mapping
+        src_to_new: dict[int, int] = {}
+
         async with AsyncSessionLocal() as db:
-            for fact_text in compressed:
+            # 1. Create the new compressed facts
+            for item in structured:
+                fact_text = item.get("summary", "")
                 if not isinstance(fact_text, str) or not fact_text.strip():
                     continue
                 fact = AtomicFact(
@@ -338,11 +369,39 @@ class IngestionService:
                     source_end=source_facts[0].source_end or 0,
                 )
                 db.add(fact)
+                new_fact_idx = len(new_facts)
                 new_facts.append(fact)
 
+                indices = item.get("source_indices", [])
+                if isinstance(indices, list):
+                    for idx in indices:
+                        if isinstance(idx, int) and 0 <= idx < len(source_facts):
+                            src_to_new[idx] = new_fact_idx
+
+            if not new_facts:
+                return []
+
+            # Flush to get auto-generated fact_ids for the new compressed facts
             await db.flush()
-            # print(f"[INGESTION] Level {target_level}: Committing {len(new_facts)} facts...")
+
+            # 2. Round-robin fallback: assign any source facts the LLM didn't map
+            for i in range(len(source_facts)):
+                if i not in src_to_new:
+                    src_to_new[i] = i % len(new_facts)
+
+            # 3. Set parent_fact_id on source facts via bulk UPDATE (avoids detached
+            #    object issues — source_facts come from a closed session)
+            for src_idx, new_fact_idx in src_to_new.items():
+                parent_id = new_facts[new_fact_idx].fact_id
+                source_fact_id = source_facts[src_idx].fact_id
+                await db.execute(
+                    update(AtomicFact)
+                    .where(AtomicFact.fact_id == source_fact_id)
+                    .values(parent_fact_id=parent_id)
+                )
+
             await db.commit()
+
         print(f"[INGESTION] Level {target_level}: compressed {len(source_facts)} -> {len(new_facts)} facts")
         return new_facts
 

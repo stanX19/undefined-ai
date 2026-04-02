@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Data Science Basics\",\n    \"difficulty\": 3,\n    \"reason\": \"Understanding data collection, cleaning, and visualization is crucial for preparing the data used in machine learning projects.\"\n  },\n  {\n    \"title\": \"Supervised Learning Algorithms\",\n    \"difficulty\": 4,\n    \"reason\": \"This topic delves into the specific techniques and models used for making predictions from labeled data, a core type of machine learning.\"\n  },\n  {\n    \"title\": \"Deep Learning Architectures\",\n    \"difficulty\": 5,\n    \"reason\": \"Exploring various deep neural network designs like CNNs and RNNs provides insight into the advanced models driving applications like image recognition and language translation.\"\n  }\n]\n```",
+  "model": "ChatGoogleGenerativeAI (gemini-2.5-flash) {api=...x94X6_VZWM}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Data Science Basics",
+      "difficulty": 3,
+      "reason": "Understanding data collection, cleaning, and visualization is crucial for preparing the data used in machine learning projects."
+    },
+    {
+      "title": "Supervised Learning Algorithms",
+      "difficulty": 4,
+      "reason": "This topic delves into the specific techniques and models used for making predictions from labeled data, a core type of machine learning."
+    },
+    {
+      "title": "Deep Learning Architectures",
+      "difficulty": 5,
+      "reason": "Exploring various deep neural network designs like CNNs and RNNs provides insight into the advanced models driving applications like image recognition and language translation."
+    }
+  ]
+}

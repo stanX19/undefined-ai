@@ -30,6 +30,7 @@ from srcs.routes.ingestion import router as ingestion_router
 from srcs.routes.recommendations import router as recommendations_router
 from srcs.routes.speech import router as speech_router
 from srcs.routes.ui import router as ui_router
+from srcs.routes.knowledge_graph import router as knowledge_graph_router
 
 
 def _run_alembic_upgrade_head() -> None:
@@ -133,6 +134,7 @@ app.include_router(ingestion_router)
 app.include_router(recommendations_router)
 app.include_router(speech_router)
 app.include_router(ui_router)
+app.include_router(knowledge_graph_router)
 
 # -- Static files (uploaded PDFs) ---------------------------------------------
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
