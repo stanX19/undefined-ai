@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Searching Algorithms\",\n    \"difficulty\": 4,\n    \"reason\": \"This topic naturally complements sorting by exploring how to efficiently find data once it has been organized, building on the concept of optimized searching.\"\n  },\n  {\n    \"title\": \"Amortized Analysis of Algorithms\",\n    \"difficulty\": 5,\n    \"reason\": \"This advanced analysis technique provides a deeper understanding of the average performance of operations over a sequence, crucial for evaluating complex data structures and dynamic algorithms beyond worst-case scenarios.\"\n  },\n  {\n    \"title\": \"Computational Complexity Theory\",\n    \"difficulty\": 6,\n    \"reason\": \"This field investigates the fundamental limits of what problems can be solved efficiently by algorithms, providing a theoretical framework for understanding the inherent difficulty of problems like sorting and beyond.\"\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...KhTLlUNXso}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Searching Algorithms",
+      "difficulty": 4,
+      "reason": "This topic naturally complements sorting by exploring how to efficiently find data once it has been organized, building on the concept of optimized searching."
+    },
+    {
+      "title": "Amortized Analysis of Algorithms",
+      "difficulty": 5,
+      "reason": "This advanced analysis technique provides a deeper understanding of the average performance of operations over a sequence, crucial for evaluating complex data structures and dynamic algorithms beyond worst-case scenarios."
+    },
+    {
+      "title": "Computational Complexity Theory",
+      "difficulty": 6,
+      "reason": "This field investigates the fundamental limits of what problems can be solved efficiently by algorithms, providing a theoretical framework for understanding the inherent difficulty of problems like sorting and beyond."
+    }
+  ]
+}

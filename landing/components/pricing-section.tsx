@@ -39,19 +39,19 @@ export default function PricingSection() {
                 />
               </svg>
             </div>
-            <div className="text-center flex justify-center flex-col text-[#37322F] text-xs font-medium leading-3 font-sans">
+            <div className="text-center flex justify-center flex-col text-[#acacac] text-xs font-medium leading-3 font-sans">
               Plans & Pricing
             </div>
           </div>
 
           {/* Title */}
           <div className="self-stretch text-center flex justify-center flex-col text-[#49423D] text-3xl md:text-5xl font-semibold leading-tight md:leading-[60px] font-sans tracking-tight">
-            Choose the perfect plan for your business
+            Choose the perfect plan for your study
           </div>
 
           {/* Description */}
           <div className="self-stretch text-center text-[#605A57] text-base font-normal leading-7 font-sans">
-            Scale your operations with flexible pricing that grows with your team.
+            Unlock the full power of Undefined AI with unrestricted access.
             <br />
             Start free, upgrade when you're ready.
           </div>

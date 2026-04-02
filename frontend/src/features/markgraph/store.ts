@@ -73,15 +73,24 @@ export const useMarkGraphStore = create<MarkGraphState>((set) => ({
             };
 
             let matchedViaFallback = false;
+            // Track whether Stage 1 made any definitive match (even into the current scene).
+            // Stages 2 and 3 are fuzzy fallbacks and must NOT run if Stage 1 already
+            // resolved the target — otherwise Jaccard can hijack a correct intra-scene
+            // scroll and redirect the user to a completely different scene.
+            let stage1Found = false;
+
+            // Stage 1: exact match on scene.id or any child element id
             for (const scene of state.ast.scenes) {
                 if (scene.id === targetId || hasId(scene, targetId)) {
                     foundSceneId = scene.id;
+                    stage1Found = true;
                     break;
                 }
             }
-            // Fallback: scene headings like "# what-is-an-os Scene" derive to "what-is-an-os-scene"
-            // but graph links often use #what-is-an-os. Try targetId + "-scene" if no match.
-            if (foundSceneId === state.sceneId) {
+
+            // Stage 2: try targetId + "-scene" suffix (legacy headings).
+            // Only runs when Stage 1 found nothing at all.
+            if (!stage1Found) {
                 const withSceneSuffix = targetId.endsWith("-scene") ? targetId : `${targetId}-scene`;
                 for (const scene of state.ast.scenes) {
                     if (scene.id === withSceneSuffix) {
@@ -89,6 +98,35 @@ export const useMarkGraphStore = create<MarkGraphState>((set) => ({
                         matchedViaFallback = true;
                         break;
                     }
+                }
+            }
+
+            // Stage 3: Jaccard word-overlap fuzzy match.
+            // LLM-generated markdown uses abbreviated anchors (#os-quiz) that don't
+            // exactly match auto-derived scene slugs (operating-systems-quiz).
+            // Jaccard (intersection / union) correctly ranks candidates when two scenes
+            // share the same number of matching words with the target — e.g.
+            //   os-quiz vs os-history-and-evolution  → 1/5 = 0.20
+            //   os-quiz vs operating-systems-quiz    → 1/4 = 0.25  ← correct winner
+            // Only runs when both Stage 1 AND Stage 2 found nothing.
+            if (!stage1Found && foundSceneId === state.sceneId) {
+                const targetWords = new Set(targetId.split("-"));
+                let bestScore = 0;
+                let bestId: string | null = null;
+                for (const scene of state.ast.scenes) {
+                    const sceneWords = new Set(scene.id.split("-"));
+                    const common = [...targetWords].filter(w => sceneWords.has(w)).length;
+                    if (common === 0) continue;
+                    const union = new Set([...targetWords, ...sceneWords]).size;
+                    const score = common / union; // Jaccard
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestId = scene.id;
+                    }
+                }
+                if (bestScore >= 0.15 && bestId) {
+                    foundSceneId = bestId;
+                    matchedViaFallback = true;
                 }
             }
 

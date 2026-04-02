@@ -9,6 +9,7 @@ import TestimonialsSection from "../components/testimonials-section"
 import FAQSection from "../components/faq-section"
 import CTASection from "../components/cta-section"
 import FooterSection from "../components/footer-section"
+import PricingSection from "../components/pricing-section"
 
 // Reusable Badge Component
 function Badge({ icon, text }: { icon: React.ReactNode; text: string }) {
@@ -411,6 +412,9 @@ export default function LandingPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Pricing Section */}
+              <PricingSection />
 
               {/* Testimonials Section */}
               <TestimonialsSection />

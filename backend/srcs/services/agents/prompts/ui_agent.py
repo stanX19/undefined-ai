@@ -22,6 +22,8 @@ Do not output anything else but the raw markdown document. DO NOT wrap it in mar
 - Prioritise using as many `# scenes` as possible and use `[links](#different-scenes)` for navigation between them.
 - Always prioritise using graphs for everything, it is the soul of MarkGraph.
 - DO NOT cite original fact ids in the UI, it is only for internal use
+- **CRITICAL: Heading text MUST be proper human-readable English prose.** NEVER use slugs as heading text. Write `# Introduction to Sorting` NOT `# intro-sorting`. Write `# What is an Operating System?` NOT `# what-is-os`. The ID is auto-derived from the text — only add `{{#explicit-id}}` when you need a specific short anchor for linking.
+- **Navigation buttons MUST use the exact same ID that the target scene heading will derive.** To guarantee a match, prefer `{{#explicit-id}}` on target scenes and reference that same id in `[[Button]](#explicit-id)` links.
 
 ## Visual-first: minimise plain text
 - **Prefer components over paragraphs.** Use :::graph, :::quiz, :::checkbox, :::progress, tables (GFM), :::input instead of long text blocks.

@@ -11,7 +11,7 @@ const faqData: FAQItem[] = [
   {
     question: "What is undefined ai?",
     answer:
-      "undefined ai is an AI powered learning platform that generates interactive learning interfaces such as mind maps, quizzes, timelines, and structured content directly from your questions or uploaded materials.",
+      "Undefined AI is an AI powered learning platform that generates interactive learning interfaces such as mind maps, quizzes, timelines, and structured content directly from your questions or uploaded materials.",
   },
   {
     question: "What kind of content can I upload?",
@@ -71,7 +71,7 @@ export default function FAQSection() {
             Frequently Asked Questions
           </div>
           <div className="w-full text-[#605A57] text-base font-normal leading-7 font-sans">
-            Learn how undefined ai transforms knowledge
+            Learn how Undefined AI transforms knowledge
             <br className="hidden md:block" />
             into interactive learning experiences.
           </div>
