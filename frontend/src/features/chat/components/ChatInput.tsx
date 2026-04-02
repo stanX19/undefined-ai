@@ -187,7 +187,7 @@ export function ChatInput({ onSend, isStreaming, embedded }: Props) {
                 <Globe size={18} className={`transition-transform duration-300 ${isWebSearchEnabled ? "rotate-360" : "rotate-0"}`} />
               </div>
               <span
-                className={`text-sm font-medium transition-all duration-300 whitespace-nowrap ${isWebSearchEnabled ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"
+                className={`text-sm font-medium transition-all duration-300 whitespace-nowrap ${isWebSearchEnabled ? "opacity-100 translate-x-0.5" : "opacity-0 -translate-x-2"
                   }`}
               >
                 Search

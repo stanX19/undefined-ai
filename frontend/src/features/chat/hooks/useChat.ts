@@ -320,20 +320,37 @@ export async function loadChatHistory(topicId: string): Promise<void> {
   if (!token) return;
 
   try {
-    const res = await apiFetch(`/api/v1/chat/history?topic_id=${topicId}`);
-    if (!res.ok) return;
+    const [historyRes, topicRes] = await Promise.all([
+      apiFetch(`/api/v1/chat/history?topic_id=${topicId}`),
+      apiFetch(`/api/v1/topics/${topicId}`),
+    ]);
+
+    if (!historyRes.ok) return;
+
     const messages: Array<{
       message_id: string;
       role: string;
       message: string;
       created_at: string;
-    }> = await res.json();
+    }> = await historyRes.json();
 
+    let documentFilename: string | null = null;
+    if (topicRes.ok) {
+      const topic = await topicRes.json();
+      documentFilename = topic.document_filename ?? null;
+    }
+
+    let documentAttached = false;
     messages.forEach((m) => {
+      const isFirstUserMsg = m.role === "user" && !documentAttached && documentFilename;
       store.addMessage({
         role: m.role as "user" | "assistant",
         content: m.message,
+        attachments: isFirstUserMsg
+          ? [{ name: documentFilename!, type: documentFilename!.split('.').pop()?.toUpperCase() || "FILE", url: "" }]
+          : undefined,
       });
+      if (isFirstUserMsg) documentAttached = true;
     });
   } catch (err) {
     console.error("Failed to load chat history:", err);
@@ -436,6 +453,16 @@ export async function sendChatMessage(
         body: uploadData,
       });
       if (!uploadRes.ok) {
+        if (uploadRes.status === 429) {
+          const rateLimitMessage = "Oops, you reached your rate limit today. Please try again tomorrow.";
+          store.addMessage({
+            role: "assistant",
+            content: rateLimitMessage,
+            isAnimatable: false,
+          });
+          store.setStreaming(false);
+          return;
+        }
         throw new Error("Failed to upload document");
       }
     }

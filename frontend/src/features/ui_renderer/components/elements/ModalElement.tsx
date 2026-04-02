@@ -23,13 +23,13 @@ export const ModalElement = memo(function ModalElement({ element }: ModalElement
 
     return (
         <div
-            className={`relative w-full max-w-2xl overflow-hidden rounded-2xl border border-(--color-border) bg-(--color-surface) p-6 shadow-2xl ${className}`}
+            className={`relative w-full max-w-2xl overflow-hidden rounded-2xl border border-border bg-surface p-6 shadow-2xl ${className}`}
             style={style}
             onClick={handleContentClick}
         >
             <button
                 onClick={handleClose}
-                className="absolute right-4 top-4 rounded-full p-2 text-(--color-text-muted) transition-colors hover:bg-(--color-surface-hover) hover:text-(--color-text-primary) cursor-pointer"
+                className="absolute right-4 top-4 rounded-full p-2 text-text-muted transition-colors hover:bg-(--color-surface-hover) hover:text-text-primary cursor-pointer"
                 title="Close modal"
             >
                 <X size={20} />

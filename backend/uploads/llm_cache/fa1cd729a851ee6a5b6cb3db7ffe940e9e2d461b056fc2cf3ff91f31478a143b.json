@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"summary\": \"Group 7's Lab 1 Report for the WIA2004 Operating System course focuses on CPU Scheduling Algorithms, specifically detailing the simple, non-preemptive First-Come, First-Served (FCFS) algorithm, which follows the FIFO principle by allocating the CPU to the first arriving process for uninterrupted execution, and is presented with its introduction, flowchart, pseudocode (including for time calculations), Java coding, sample output, and an external video reference.\",\n    \"source_indices\": [0, 1, 2]\n  },\n  {\n    \"summary\": \"Despite its ease of implementation, FCFS can result in poor performance due to long waiting and turnaround times, particularly when shorter processes are delayed, though processes with a burst time of 0 complete immediately, leading to equal turnaround and waiting times, where Turnaround Time is defined as Completion Time minus Arrival Time and Waiting Time as Turnaround Time minus Burst Time.\",\n    \"source_indices\": [3, 4]\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...PdFR2Equ6U}",
+  "status": "ok",
+  "json_data": [
+    {
+      "summary": "Group 7's Lab 1 Report for the WIA2004 Operating System course focuses on CPU Scheduling Algorithms, specifically detailing the simple, non-preemptive First-Come, First-Served (FCFS) algorithm, which follows the FIFO principle by allocating the CPU to the first arriving process for uninterrupted execution, and is presented with its introduction, flowchart, pseudocode (including for time calculations), Java coding, sample output, and an external video reference.",
+      "source_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "summary": "Despite its ease of implementation, FCFS can result in poor performance due to long waiting and turnaround times, particularly when shorter processes are delayed, though processes with a burst time of 0 complete immediately, leading to equal turnaround and waiting times, where Turnaround Time is defined as Completion Time minus Arrival Time and Waiting Time as Turnaround Time minus Burst Time.",
+      "source_indices": [
+        3,
+        4
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Agile Software Development Methodologies\",\n    \"difficulty\": 4,\n    \"reason\": \"Understanding agile frameworks provides broader context for the 'agile-friendly' SRE processes covered in the project.\"\n  },\n  {\n    \"title\": \"Requirements Engineering for AI-Powered Systems\",\n    \"difficulty\": 5,\n    \"reason\": \"This explores the unique challenges of eliciting and managing requirements for complex AI systems, building on modern software trends.\"\n  },\n  {\n    \"title\": \"Automated Requirements Analysis and Conflict Detection using Natural Language Processing (NLP)\",\n    \"difficulty\": 6,\n    \"reason\": \"This research topic investigates advanced AI techniques to enhance the efficiency and accuracy of requirements analysis and validation.\"\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...PdFR2Equ6U}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Agile Software Development Methodologies",
+      "difficulty": 4,
+      "reason": "Understanding agile frameworks provides broader context for the 'agile-friendly' SRE processes covered in the project."
+    },
+    {
+      "title": "Requirements Engineering for AI-Powered Systems",
+      "difficulty": 5,
+      "reason": "This explores the unique challenges of eliciting and managing requirements for complex AI systems, building on modern software trends."
+    },
+    {
+      "title": "Automated Requirements Analysis and Conflict Detection using Natural Language Processing (NLP)",
+      "difficulty": 6,
+      "reason": "This research topic investigates advanced AI techniques to enhance the efficiency and accuracy of requirements analysis and validation."
+    }
+  ]
+}

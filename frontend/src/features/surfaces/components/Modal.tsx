@@ -33,7 +33,7 @@ export function A2UIModal({
           onClick={handleClose}
         >
           <div
-            className="mx-4 w-full max-w-lg rounded-xl bg-[var(--color-surface)] p-6 shadow-xl"
+            className="mx-4 w-full max-w-lg rounded-xl bg-surface p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             {contentChild && (

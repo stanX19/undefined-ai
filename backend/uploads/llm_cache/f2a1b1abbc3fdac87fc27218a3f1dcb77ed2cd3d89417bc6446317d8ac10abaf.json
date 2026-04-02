@@ -1,0 +1,68 @@
+{
+  "text": "```json\n[\n  {\n    \"summary\": \"Students are permitted limited AI usage (Level 2) for this project, specifically for refining wording, improving clarity, and brainstorming ideas, but are strictly prohibited from using it to generate requirements, submit AI-generated content as original work, or for analysis, conclusions, or technical details.\",\n    \"source_indices\": [0, 1, 2]\n  },\n  {\n    \"summary\": \"The WIF2002 Software Requirement Engineering project, for Semester 2, Session 2025/2026, is taught by Dr. Hema Subramaniam and Dr. Nazean.\",\n    \"source_indices\": [3, 4, 5, 6]\n  },\n  {\n    \"summary\": \"This group project, requiring 10 students per group, runs from Week 1 to Week 14 and is assessed via a report and a pre-recorded presentation.\",\n    \"source_indices\": [7, 8, 9]\n  },\n  {\n    \"summary\": \"The project consists of five core Software Requirements Engineering (SRE) processes: Requirement Elicitation, Requirement Documentation, Requirement Management, Requirement Validation, and Requirement Negotiations.\",\n    \"source_indices\": [10]\n  },\n  {\n    \"summary\": \"The document provides 10 realistic, agile-friendly SRE project ideas with defined stakeholders, encouraging these processes through lightweight artifacts, a short SRS/vision document, stakeholder interaction simulation, backlog refinement, and a simple traceability matrix, aligning with agile principles rather than long waterfall-style documents.\",\n    \"source_indices\": [11, 12, 13]\n  },\n  {\n    \"summary\": \"Specific deliverables are required for each of the five project processes: Requirements Elicitation (interview scripts, personas, user journey maps, meeting notes), Requirements Documentation (vision document, product backlog with user stories, acceptance criteria), Requirements Management (prioritization methods, lightweight traceability matrix), Requirements Validation (prototypes/wireframes, stakeholder review summary, walkthrough session), and Requirements Negotiation (meeting minutes, change request log, prioritization decisions).\",\n    \"source_indices\": [14, 15, 16, 17, 18]\n  },\n  {\n    \"summary\": \"The project has a total of 40 marks, allocated across the five processes: Requirements Elicitation (8%), Documentation (12%), Management (8%), Validation (6%), Negotiation (4%), and an additional 2% for Presentation, Collaboration & Professionalism.\",\n    \"source_indices\": [19, 20, 21, 22, 23, 24, 25]\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...F-_QjMhS4A}",
+  "status": "ok",
+  "json_data": [
+    {
+      "summary": "Students are permitted limited AI usage (Level 2) for this project, specifically for refining wording, improving clarity, and brainstorming ideas, but are strictly prohibited from using it to generate requirements, submit AI-generated content as original work, or for analysis, conclusions, or technical details.",
+      "source_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "summary": "The WIF2002 Software Requirement Engineering project, for Semester 2, Session 2025/2026, is taught by Dr. Hema Subramaniam and Dr. Nazean.",
+      "source_indices": [
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "summary": "This group project, requiring 10 students per group, runs from Week 1 to Week 14 and is assessed via a report and a pre-recorded presentation.",
+      "source_indices": [
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "summary": "The project consists of five core Software Requirements Engineering (SRE) processes: Requirement Elicitation, Requirement Documentation, Requirement Management, Requirement Validation, and Requirement Negotiations.",
+      "source_indices": [
+        10
+      ]
+    },
+    {
+      "summary": "The document provides 10 realistic, agile-friendly SRE project ideas with defined stakeholders, encouraging these processes through lightweight artifacts, a short SRS/vision document, stakeholder interaction simulation, backlog refinement, and a simple traceability matrix, aligning with agile principles rather than long waterfall-style documents.",
+      "source_indices": [
+        11,
+        12,
+        13
+      ]
+    },
+    {
+      "summary": "Specific deliverables are required for each of the five project processes: Requirements Elicitation (interview scripts, personas, user journey maps, meeting notes), Requirements Documentation (vision document, product backlog with user stories, acceptance criteria), Requirements Management (prioritization methods, lightweight traceability matrix), Requirements Validation (prototypes/wireframes, stakeholder review summary, walkthrough session), and Requirements Negotiation (meeting minutes, change request log, prioritization decisions).",
+      "source_indices": [
+        14,
+        15,
+        16,
+        17,
+        18
+      ]
+    },
+    {
+      "summary": "The project has a total of 40 marks, allocated across the five processes: Requirements Elicitation (8%), Documentation (12%), Management (8%), Validation (6%), Negotiation (4%), and an additional 2% for Presentation, Collaboration & Professionalism.",
+      "source_indices": [
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ]
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "text": "```json\n[\n  \"Students are permitted to use Artificial Intelligence (AI) tools at a Level 2 – Limited Usage capacity for this project.\",\n  \"Permitted AI usage includes refining wording, improving clarity of written content, and brainstorming ideas at an early stage.\",\n  \"Strictly prohibited AI usage includes generating project requirements, submitting AI-generated content as original work, or relying on AI for analysis, conclusions, or technical details.\",\n  \"The course code for this project is WIF2002.\",\n  \"The course name is Software Requirement Engineering.\",\n  \"The project is for Semester 2, Session 2025/2026.\",\n  \"The lecturers for this course are Dr. Hema Subramaniam and Dr. Nazean.\",\n  \"The assessment for this project includes a report and a pre-recorded presentation.\",\n  \"The project activities are scheduled from Week 1 to Week 14.\",\n  \"This is a group project, and each group should consist of 10 students.\",\n  \"The project consists of 5 processes: Requirement Elicitation, Requirement Documentation, Requirement Management, Requirement Validation, and Requirement Negotiations.\",\n  \"The document provides 10 different, realistic, agile-friendly Software Requirements Engineering (SRE) project ideas, each with defined stakeholders.\",\n  \"These projects encourage requirements elicitation, documentation, validation, negotiation, and management without producing long waterfall-style documents.\",\n  \"The projects align with agile principles by requiring lightweight artifacts, a short SRS/vision document, stakeholder interaction simulation, backlog refinement, and a simple traceability matrix.\",\n  \"Deliverables for Requirements Elicitation include interview scripts, personas, user journey maps, and meeting notes.\",\n  \"Deliverables for Requirements Documentation include a 1-2 page vision document, a product backlog with 10-20 user stories, and acceptance criteria.\",\n  \"Deliverables for Requirements Management include prioritization using methods like MoSCoW, Kano, or Value vs. Effort, and a lightweight traceability matrix.\",\n  \"Deliverables for Requirements Validation include prototypes or low-fidelity wireframes, a stakeholder review summary, and a requirements walkthrough session.\",\n  \"Deliverables for Requirements Negotiation include meeting minutes showing competing stakeholder needs, a change request log, and prioritization decisions.\",\n  \"Requirements Elicitation is weighted at 8% of the total mark.\",\n  \"Requirements Documentation is weighted at 12% of the total mark.\",\n  \"Requirements Management is weighted at 8% of the total mark.\",\n  \"Requirements Validation is weighted at 6% of the total mark.\",\n  \"Requirements Negotiation is weighted at 4% of the total mark.\",\n  \"Presentation, Collaboration & Professionalism is weighted at 2% of the total mark.\",\n  \"The total marks for the project is 40.\"\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...PdFR2Equ6U}",
+  "status": "ok",
+  "json_data": [
+    "Students are permitted to use Artificial Intelligence (AI) tools at a Level 2 – Limited Usage capacity for this project.",
+    "Permitted AI usage includes refining wording, improving clarity of written content, and brainstorming ideas at an early stage.",
+    "Strictly prohibited AI usage includes generating project requirements, submitting AI-generated content as original work, or relying on AI for analysis, conclusions, or technical details.",
+    "The course code for this project is WIF2002.",
+    "The course name is Software Requirement Engineering.",
+    "The project is for Semester 2, Session 2025/2026.",
+    "The lecturers for this course are Dr. Hema Subramaniam and Dr. Nazean.",
+    "The assessment for this project includes a report and a pre-recorded presentation.",
+    "The project activities are scheduled from Week 1 to Week 14.",
+    "This is a group project, and each group should consist of 10 students.",
+    "The project consists of 5 processes: Requirement Elicitation, Requirement Documentation, Requirement Management, Requirement Validation, and Requirement Negotiations.",
+    "The document provides 10 different, realistic, agile-friendly Software Requirements Engineering (SRE) project ideas, each with defined stakeholders.",
+    "These projects encourage requirements elicitation, documentation, validation, negotiation, and management without producing long waterfall-style documents.",
+    "The projects align with agile principles by requiring lightweight artifacts, a short SRS/vision document, stakeholder interaction simulation, backlog refinement, and a simple traceability matrix.",
+    "Deliverables for Requirements Elicitation include interview scripts, personas, user journey maps, and meeting notes.",
+    "Deliverables for Requirements Documentation include a 1-2 page vision document, a product backlog with 10-20 user stories, and acceptance criteria.",
+    "Deliverables for Requirements Management include prioritization using methods like MoSCoW, Kano, or Value vs. Effort, and a lightweight traceability matrix.",
+    "Deliverables for Requirements Validation include prototypes or low-fidelity wireframes, a stakeholder review summary, and a requirements walkthrough session.",
+    "Deliverables for Requirements Negotiation include meeting minutes showing competing stakeholder needs, a change request log, and prioritization decisions.",
+    "Requirements Elicitation is weighted at 8% of the total mark.",
+    "Requirements Documentation is weighted at 12% of the total mark.",
+    "Requirements Management is weighted at 8% of the total mark.",
+    "Requirements Validation is weighted at 6% of the total mark.",
+    "Requirements Negotiation is weighted at 4% of the total mark.",
+    "Presentation, Collaboration & Professionalism is weighted at 2% of the total mark.",
+    "The total marks for the project is 40."
+  ]
+}
