@@ -453,6 +453,19 @@ export async function sendChatMessage(
     });
 
     if (!chatRes.ok) {
+      if (chatRes.status === 429) {
+        // Rate limit reached: handled below to render like a normal assistant reply
+        const rateLimitMessage = "Oops, you reached your rate limit today. Please try again tomorrow.";
+        console.warn("Rate limit reached (429):", rateLimitMessage);
+        store.addMessage({
+          role: "assistant",
+          content: rateLimitMessage,
+          isAnimatable: false,
+        });
+        store.setStreaming(false);
+        return;
+      }
+
       throw new Error(`Chat request failed: ${chatRes.status}`);
     }
 

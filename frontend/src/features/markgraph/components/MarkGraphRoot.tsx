@@ -322,9 +322,27 @@ const HEADING_CLASSES: Record<number, string> = {
   6: "text-sm font-medium",
 };
 
+/**
+ * Convert a slug-like heading to title-case readable text.
+ * Only transforms strings that look like slugs (all lowercase, hyphens, no spaces).
+ * Handles "q1"-style quiz labels as "Question 1".
+ * Examples: "intro-sorting" → "Intro Sorting", "what-is-os" → "What Is OS"
+ */
+function formatHeading(raw: string): string {
+  // Quiz shorthand: q1 → Question 1
+  const qm = raw.match(/^q(\d+)$/i);
+  if (qm) return `Question ${qm[1]}`;
+  // Slug detection: all lowercase alphanumeric words separated by hyphens
+  if (/^[a-z][a-z0-9]*(-[a-z0-9]+)+$/.test(raw)) {
+    return raw.split('-')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+  }
+  return raw;
+}
+
 function formatContainerHeading(raw: string): string {
-  const m = raw.match(/^q(\d+)$/i);
-  return m ? `Question ${m[1]}` : raw;
+  return formatHeading(raw);
 }
 
 function ContainerRenderer({ container }: { container: Container }) {
@@ -359,7 +377,7 @@ function SceneRenderer({ scene }: { scene: Scene }) {
     <section id={scene.id} className="flex flex-col gap-5">
       {scene.raw_heading && (
         <h1 className="text-2xl sm:text-3xl font-bold text-[#1a1a1a] tracking-tight leading-tight">
-          {scene.raw_heading}
+          {formatHeading(scene.raw_heading)}
         </h1>
       )}
       <div className="flex flex-col gap-4">

@@ -114,7 +114,9 @@ class UIService:
             description = "Untitled Scene"
             match = re.search(r"^#\s+(.+)$", s.ui_markdown, re.MULTILINE)
             if match:
-                description = match.group(1).strip()
+                raw_heading = match.group(1).strip()
+                # Strip trailing MarkGraph layout attributes like "@column", "@row", etc.
+                description = re.sub(r"\s+@[\w-]+(?:\s+@[\w-]+)*$", "", raw_heading).strip() or "Untitled Scene"
             
             history.append(UIHistoryItem(
                 scene_id=s.scene_id,

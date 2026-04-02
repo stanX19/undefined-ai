@@ -768,14 +768,50 @@ SIGNAL_TYPES = (QuizBlock, CheckboxBlock, InputBlock, ProgressBlock)
 
 def resolve(scenes: list[Scene], diags: list[Diagnostic]) -> dict[str, Any]:
     id_map = _collect_ids(scenes)
+    scene_ids = [s.id for s in scenes]
+
+    # ── Word-overlap fuzzy resolver ───────────────────────────────────────────
+    # LLM-generated markdown often uses a short/abbreviated anchor in buttons
+    # (e.g. #what-is-os) that doesn't match the auto-derived scene ID
+    # (e.g. what-is-an-operating-system). We resolve the mismatch here so the
+    # AST the frontend receives already contains the correct, navigable IDs.
+    def _fuzzy_resolve(target: str) -> str | None:
+        """Return the best-matching scene ID by Jaccard word-overlap, or None."""
+        target_words = set(target.split('-'))
+        best_id: str | None = None
+        best_score = 0.0
+        for sid in scene_ids:
+            scene_words = set(sid.split('-'))
+            common = len(target_words & scene_words)
+            if common == 0:
+                continue
+            # Jaccard similarity: |intersection| / |union|
+            # This correctly differentiates candidates that share equal numbers
+            # of matching words with the target (e.g. os-quiz vs os-history vs
+            # operating-systems-quiz — Jaccard picks the smaller union winner).
+            score = common / len(target_words | scene_words)
+            if score > best_score:
+                best_score = score
+                best_id = sid
+        return best_id if best_score >= 0.2 else None
 
     # ── 1. Bind all link/button/include targets ───────────────────────────────
-    def check_target(target: str, lineno: int):
+    def check_target(target: str, lineno: int) -> str:
+        """Return resolved target ID; rewrites dead links via fuzzy matching."""
         if target in RESERVED_IDS:
-            return   # always valid
-        if target not in id_map:
+            return target
+        if target in id_map:
+            return target
+        # Fuzzy fallback: LLM used an abbreviated anchor that doesn't exactly
+        # match the auto-derived slug. Rewrite to the best-matching scene ID.
+        resolved = _fuzzy_resolve(target)
+        if resolved:
             diags.append(Diagnostic("warning",
-                f"Dead link — target '#{target}' not found", lineno))
+                f"Link '#{target}' resolved to '#{resolved}' via fuzzy match", lineno))
+            return resolved
+        diags.append(Diagnostic("warning",
+            f"Dead link — target '#{target}' not found", lineno))
+        return target
 
     def walk_links(node: Any):
         if isinstance(node, (Scene, Container)):
@@ -786,9 +822,9 @@ def resolve(scenes: list[Scene], diags: list[Diagnostic]) -> dict[str, Any]:
                 if isinstance(frag, (RedirLink, Include)):
                     walk_links(frag)
         elif isinstance(node, RedirLink):
-            check_target(node.target, 0)
+            node.target = check_target(node.target, 0)
         elif isinstance(node, Include):
-            check_target(node.target, 0)
+            node.target = check_target(node.target, 0)
         elif isinstance(node, ProgressBlock):
             for tid in node.value_ids:
                 if tid not in id_map:
@@ -799,7 +835,7 @@ def resolve(scenes: list[Scene], diags: list[Diagnostic]) -> dict[str, Any]:
                         f"Progress references '{tid}' which does not emit a signal", 0))
             for th in node.thresholds:
                 if th.body.include:
-                    check_target(th.body.include.target, 0)
+                    th.body.include.target = check_target(th.body.include.target, 0)
 
     for scene in scenes:
         walk_links(scene)
