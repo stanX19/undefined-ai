@@ -4,7 +4,7 @@ services:
     runtime: docker
     env: docker
     repo: https://github.com/stanX19/undefined-ai
-    branch: deploy-branch
+    branch: main
     rootDir: ./backend
     dockerContext: .
     dockerfilePath: ./Dockerfile
