@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: undefined-ai-backend
+    runtime: docker
+    env: docker
+    repo: https://github.com/stanX19/undefined-ai
+    branch: deploy-branch
+    rootDir: ./backend
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: singapore # Adjust if you prefer another region
+    envVars:
+      - key: DEBUG
+        value: "True"
+      - key: USE_IN_MEMORY_DB
+        value: "False" # Set to False since you connected Supabase
+      - key: HOST
+        value: "0.0.0.0"
+      - key: PORT
+        value: "8001"
+      - key: GEMINI_MODEL_NAME
+        value: "gemini-1.5-flash"
+      
+      # Secrets - You will fill these in the Render Dashboard
+      - key: GEMINI_API_KEY
+        value: "" # Fill in dashboard
+      - key: DATABASE_URL
+        value: "" # Fill in dashboard (Supabase URL)
+      - key: ELEVENLABS_API_KEY
+        value: ""
+      - key: EXA_API_KEY
+        value: ""
+      - key: MINIMAX_API_KEY
+        value: ""
+      - key: CANTONESE_API_KEY
+        value: ""
+      - key: GEMINI_API_KEY_LIST
+        value: "[]"
