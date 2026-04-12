@@ -12,7 +12,11 @@ settings = get_settings()
 logger = logging.getLogger(__name__)
 
 if settings.DATABASE_URL:
-    SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
+    # Handle Supabase / Postgres async driver requirement automatically
+    if settings.DATABASE_URL.startswith("postgresql://") and "+asyncpg" not in settings.DATABASE_URL:
+        SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+    else:
+        SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
 elif settings.USE_IN_MEMORY_DB:
     SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///file:memdb?mode=memory&cache=shared&uri=true"
 else:

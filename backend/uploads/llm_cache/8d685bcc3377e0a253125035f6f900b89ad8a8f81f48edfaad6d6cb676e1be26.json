@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Fundamentals of Knowledge Representation and Reasoning\",\n    \"difficulty\": 4,\n    \"reason\": \"This topic directly underpins the symbolic aspects of cognitive architectures and rule-based AI, providing essential foundational knowledge for how information is structured and processed.\"\n  },\n  {\n    \"title\": \"Embodied Cognition and Robotics\",\n    \"difficulty\": 5,\n    \"reason\": \"This area challenges traditional cognitive architecture views by emphasizing the role of physical interaction and the environment in shaping cognition, offering a deeper theoretical and practical perspective for designing intelligent systems.\"\n  },\n  {\n    \"title\": \"Neuro-symbolic AI for Robust and Explainable Reasoning\",\n    \"difficulty\": 6,\n    \"reason\": \"This cutting-edge research area aims to combine the strengths of neural and symbolic approaches, directly addressing the hybrid architectures, deep learning comparison, and Explainable AI aspects at an advanced level.\"\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...0j3_cK7bJM}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Fundamentals of Knowledge Representation and Reasoning",
+      "difficulty": 4,
+      "reason": "This topic directly underpins the symbolic aspects of cognitive architectures and rule-based AI, providing essential foundational knowledge for how information is structured and processed."
+    },
+    {
+      "title": "Embodied Cognition and Robotics",
+      "difficulty": 5,
+      "reason": "This area challenges traditional cognitive architecture views by emphasizing the role of physical interaction and the environment in shaping cognition, offering a deeper theoretical and practical perspective for designing intelligent systems."
+    },
+    {
+      "title": "Neuro-symbolic AI for Robust and Explainable Reasoning",
+      "difficulty": 6,
+      "reason": "This cutting-edge research area aims to combine the strengths of neural and symbolic approaches, directly addressing the hybrid architectures, deep learning comparison, and Explainable AI aspects at an advanced level."
+    }
+  ]
+}
