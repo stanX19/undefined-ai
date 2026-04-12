@@ -20,7 +20,7 @@ services:
       - key: PORT
         value: "8001"
       - key: GEMINI_MODEL_NAME
-        value: "gemini-1.5-flash"
+        value: "gemini-2.5-flash"
       
       # Secrets - You will fill these in the Render Dashboard
       - key: GEMINI_API_KEY
