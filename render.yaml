@@ -24,16 +24,10 @@ services:
       
       # Secrets - You will fill these in the Render Dashboard
       - key: GEMINI_API_KEY
-        value: "" # Fill in dashboard
       - key: DATABASE_URL
-        value: "" # Fill in dashboard (Supabase URL)
       - key: ELEVENLABS_API_KEY
-        value: ""
       - key: EXA_API_KEY
-        value: ""
       - key: MINIMAX_API_KEY
-        value: ""
       - key: CANTONESE_API_KEY
-        value: ""
       - key: GEMINI_API_KEY_LIST
         value: "[]"
