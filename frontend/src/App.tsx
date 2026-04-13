@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
 import { LoginPage } from "./features/auth/pages/LoginPage.tsx";
 import { RegisterPage } from "./features/auth/pages/RegisterPage.tsx";
 import { OnboardingPage } from "./features/onboarding/OnboardingPage.tsx";
@@ -24,6 +25,14 @@ function RequireEducation({ children }: { children: React.ReactNode }) {
 }
 
 export function App() {
+  useEffect(() => {
+    const apiBase = (import.meta as any).env.VITE_API_URL as string | undefined;
+    if (!apiBase) return;
+
+    const base = apiBase.endsWith("/") ? apiBase.slice(0, -1) : apiBase;
+    void fetch(`${base}/health`).catch(() => undefined);
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>

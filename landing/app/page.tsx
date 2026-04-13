@@ -33,6 +33,14 @@ export default function LandingPage() {
   const mountedRef = useRef(true)
 
   useEffect(() => {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL
+    if (!apiBase) return
+
+    const base = apiBase.endsWith("/") ? apiBase.slice(0, -1) : apiBase
+    void fetch(`${base}/health`).catch(() => undefined)
+  }, [])
+
+  useEffect(() => {
     let cancelled = false
     fetch("https://lottie.host/29e742a8-effc-4a4e-91a6-e3c0c7d901ac/ERHZpsejbC.json")
       .then((res) => res.json())
