@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Searching Algorithms\",\n    \"difficulty\": 4,\n    \"reason\": \"Sorting algorithms often prepare data for efficient searching, making this a natural and complementary next step at a similar foundational level.\"\n  },\n  {\n    \"title\": \"Parallel and Distributed Algorithms\",\n    \"difficulty\": 5,\n    \"reason\": \"As datasets grow, applying sorting algorithms efficiently often requires understanding how to design them for parallel or distributed computing environments.\"\n  },\n  {\n    \"title\": \"Algorithmic Lower Bounds\",\n    \"difficulty\": 6,\n    \"reason\": \"This topic delves into the theoretical minimum computational resources required for problems like sorting, providing a deeper understanding of fundamental algorithmic efficiency limits.\"\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...G8WEhvr498}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Searching Algorithms",
+      "difficulty": 4,
+      "reason": "Sorting algorithms often prepare data for efficient searching, making this a natural and complementary next step at a similar foundational level."
+    },
+    {
+      "title": "Parallel and Distributed Algorithms",
+      "difficulty": 5,
+      "reason": "As datasets grow, applying sorting algorithms efficiently often requires understanding how to design them for parallel or distributed computing environments."
+    },
+    {
+      "title": "Algorithmic Lower Bounds",
+      "difficulty": 6,
+      "reason": "This topic delves into the theoretical minimum computational resources required for problems like sorting, providing a deeper understanding of fundamental algorithmic efficiency limits."
+    }
+  ]
+}

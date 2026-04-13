@@ -29,13 +29,16 @@ export async function apiFetch(
         ...((init?.headers as Record<string, string>) ?? {}),
     };
 
-    // Remove trailing slash from apiUrl if present, and ensure input starts with slash
+    // Use absolute API URL only for browser-reachable hosts.
     let finalInput = input;
-    const apiUrl = (import.meta as any).env.VITE_API_URL;
-    
+    const apiUrl = (import.meta as any).env.VITE_API_URL as string | undefined;
+
     if (typeof input === "string" && input.startsWith("/api") && apiUrl) {
-        const base = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
-        finalInput = `${base}${input}`;
+        const isDockerInternalHost = apiUrl.includes("://backend") || apiUrl.includes("//backend:");
+        if (!isDockerInternalHost) {
+            const base = apiUrl.endsWith("/") ? apiUrl.slice(0, -1) : apiUrl;
+            finalInput = `${base}${input}`;
+        }
     }
     const response = await fetch(finalInput, { ...init, headers: mergedHeaders });
     
