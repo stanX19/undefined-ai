@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 import { useAuthStore } from "../hooks/useAuthStore";
+import { resolveApiUrl } from "../../../constants/api";
 
 export function RegisterPage() {
     const [username, setUsername] = useState("");
@@ -36,7 +37,7 @@ export function RegisterPage() {
         setError(null);
 
         try {
-            const response = await fetch("/api/v1/auth/register", {
+            const response = await fetch(resolveApiUrl("/api/v1/auth/register"), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: email.trim(), password, username: username.trim() }),

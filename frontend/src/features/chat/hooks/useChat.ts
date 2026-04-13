@@ -4,7 +4,7 @@ import { useSurfaceStore } from "../../a2ui/store.ts";
 import { fallbackParse } from "../../a2ui/fallbackParser.ts";
 import { useTopicListStore, fetchTopics } from "../../workspace/hooks/useTopicList.ts";
 import { useUIStore } from "../../ui_renderer/store.ts";
-import { apiFetch } from "../../../constants/api";
+import { apiFetch, resolveApiUrl } from "../../../constants/api";
 
 export interface ChatMessage {
   id: string;
@@ -106,8 +106,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
  */
 function openSseStream(sessionId: string): Promise<void> {
   return new Promise((resolve) => {
+    const streamPath = `/api/v1/chat/stream/${sessionId}`;
     // If we're already connected to this topic, just return
-    if (activeEventSource && activeEventSource.url.includes(`/api/v1/chat/stream/${sessionId}`)) {
+    if (activeEventSource && activeEventSource.url.includes(streamPath)) {
       return resolve();
     }
 
@@ -119,7 +120,7 @@ function openSseStream(sessionId: string): Promise<void> {
     const store = useChatStore.getState();
     const surfaceStore = useSurfaceStore.getState();
 
-    const url = `/api/v1/chat/stream/${sessionId}`;
+    const url = String(resolveApiUrl(streamPath));
     const eventSource = new EventSource(url);
     activeEventSource = eventSource;
 

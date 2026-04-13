@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 import { useAuthStore } from "../hooks/useAuthStore";
-import { apiFetch } from "../../../constants/api";
+import { apiFetch, resolveApiUrl } from "../../../constants/api";
 
 export function LoginPage() {
   const [email, setEmail] = useState("");
@@ -54,7 +54,7 @@ export function LoginPage() {
     setError(null);
 
     try {
-      const response = await fetch("/api/v1/auth/login", {
+      const response = await fetch(resolveApiUrl("/api/v1/auth/login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim(), password }),

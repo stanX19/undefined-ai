@@ -14,6 +14,21 @@ export function getAuthHeaders(): Record<string, string> {
     return { Authorization: `Bearer ${token}` };
 }
 
+/** Resolve relative /api URLs against VITE_API_URL when browser-reachable. */
+export function resolveApiUrl(input: RequestInfo | URL): RequestInfo | URL {
+    if (typeof input !== "string") return input;
+    if (!input.startsWith("/api")) return input;
+
+    const apiUrl = (import.meta as any).env.VITE_API_URL as string | undefined;
+    if (!apiUrl) return input;
+
+    const isDockerInternalHost = apiUrl.includes("://backend") || apiUrl.includes("//backend:");
+    if (isDockerInternalHost) return input;
+
+    const base = apiUrl.endsWith("/") ? apiUrl.slice(0, -1) : apiUrl;
+    return `${base}${input}`;
+}
+
 /**
  * Thin wrapper around `fetch` that injects the bearer token automatically.
  * Mirrors the native `fetch` signature so it's a drop-in replacement.
@@ -29,17 +44,7 @@ export async function apiFetch(
         ...((init?.headers as Record<string, string>) ?? {}),
     };
 
-    // Use absolute API URL only for browser-reachable hosts.
-    let finalInput = input;
-    const apiUrl = (import.meta as any).env.VITE_API_URL as string | undefined;
-
-    if (typeof input === "string" && input.startsWith("/api") && apiUrl) {
-        const isDockerInternalHost = apiUrl.includes("://backend") || apiUrl.includes("//backend:");
-        if (!isDockerInternalHost) {
-            const base = apiUrl.endsWith("/") ? apiUrl.slice(0, -1) : apiUrl;
-            finalInput = `${base}${input}`;
-        }
-    }
+    const finalInput = resolveApiUrl(input);
     const response = await fetch(finalInput, { ...init, headers: mergedHeaders });
     
     if (response.status === 401) {
