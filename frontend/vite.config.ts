@@ -5,7 +5,8 @@ import fs from "fs";
 
 export default defineConfig(() => {
   const isDocker = fs.existsSync("/.dockerenv");
-  const target = isDocker ? "http://backend:8001" : "http://localhost:8001";
+  const envTarget = process.env.VITE_API_URL;
+  const target = envTarget || (isDocker ? "http://backend:8001" : "http://localhost:8001");
 
   return {
     plugins: [react(), tailwindcss()],

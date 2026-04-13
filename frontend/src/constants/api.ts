@@ -29,7 +29,15 @@ export async function apiFetch(
         ...((init?.headers as Record<string, string>) ?? {}),
     };
 
-    const response = await fetch(input, { ...init, headers: mergedHeaders });
+    // Remove trailing slash from apiUrl if present, and ensure input starts with slash
+    let finalInput = input;
+    const apiUrl = (import.meta as any).env.VITE_API_URL;
+    
+    if (typeof input === "string" && input.startsWith("/api") && apiUrl) {
+        const base = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+        finalInput = `${base}${input}`;
+    }
+    const response = await fetch(finalInput, { ...init, headers: mergedHeaders });
     
     if (response.status === 401) {
         useAuthStore.getState().logout();
