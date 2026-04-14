@@ -4,7 +4,7 @@ import { useSurfaceStore } from "../../a2ui/store.ts";
 import { fallbackParse } from "../../a2ui/fallbackParser.ts";
 import { useTopicListStore, fetchTopics } from "../../workspace/hooks/useTopicList.ts";
 import { useUIStore } from "../../ui_renderer/store.ts";
-import { apiFetch, resolveApiUrl } from "../../../constants/api";
+import { apiFetch, resolveApiUrl, resolveMediaUrl } from "../../../constants/api";
 
 export interface ChatMessage {
   id: string;
@@ -195,8 +195,7 @@ function openSseStream(sessionId: string): Promise<void> {
 
         if (useChatStore.getState().ttsMuted) return;
 
-        // Backend returns /media/tts/... but serves files at /uploads/tts/...
-        const audioUrl = rawUrl.replace(/^\/media\//, "/uploads/");
+        const audioUrl = resolveMediaUrl(rawUrl);
 
         // Auto-play (allowed because user initiated the interaction)
         activeAudio = new Audio(audioUrl);

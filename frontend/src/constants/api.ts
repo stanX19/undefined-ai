@@ -30,6 +30,33 @@ export function resolveApiUrl(input: RequestInfo | URL): RequestInfo | URL {
 }
 
 /**
+ * Resolve relative media URLs against VITE_API_URL when needed.
+ * Also maps legacy backend /media/* paths to the mounted /uploads/* route.
+ */
+export function resolveMediaUrl(input: string): string {
+    if (!input) return input;
+
+    if (/^(https?:)?\/\//i.test(input) || input.startsWith("blob:") || input.startsWith("data:")) {
+        return input;
+    }
+
+    const normalized = input.startsWith("/media/")
+        ? input.replace(/^\/media\//, "/uploads/")
+        : input;
+
+    if (!normalized.startsWith("/")) return normalized;
+
+    const apiUrl = (import.meta as any).env.VITE_API_URL as string | undefined;
+    if (!apiUrl) return normalized;
+
+    const isDockerInternalHost = apiUrl.includes("://backend") || apiUrl.includes("//backend:");
+    if (isDockerInternalHost) return normalized;
+
+    const base = apiUrl.endsWith("/") ? apiUrl.slice(0, -1) : apiUrl;
+    return `${base}${normalized}`;
+}
+
+/**
  * Thin wrapper around `fetch` that injects the bearer token automatically.
  * Mirrors the native `fetch` signature so it's a drop-in replacement.
  */
