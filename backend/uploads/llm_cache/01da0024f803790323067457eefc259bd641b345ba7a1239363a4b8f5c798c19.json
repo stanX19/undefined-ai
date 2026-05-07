@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Scrum Framework Overview\",\n    \"difficulty\": 4,\n    \"reason\": \"Understanding Scrum provides a foundational comparison point to Kanban, as both are prominent agile methodologies for managing knowledge work.\"\n  },\n  {\n    \"title\": \"Advanced Queuing Theory Applications in Workflow Management\",\n    \"difficulty\": 5,\n    \"reason\": \"This topic deepens the understanding of Kanban's theoretical roots by exploring how queuing theory is applied to optimize flow, manage WIP, and predict lead times in complex systems.\"\n  },\n  {\n    \"title\": \"Stochastic Modeling of Kanban Systems with Dynamic Demand and Capacity\",\n    \"difficulty\": 6,\n    \"reason\": \"This research-level topic involves developing and analyzing complex mathematical models to predict and optimize the behavior of Kanban systems under highly variable and uncertain conditions.\"\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...F-_QjMhS4A}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Scrum Framework Overview",
+      "difficulty": 4,
+      "reason": "Understanding Scrum provides a foundational comparison point to Kanban, as both are prominent agile methodologies for managing knowledge work."
+    },
+    {
+      "title": "Advanced Queuing Theory Applications in Workflow Management",
+      "difficulty": 5,
+      "reason": "This topic deepens the understanding of Kanban's theoretical roots by exploring how queuing theory is applied to optimize flow, manage WIP, and predict lead times in complex systems."
+    },
+    {
+      "title": "Stochastic Modeling of Kanban Systems with Dynamic Demand and Capacity",
+      "difficulty": 6,
+      "reason": "This research-level topic involves developing and analyzing complex mathematical models to predict and optimize the behavior of Kanban systems under highly variable and uncertain conditions."
+    }
+  ]
+}

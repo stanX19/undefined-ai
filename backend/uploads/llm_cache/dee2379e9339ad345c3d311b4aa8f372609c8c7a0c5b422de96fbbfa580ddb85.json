@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Kanban Methodologies\",\n    \"difficulty\": 4,\n    \"reason\": \"This topic explores another popular Agile-related methodology that complements the general Agile overview by providing a distinct framework for workflow visualization and continuous delivery.\"\n  },\n  {\n    \"title\": \"Scaling Agile Frameworks (SAFe, LeSS, Scrum@Scale)\",\n    \"difficulty\": 5,\n    \"reason\": \"This topic addresses how Agile principles are applied beyond a single team to large enterprises, requiring a more complex understanding of coordination, governance, and strategic implementation.\"\n  },\n  {\n    \"title\": \"Empirical Studies on Agile Adoption Success Factors and Organizational Agility\",\n    \"difficulty\": 6,\n    \"reason\": \"This topic involves critically assessing the actual impact and effectiveness of Agile practices within organizations, requiring advanced research design, data analysis, and theoretical synthesis.\"\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...2QpdOtfUUs}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Kanban Methodologies",
+      "difficulty": 4,
+      "reason": "This topic explores another popular Agile-related methodology that complements the general Agile overview by providing a distinct framework for workflow visualization and continuous delivery."
+    },
+    {
+      "title": "Scaling Agile Frameworks (SAFe, LeSS, Scrum@Scale)",
+      "difficulty": 5,
+      "reason": "This topic addresses how Agile principles are applied beyond a single team to large enterprises, requiring a more complex understanding of coordination, governance, and strategic implementation."
+    },
+    {
+      "title": "Empirical Studies on Agile Adoption Success Factors and Organizational Agility",
+      "difficulty": 6,
+      "reason": "This topic involves critically assessing the actual impact and effectiveness of Agile practices within organizations, requiring advanced research design, data analysis, and theoretical synthesis."
+    }
+  ]
+}
