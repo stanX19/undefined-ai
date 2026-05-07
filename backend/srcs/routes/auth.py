@@ -4,9 +4,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
+from srcs.config import get_settings
 from srcs.database import get_db
-from srcs.schemas.user_dto import RegisterRequest, LoginRequest, TokenResponse, ProfileUpdateRequest, ProfileResponse
+from srcs.schemas.user_dto import (
+    RegisterRequest,
+    LoginRequest,
+    TokenResponse,
+    ProfileUpdateRequest,
+    ProfileResponse,
+    RedeemUsageCodeRequest,
+    RedeemUsageCodeResponse,
+)
 from srcs.services.user_service import UserService
+from srcs.services.usage_service import UsageService
 from srcs.utils.auth_utils import create_access_token
 from srcs.models.user import User
 from srcs.dependencies import get_current_user
@@ -37,6 +47,7 @@ async def register(
     )
 
     access_token = create_access_token(data={"sub": user.user_id})
+    usage = await UsageService.get_usage_snapshot(db, user)
 
     return TokenResponse(
         access_token=access_token,
@@ -46,6 +57,8 @@ async def register(
         education_level=user.education_level,
         plan_tier=user.plan_tier,
         credits_balance=user.credits_balance,
+        daily_free_units=usage["daily_free_units"],
+        units_used_today=usage["units_used_today"],
     )
 
 
@@ -65,6 +78,7 @@ async def login(
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
     access_token = create_access_token(data={"sub": user.user_id})
+    usage = await UsageService.get_usage_snapshot(db, user)
 
     return TokenResponse(
         access_token=access_token,
@@ -74,14 +88,18 @@ async def login(
         education_level=user.education_level,
         plan_tier=user.plan_tier,
         credits_balance=user.credits_balance,
+        daily_free_units=usage["daily_free_units"],
+        units_used_today=usage["units_used_today"],
     )
 
 
 @router.get("/profile", response_model=ProfileResponse)
 async def get_profile(
     current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> ProfileResponse:
     """Get the authenticated user's profile data."""
+    usage = await UsageService.get_usage_snapshot(db, current_user)
     return ProfileResponse(
         user_id=current_user.user_id,
         email=current_user.email,
@@ -89,6 +107,8 @@ async def get_profile(
         education_level=current_user.education_level,
         plan_tier=current_user.plan_tier,
         credits_balance=current_user.credits_balance,
+        daily_free_units=usage["daily_free_units"],
+        units_used_today=usage["units_used_today"],
     )
 
 
@@ -105,6 +125,7 @@ async def update_profile(
     user = await UserService.update_education_level(
         db, current_user, body.education_level
     )
+    usage = await UsageService.get_usage_snapshot(db, user)
     return ProfileResponse(
         user_id=user.user_id,
         email=user.email,
@@ -112,4 +133,31 @@ async def update_profile(
         education_level=user.education_level,
         plan_tier=user.plan_tier,
         credits_balance=user.credits_balance,
+        daily_free_units=usage["daily_free_units"],
+        units_used_today=usage["units_used_today"],
+    )
+
+
+@router.post("/redeem-usage-code", response_model=RedeemUsageCodeResponse)
+async def redeem_usage_code(
+    body: RedeemUsageCodeRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> RedeemUsageCodeResponse:
+    """Grant extra usage credits when the shared dev/test code is provided."""
+    settings = get_settings()
+    if body.code.strip() != settings.USAGE_REDEEM_CODE:
+        raise HTTPException(status_code=400, detail="Invalid usage code")
+
+    credits_to_grant = settings.USAGE_REDEEM_CREDITS
+    if credits_to_grant <= 0:
+        raise HTTPException(status_code=400, detail="Usage code is not active")
+
+    current_user.credits_balance += credits_to_grant
+    await db.commit()
+    await db.refresh(current_user)
+
+    return RedeemUsageCodeResponse(
+        credits_granted=credits_to_grant,
+        credits_balance=current_user.credits_balance,
     )

@@ -57,11 +57,24 @@ class TokenResponse(BaseModel):
     education_level: str | None = None
     plan_tier: str = "free"
     credits_balance: int = 0
+    daily_free_units: int = 0
+    units_used_today: int = 0
 
 
 class ProfileUpdateRequest(BaseModel):
     """Request to update user profile fields."""
     education_level: str
+
+
+class RedeemUsageCodeRequest(BaseModel):
+    """Request to redeem a shared usage top-up code."""
+    code: str
+
+
+class RedeemUsageCodeResponse(BaseModel):
+    """Response after credits are granted to the current account."""
+    credits_granted: int
+    credits_balance: int
 
 
 class ProfileResponse(BaseModel):
@@ -72,5 +85,7 @@ class ProfileResponse(BaseModel):
     education_level: str | None = None
     plan_tier: str = "free"
     credits_balance: int = 0
+    daily_free_units: int = 0
+    units_used_today: int = 0
 
     model_config = {"from_attributes": True}
