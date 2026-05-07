@@ -14,6 +14,48 @@ export function getAuthHeaders(): Record<string, string> {
     return { Authorization: `Bearer ${token}` };
 }
 
+/** Resolve relative /api URLs against VITE_API_URL when browser-reachable. */
+export function resolveApiUrl(input: RequestInfo | URL): RequestInfo | URL {
+    if (typeof input !== "string") return input;
+    if (!input.startsWith("/api")) return input;
+
+    const apiUrl = (import.meta as any).env.VITE_API_URL as string | undefined;
+    if (!apiUrl) return input;
+
+    const isDockerInternalHost = apiUrl.includes("://backend") || apiUrl.includes("//backend:");
+    if (isDockerInternalHost) return input;
+
+    const base = apiUrl.endsWith("/") ? apiUrl.slice(0, -1) : apiUrl;
+    return `${base}${input}`;
+}
+
+/**
+ * Resolve relative media URLs against VITE_API_URL when needed.
+ * Also maps legacy backend /media/* paths to the mounted /uploads/* route.
+ */
+export function resolveMediaUrl(input: string): string {
+    if (!input) return input;
+
+    if (/^(https?:)?\/\//i.test(input) || input.startsWith("blob:") || input.startsWith("data:")) {
+        return input;
+    }
+
+    const normalized = input.startsWith("/media/")
+        ? input.replace(/^\/media\//, "/uploads/")
+        : input;
+
+    if (!normalized.startsWith("/")) return normalized;
+
+    const apiUrl = (import.meta as any).env.VITE_API_URL as string | undefined;
+    if (!apiUrl) return normalized;
+
+    const isDockerInternalHost = apiUrl.includes("://backend") || apiUrl.includes("//backend:");
+    if (isDockerInternalHost) return normalized;
+
+    const base = apiUrl.endsWith("/") ? apiUrl.slice(0, -1) : apiUrl;
+    return `${base}${normalized}`;
+}
+
 /**
  * Thin wrapper around `fetch` that injects the bearer token automatically.
  * Mirrors the native `fetch` signature so it's a drop-in replacement.
@@ -29,7 +71,8 @@ export async function apiFetch(
         ...((init?.headers as Record<string, string>) ?? {}),
     };
 
-    const response = await fetch(input, { ...init, headers: mergedHeaders });
+    const finalInput = resolveApiUrl(input);
+    const response = await fetch(finalInput, { ...init, headers: mergedHeaders });
     
     if (response.status === 401) {
         useAuthStore.getState().logout();

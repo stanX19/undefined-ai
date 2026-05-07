@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Volume2, Pause, Play } from "lucide-react";
+import { resolveMediaUrl } from "../../../constants/api";
 
 interface TtsPlayerProps {
     audioUrl: string;
@@ -13,9 +14,10 @@ export function TtsPlayer({ audioUrl }: TtsPlayerProps) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [duration, setDuration] = useState(0);
+    const resolvedAudioUrl = resolveMediaUrl(audioUrl);
 
     useEffect(() => {
-        const audio = new Audio(audioUrl);
+        const audio = new Audio(resolvedAudioUrl);
         audio.playbackRate = 1.1;
         audioRef.current = audio;
 
@@ -41,7 +43,7 @@ export function TtsPlayer({ audioUrl }: TtsPlayerProps) {
             audio.pause();
             audio.src = "";
         };
-    }, [audioUrl]);
+    }, [resolvedAudioUrl]);
 
     const togglePlay = useCallback(() => {
         const audio = audioRef.current;

@@ -25,7 +25,7 @@ services:
     # volumes:
     #   - ./frontend:/app
     environment:
-      - VITE_API_URL=http://localhost:8001
+      - VITE_API_URL=http://backend:8001
     depends_on:
       - backend
     develop:
