@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { useMarkGraphStore } from "../store.ts";
 import type { MarkGraphElement, Container, Scene } from "../types.ts";
 import { CheckboxBlockView } from "./CheckboxBlockView.tsx";
@@ -182,10 +182,10 @@ function ElementRenderer({ element }: { element: MarkGraphElement }) {
                   <button
                     key={i}
                     onClick={() => useMarkGraphStore.getState().navigateScene(targetId)}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 text-[14px] font-semibold text-[#1a1a1a] bg-gray-100 hover:bg-gray-200 border border-gray-200/80 rounded-xl transition-all duration-200 hover:shadow-sm hover:border-gray-300 active:scale-[0.98] mt-2 mr-3"
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 text-[14px] font-semibold text-[#1a1a1a] bg-gray-100 hover:bg-gray-200 border border-gray-200/80 rounded-xl transition-all duration-200 hover:shadow-sm hover:border-gray-300 active:scale-[0.98] mt-2 mr-3"
                   >
                     {frag.label}
-                    <span className="text-gray-500">→</span>
+                    <ChevronRight size={16} className="text-gray-500 -mr-0.5" />
                   </button>
                 );
               } else {
@@ -294,10 +294,10 @@ function ElementRenderer({ element }: { element: MarkGraphElement }) {
           const targetId = element.target.replace(/^#/, '');
           useMarkGraphStore.getState().navigateScene(targetId);
         }}
-        className="inline-flex items-center gap-2 px-4 py-2.5 text-[14px] font-semibold text-[#1a1a1a] bg-gray-100 hover:bg-gray-200 border border-gray-200/80 rounded-xl transition-all duration-200 hover:shadow-sm hover:border-gray-300 active:scale-[0.98] mr-3"
+        className="inline-flex items-center gap-1.5 px-4 py-2.5 text-[14px] font-semibold text-[#1a1a1a] bg-gray-100 hover:bg-gray-200 border border-gray-200/80 rounded-xl transition-all duration-200 hover:shadow-sm hover:border-gray-300 active:scale-[0.98] mr-3"
       >
         {element.label}
-        <span className="text-gray-500">→</span>
+        <ChevronRight size={16} className="text-gray-500 -mr-0.5" />
       </button>
     );
   }
@@ -413,7 +413,19 @@ export function MarkGraphRoot() {
       const timer = setTimeout(() => {
         const el = document.getElementById(scrollTarget.id);
         if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          if (el.tagName.toLowerCase() === "section") {
+            // If it's a full scene navigation, scroll the main scrollable container to the very top 
+            // so that the back button and top padding aren't hidden by scrollIntoView.
+            const container = el.closest('.overflow-y-auto');
+            if (container) {
+              container.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+              el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          } else {
+            // It's an inline element or specific block target, scroll directly to it
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
         }
       }, 100);
       return () => clearTimeout(timer);
@@ -431,10 +443,10 @@ export function MarkGraphRoot() {
       {history.length > 0 && (
         <button
           onClick={() => goBack()}
-          className="flex items-center gap-1.5 self-start px-2 py-1 text-xs font-semibold text-text-secondary hover:text-primary transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 self-start px-3 py-1.5 text-[13px] font-semibold text-[#1a1a1a] bg-gray-100 hover:bg-gray-200 border border-gray-200/80 rounded-xl transition-all duration-200 hover:shadow-sm hover:border-gray-300 active:scale-[0.98] cursor-pointer"
           title="Go back"
         >
-          <span>←</span> Back
+          <ChevronLeft size={16} className="text-gray-500 -ml-0.5" /> Back
         </button>
       )}
       <SceneRenderer key={activeScene.id} scene={activeScene} />

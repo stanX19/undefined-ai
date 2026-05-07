@@ -23,23 +23,42 @@ function NeoNode({ data, id }: any) {
   const isClickable = !!data.nav_target;
   // If the explicit label (display text) is different from the ID, 
   // we show the ID in parentheses as context if it fits.
-  const displayLabel = data.label === id ? id : `(${id}) ${data.label}`;
+  const hasDistinctLabel = data.label && data.label !== id;
   
   return (
     <div 
-      title={displayLabel} 
+      title={data.label || id} 
       className={`
-        flex items-center justify-center min-w-[120px] max-w-[200px] min-h-[60px] p-3 rounded-2xl border-4 shadow-lg transition-all font-bold text-xs text-center leading-snug
-        bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 
+        group relative flex flex-col items-center justify-center min-w-[140px] max-w-[240px] min-h-[64px] px-5 py-3.5 
+        rounded-2xl border bg-white dark:bg-slate-900/95 
+        backdrop-blur-sm
+        shadow-sm hover:shadow-md
+        transition-all duration-300 ease-out
         ${isClickable 
-          ? "border-blue-500/20 cursor-pointer hover:ring-2 hover:ring-blue-500/50" 
-          : "border-blue-100/20"
+          ? "cursor-pointer border-blue-200 dark:border-blue-800/60 hover:-translate-y-1 hover:border-blue-400 dark:hover:border-blue-500 ring-4 ring-transparent hover:ring-blue-50 dark:hover:ring-blue-900/20" 
+          : "border-slate-200 dark:border-slate-800"
         }
       `}
     >
-      <span>{displayLabel}</span>
-      <Handle type="source" position={Position.Bottom} style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} className="opacity-0 w-0 h-0" />
-      <Handle type="target" position={Position.Top} style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} className="opacity-0 w-0 h-0" />
+      <div className="flex flex-col items-center gap-1.5 z-10">
+        {hasDistinctLabel && (
+          <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 rounded-full">
+            {id}
+          </span>
+        )}
+        <span className={`font-medium text-[13px] text-center leading-snug wrap-break-word ${
+          isClickable ? 'text-blue-700 dark:text-blue-300 font-semibold' : 'text-slate-700 dark:text-slate-200'
+        }`}>
+          {hasDistinctLabel ? data.label : id}
+        </span>
+      </div>
+      
+      {isClickable && (
+        <div className="absolute inset-0 rounded-2xl bg-linear-to-b from-transparent to-blue-50/50 dark:to-blue-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+      )}
+      
+      <Handle type="source" position={Position.Bottom} className="opacity-0! w-0! h-0!" />
+      <Handle type="target" position={Position.Top} className="opacity-0! w-0! h-0!" />
     </div>
   );
 }
@@ -158,24 +177,24 @@ export function GraphBlockView({ block }: { block: GraphBlock }) {
   })), [animatedNodes]);
 
   const initialReactEdges = useMemo(() => block.edges.map((e, i) => {
-    const strokeColor = "#3b82f6";
-    let style: any = { strokeWidth: 2.5, stroke: strokeColor };
-    if (e.op === "--") style.strokeDasharray = "6 4";
+    const strokeColor = "#94a3b8"; // clean slate-400
+    let style: any = { strokeWidth: 2, stroke: strokeColor, transition: 'stroke 0.3s' };
+    if (e.op === "--") style.strokeDasharray = "5 5";
     
     const edge: any = {
       id: `e-${e.src}-${e.dst}-${i}`,
       source: e.src,
       target: e.dst,
       animated: e.op === "->" || e.op === "<-",
-      type: "default", // Curvy Bezier lines look more organic and less tangled than straight/orthogonal ones
+      type: "smoothstep", 
       style,
     };
 
     if (e.op === "->" || e.op === "<->") {
-      edge.markerEnd = { type: MarkerType.ArrowClosed, width: 12, height: 12, color: strokeColor };
+      edge.markerEnd = { type: MarkerType.ArrowClosed, width: 14, height: 14, color: strokeColor };
     }
     if (e.op === "<-" || e.op === "<->") {
-      edge.markerStart = { type: MarkerType.ArrowClosed, width: 12, height: 12, color: strokeColor };
+      edge.markerStart = { type: MarkerType.ArrowClosed, width: 14, height: 14, color: strokeColor };
     }
     
     return edge;
@@ -219,7 +238,7 @@ export function GraphBlockView({ block }: { block: GraphBlock }) {
   };
 
   return (
-    <div id={block.explicit_id || undefined} className="w-full h-[560px] border border-border rounded-lg overflow-hidden bg-surface relative">
+    <div id={block.explicit_id || undefined} className="w-full h-[560px] border border-border rounded-2xl overflow-hidden bg-surface relative">
       <ReactFlowProvider>
         <GraphInner 
           block={block}

@@ -333,7 +333,7 @@ export function WorkspacePage() {
                   onClose={() => setShowKnowledgeGraph(false)}
                 />
               ) : (
-                <main className="flex flex-1 flex-col overflow-y-auto workspace-scrollbar p-6">
+                <main className="flex flex-1 flex-col overflow-y-auto p-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                   {!chatTopicId ? (
                     <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
                       <h2 className="text-2xl font-semibold text-[#49423D] font-sans">

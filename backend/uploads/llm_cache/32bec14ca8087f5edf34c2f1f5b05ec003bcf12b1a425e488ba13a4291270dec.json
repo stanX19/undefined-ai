@@ -1,0 +1,29 @@
+{
+  "text": "```json\n[\n  {\n    \"summary\": \"Agile is a project management approach and mindset, originating in software development, that emphasizes iterative steps, adaptability, and collaboration for quick delivery, suitable for ongoing or unclear projects; it serves as an umbrella for methodologies like Scrum, and its core values and principles were established by the 2001 Agile Manifesto.\",\n    \"source_indices\": [0, 1, 2]\n  },\n  {\n    \"summary\": \"Agile offers benefits such as managing changing priorities, increased project visibility, and faster delivery speed, but it also presents challenges including organizational resistance to change, inconsistent team practices, and higher adoption costs.\",\n    \"source_indices\": [3, 4]\n  },\n  {\n    \"summary\": \"While traditional linear approaches like Waterfall suit projects with clear constraints, a hybrid Agile-Waterfall approach can combine elements of both, and various certifications like PMI-ACP and CSM are available to verify Agile knowledge.\",\n    \"source_indices\": [5, 6]\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...KhTLlUNXso}",
+  "status": "ok",
+  "json_data": [
+    {
+      "summary": "Agile is a project management approach and mindset, originating in software development, that emphasizes iterative steps, adaptability, and collaboration for quick delivery, suitable for ongoing or unclear projects; it serves as an umbrella for methodologies like Scrum, and its core values and principles were established by the 2001 Agile Manifesto.",
+      "source_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "summary": "Agile offers benefits such as managing changing priorities, increased project visibility, and faster delivery speed, but it also presents challenges including organizational resistance to change, inconsistent team practices, and higher adoption costs.",
+      "source_indices": [
+        3,
+        4
+      ]
+    },
+    {
+      "summary": "While traditional linear approaches like Waterfall suit projects with clear constraints, a hybrid Agile-Waterfall approach can combine elements of both, and various certifications like PMI-ACP and CSM are available to verify Agile knowledge.",
+      "source_indices": [
+        5,
+        6
+      ]
+    }
+  ]
+}

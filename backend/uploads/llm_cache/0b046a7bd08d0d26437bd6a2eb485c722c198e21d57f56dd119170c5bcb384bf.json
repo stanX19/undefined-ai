@@ -1,0 +1,44 @@
+{
+  "text": "```json\n[\n  {\n    \"summary\": \"The **Kanban Method**, developed by **David J Anderson** in **2005** for **knowledge work** and **service work**, is a structured approach of principles and practices applied to existing processes, not requiring an overhaul. It integrates concepts from **W Edwards Deming**, **Eli Goldratt**, **Peter Drucker**, and **Taiichi Ohno**, incorporating **pull systems**, **queuing theory**, and **flow**. Anderson refined the method over several years, and its principles and practices continue to evolve through collaborative efforts with the broader **Kanban community**.\",\n    \"source_indices\": [0, 12, 13, 14, 15, 16]\n  },\n  {\n    \"summary\": \"The **Kanban Method** is guided by **Foundational Principles** that emphasize starting with the current process (\\\"Start with what you do now\\\"), pursuing gradual improvements (\\\"Agree to pursue evolutionary change\\\"), respecting existing organizational structures (\\\"Initially, respect current roles, responsibilities & job titles\\\"), and fostering initiative (\\\"Encourage acts of leadership at all levels\\\").\",\n    \"source_indices\": [2, 3, 4, 5]\n  },\n  {\n    \"summary\": \"The **Kanban Method** employs several **Core Practices** to optimize workflow: \\\"Visualize\\\" makes the workflow transparent (e.g., using a Kanban board); \\\"Limit WIP\\\" (**Work In Progress**) reduces multitasking and identifies constraints; \\\"Manage flow\\\" optimizes work item movement; \\\"Make policies explicit\\\" defines clear rules; \\\"Implement feedback loops\\\" enables continuous adaptation; and \\\"Improve collaboratively, evolve experimentally (using models and the scientific method)\\\" promotes data-driven, collective improvement.\",\n    \"source_indices\": [6, 7, 8, 9, 10, 11]\n  },\n  {\n    \"summary\": \"The curriculum for all **LeanKanban University Certified Kanban Training** classes is based on the Kanban Method, and its principles and practices are followed by all **LKU Kanban Coaching Professionals**, ensuring a standardized approach to teaching and applying the method.\",\n    \"source_indices\": [1]\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...2QpdOtfUUs}",
+  "status": "ok",
+  "json_data": [
+    {
+      "summary": "The **Kanban Method**, developed by **David J Anderson** in **2005** for **knowledge work** and **service work**, is a structured approach of principles and practices applied to existing processes, not requiring an overhaul. It integrates concepts from **W Edwards Deming**, **Eli Goldratt**, **Peter Drucker**, and **Taiichi Ohno**, incorporating **pull systems**, **queuing theory**, and **flow**. Anderson refined the method over several years, and its principles and practices continue to evolve through collaborative efforts with the broader **Kanban community**.",
+      "source_indices": [
+        0,
+        12,
+        13,
+        14,
+        15,
+        16
+      ]
+    },
+    {
+      "summary": "The **Kanban Method** is guided by **Foundational Principles** that emphasize starting with the current process (\"Start with what you do now\"), pursuing gradual improvements (\"Agree to pursue evolutionary change\"), respecting existing organizational structures (\"Initially, respect current roles, responsibilities & job titles\"), and fostering initiative (\"Encourage acts of leadership at all levels\").",
+      "source_indices": [
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "summary": "The **Kanban Method** employs several **Core Practices** to optimize workflow: \"Visualize\" makes the workflow transparent (e.g., using a Kanban board); \"Limit WIP\" (**Work In Progress**) reduces multitasking and identifies constraints; \"Manage flow\" optimizes work item movement; \"Make policies explicit\" defines clear rules; \"Implement feedback loops\" enables continuous adaptation; and \"Improve collaboratively, evolve experimentally (using models and the scientific method)\" promotes data-driven, collective improvement.",
+      "source_indices": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "summary": "The curriculum for all **LeanKanban University Certified Kanban Training** classes is based on the Kanban Method, and its principles and practices are followed by all **LKU Kanban Coaching Professionals**, ensuring a standardized approach to teaching and applying the method.",
+      "source_indices": [
+        1
+      ]
+    }
+  ]
+}
