@@ -57,6 +57,8 @@ class Settings(BaseSettings):
     INGEST_WORDS_PER_UNIT: int = 1000
     UI_MIN_UNITS: int = 2
     UI_WORDS_PER_UNIT: int = 500
+    USAGE_REDEEM_CODE: str = "ADD_USAGE"
+    USAGE_REDEEM_CREDITS: int = 500
     MAX_DOC_UPLOAD_BYTES: int = 50 * 1024 * 1024
     MAX_AUDIO_UPLOAD_BYTES: int = 25 * 1024 * 1024
 

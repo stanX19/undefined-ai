@@ -66,7 +66,17 @@ export function LoginPage() {
       }
 
       const data = await response.json();
-      login(data.access_token, data.user_id, data.email, data.username, data.education_level);
+      login(
+        data.access_token,
+        data.user_id,
+        data.email,
+        data.username,
+        data.education_level,
+        data.plan_tier,
+        data.credits_balance,
+        data.daily_free_units,
+        data.units_used_today,
+      );
 
       if (data.education_level) {
         navigate("/menu");

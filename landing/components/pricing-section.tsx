@@ -12,12 +12,12 @@ export default function PricingSection() {
       annually: 0,
     },
     professional: {
-      monthly: 20,
-      annually: 16, // 20% discount for annual
+      monthly: 4,
+      annually: 40,
     },
     enterprise: {
-      monthly: 200,
-      annually: 160, // 20% discount for annual
+      monthly: 11,
+      annually: 100,
     },
   }
 
@@ -160,7 +160,7 @@ export default function PricingSection() {
                       </span>
                     </div>
                     <div className="text-[#847971] text-sm font-medium font-sans pb-2">
-                      USD / month
+                      per {billingPeriod === "monthly" ? "month" : "year"}, per user.
                     </div>
                   </div>
                 </div>
@@ -243,7 +243,7 @@ export default function PricingSection() {
                       </span>
                     </div>
                     <div className="text-[#D2C6BF] text-sm font-medium font-sans pb-2">
-                      USD / month
+                      per {billingPeriod === "monthly" ? "month" : "year"}, per user.
                     </div>
                   </div>
                 </div>
@@ -325,7 +325,7 @@ export default function PricingSection() {
                       </span>
                     </div>
                     <div className="text-[#847971] text-sm font-medium font-sans pb-2">
-                      USD / month
+                      per {billingPeriod === "monthly" ? "month" : "year"}, per user.
                     </div>
                   </div>
                 </div>
