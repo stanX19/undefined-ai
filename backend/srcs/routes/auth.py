@@ -4,8 +4,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
+from srcs.config import get_settings
 from srcs.database import get_db
-from srcs.schemas.user_dto import RegisterRequest, LoginRequest, TokenResponse, ProfileUpdateRequest, ProfileResponse
+from srcs.schemas.user_dto import (
+    RegisterRequest,
+    LoginRequest,
+    TokenResponse,
+    ProfileUpdateRequest,
+    ProfileResponse,
+    RedeemUsageCodeRequest,
+    RedeemUsageCodeResponse,
+)
 from srcs.services.user_service import UserService
 from srcs.utils.auth_utils import create_access_token
 from srcs.models.user import User
@@ -112,4 +121,29 @@ async def update_profile(
         education_level=user.education_level,
         plan_tier=user.plan_tier,
         credits_balance=user.credits_balance,
+    )
+
+
+@router.post("/redeem-usage-code", response_model=RedeemUsageCodeResponse)
+async def redeem_usage_code(
+    body: RedeemUsageCodeRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> RedeemUsageCodeResponse:
+    """Grant extra usage credits when the shared dev/test code is provided."""
+    settings = get_settings()
+    if body.code.strip() != settings.USAGE_REDEEM_CODE:
+        raise HTTPException(status_code=400, detail="Invalid usage code")
+
+    credits_to_grant = settings.USAGE_REDEEM_CREDITS
+    if credits_to_grant <= 0:
+        raise HTTPException(status_code=400, detail="Usage code is not active")
+
+    current_user.credits_balance += credits_to_grant
+    await db.commit()
+    await db.refresh(current_user)
+
+    return RedeemUsageCodeResponse(
+        credits_granted=credits_to_grant,
+        credits_balance=current_user.credits_balance,
     )

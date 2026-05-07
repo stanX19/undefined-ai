@@ -24,6 +24,7 @@ export function TopicsSidebar() {
 
     const email = useAuthStore((s) => s.email);
     const username = useAuthStore((s) => s.username);
+    const planTier = useAuthStore((s) => s.planTier);
     const logout = useAuthStore((s) => s.logout);
     const navigate = useNavigate();
     const location = useLocation();
@@ -328,24 +329,49 @@ export function TopicsSidebar() {
                         )}
                     </div>
 
-                    {/* Footer — User Info / Logout */}
+                    {/* Footer — User Info / Plans Navigation + Logout */}
                     <div className="border-t border-[#E0DEDB] p-4">
-                        <button
-                            onClick={handleLogout}
-                            className="flex w-full cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-[rgba(55,50,47,0.06)]"
-                        >
-                            <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex w-full items-center justify-between gap-1">
+                            {/* Left: profile/billing navigation */}
+                            <button
+                                onClick={() => navigate("/plans")}
+                                className="flex flex-1 items-center gap-3 min-w-0 rounded-lg px-2 py-2 transition-colors hover:bg-[rgba(55,50,47,0.06)] cursor-pointer"
+                            >
                                 <div className="flex shrink-0 h-8 w-8 items-center justify-center rounded-full bg-[#E0DEDB] text-sm font-bold text-[#37322F]">
                                     {username?.[0]?.toUpperCase() || email?.[0]?.toUpperCase() || "U"}
                                 </div>
-                                <div className="flex flex-col items-start min-w-0 pb-0.5">
-                                    <span className="truncate text-[13px] font-medium text-[#49423D] leading-normal max-w-[150px]" title={username || email || "User"}>
+                                <div className="flex flex-col items-start min-w-0">
+                                    <span
+                                        className="truncate text-[13px] font-medium text-[#49423D] leading-normal max-w-[150px]"
+                                        title={username || email || "User"}
+                                    >
                                         {username || email || "User"}
                                     </span>
+                                    <span className={`text-[11px] leading-tight ${
+                                        planTier === "enterprise"
+                                            ? "text-[#7C3AED]"
+                                            : planTier === "pro"
+                                              ? "text-[#C4841D]"
+                                              : "text-[#847971]"
+                                    }`}>
+                                        {planTier === "enterprise"
+                                            ? "Enterprise Plan"
+                                            : planTier === "pro"
+                                              ? "Pro Plan"
+                                              : "Free Plan"}
+                                    </span>
                                 </div>
-                            </div>
-                            <LogOut size={16} className="text-[#605A57] hover:text-red-500 transition-colors" />
-                        </button>
+                            </button>
+
+                            {/* Right: isolated logout */}
+                            <button
+                                onClick={handleLogout}
+                                className="flex shrink-0 items-center justify-center rounded-md p-1.5 transition-colors hover:bg-red-50 cursor-pointer"
+                                title="Log out"
+                            >
+                                <LogOut size={16} className="text-[#605A57] hover:text-red-500 transition-colors" />
+                            </button>
+                        </div>
                     </div>
 
                     {/* Resizer Handle — full sidebar height */}

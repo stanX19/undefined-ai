@@ -64,6 +64,17 @@ class ProfileUpdateRequest(BaseModel):
     education_level: str
 
 
+class RedeemUsageCodeRequest(BaseModel):
+    """Request to redeem a shared usage top-up code."""
+    code: str
+
+
+class RedeemUsageCodeResponse(BaseModel):
+    """Response after credits are granted to the current account."""
+    credits_granted: int
+    credits_balance: int
+
+
 class ProfileResponse(BaseModel):
     """Safe user profile response — never exposes password_hash."""
     user_id: str

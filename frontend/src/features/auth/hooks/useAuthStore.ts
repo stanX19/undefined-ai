@@ -7,8 +7,19 @@ interface AuthState {
   email: string | null;
   username: string | null;
   educationLevel: string | null;
-  login: (token: string, userId: string, email: string, username?: string | null, educationLevel?: string | null) => void;
+  planTier: string;
+  creditsBalance: number;
+  login: (
+    token: string,
+    userId: string,
+    email: string,
+    username?: string | null,
+    educationLevel?: string | null,
+    planTier?: string,
+    creditsBalance?: number,
+  ) => void;
   setEducationLevel: (level: string) => void;
+  setCreditsBalance: (balance: number) => void;
   /** Stateless logout — clears token + user data from client storage. */
   logout: () => void;
 }
@@ -21,11 +32,14 @@ export const useAuthStore = create<AuthState>()(
       email: null,
       username: null,
       educationLevel: null,
-      login: (token, userId, email, username = null, educationLevel = null) =>
-        set({ accessToken: token, userId, email, username, educationLevel }),
+      planTier: "free",
+      creditsBalance: 0,
+      login: (token, userId, email, username = null, educationLevel = null, planTier = "free", creditsBalance = 0) =>
+        set({ accessToken: token, userId, email, username, educationLevel, planTier, creditsBalance }),
       setEducationLevel: (level) => set({ educationLevel: level }),
+      setCreditsBalance: (balance) => set({ creditsBalance: balance }),
       logout: () =>
-        set({ userId: null, accessToken: null, email: null, username: null, educationLevel: null }),
+        set({ userId: null, accessToken: null, email: null, username: null, educationLevel: null, planTier: "free", creditsBalance: 0 }),
     }),
     {
       name: "auth-storage",

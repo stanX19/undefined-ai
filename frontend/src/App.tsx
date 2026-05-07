@@ -4,6 +4,7 @@ import { RegisterPage } from "./features/auth/pages/RegisterPage.tsx";
 import { OnboardingPage } from "./features/onboarding/OnboardingPage.tsx";
 import { MenuPage } from "./features/onboarding/MenuPage.tsx";
 import { WorkspacePage } from "./features/workspace/WorkspacePage.tsx";
+import { PlansPage } from "./features/billing/PlansPage.tsx";
 import { AuthGuard } from "./features/auth/components/AuthGuard.tsx";
 import { useAuthStore } from "./features/auth/hooks/useAuthStore.ts";
 import { SharedViewPage } from "./features/workspace/SharedViewPage.tsx";
@@ -39,6 +40,7 @@ export function App() {
           <Route path="/menu" element={<RequireEducation><MenuPage /></RequireEducation>} />
           <Route path="/home" element={<RequireEducation><WorkspacePage /></RequireEducation>} />
           <Route path="/workspace" element={<RequireEducation><WorkspacePage /></RequireEducation>} />
+          <Route path="/plans" element={<PlansPage />} />
         </Route>
 
         {/* Catch-all redirect */}
