@@ -26,7 +26,7 @@ import logging
 from datetime import datetime, timezone, time
 
 from fastapi import HTTPException
-from sqlalchemy import insert, select, update
+from sqlalchemy import func, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -47,6 +47,30 @@ def _today_bucket() -> datetime:
 
 class UsageService:
     """Transactional, concurrency-safe quota enforcement."""
+
+    @staticmethod
+    async def get_usage_snapshot(
+        db: AsyncSession,
+        user: User,
+    ) -> dict[str, int]:
+        """Return today's usage and daily free quota for a user."""
+        settings = get_settings()
+        daily_free = settings.RATE_LIMIT_FREE_UNITS_BY_PLAN.get(
+            user.plan_tier, settings.RATE_LIMIT_FREE_UNITS_BY_PLAN.get("free", 10)
+        )
+        bucket = _today_bucket()
+
+        result = await db.execute(
+            select(func.coalesce(func.sum(DailyUsage.units_used), 0)).where(
+                DailyUsage.user_id == user.user_id,
+                DailyUsage.bucket_start_utc == bucket,
+            )
+        )
+        units_used_today = int(result.scalar_one())
+        return {
+            "daily_free_units": daily_free,
+            "units_used_today": units_used_today,
+        }
 
     @staticmethod
     async def check_and_consume_units(

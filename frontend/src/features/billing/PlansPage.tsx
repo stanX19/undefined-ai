@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, ArrowLeft, Sparkles, Construction, Gift, Gauge } from "lucide-react";
 
@@ -67,7 +67,10 @@ export function PlansPage() {
   const navigate = useNavigate();
   const planTier = useAuthStore((s) => s.planTier);
   const creditsBalance = useAuthStore((s) => s.creditsBalance);
+  const dailyFreeUnits = useAuthStore((s) => s.dailyFreeUnits);
+  const unitsUsedToday = useAuthStore((s) => s.unitsUsedToday);
   const setCreditsBalance = useAuthStore((s) => s.setCreditsBalance);
+  const setUsageSnapshot = useAuthStore((s) => s.setUsageSnapshot);
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annually">("monthly");
   const [usageCode, setUsageCode] = useState("");
   const [redeemStatus, setRedeemStatus] = useState<{
@@ -83,6 +86,27 @@ export function PlansPage() {
     if (plan.monthly_price === 0) return "free forever";
     return billingPeriod === "annually" ? "per year, per user." : "per month, per user.";
   };
+
+  useEffect(() => {
+    const syncUsage = async () => {
+      try {
+        const response = await apiFetch("/api/v1/auth/profile");
+        if (!response.ok) return;
+
+        const data = await response.json();
+        setCreditsBalance(data.credits_balance ?? 0);
+        setUsageSnapshot(data.daily_free_units ?? 0, data.units_used_today ?? 0);
+      } catch (error) {
+        console.error("Failed to refresh usage snapshot:", error);
+      }
+    };
+
+    syncUsage();
+  }, [setCreditsBalance, setUsageSnapshot]);
+
+  const usageLimit = Math.max(dailyFreeUnits || DAILY_FREE_UNITS_BY_PLAN[planTier] || DAILY_FREE_UNITS_BY_PLAN.free, 0);
+  const usagePercent = usageLimit > 0 ? Math.min(100, Math.round((unitsUsedToday / usageLimit) * 100)) : 0;
+  const progressWidth = usageLimit > 0 ? `${Math.min(100, (unitsUsedToday / usageLimit) * 100)}%` : "0%";
 
   const handleRedeemUsageCode = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -295,23 +319,32 @@ export function PlansPage() {
 
         <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
           <section className="rounded-2xl border border-[#E0DEDB] bg-white p-4">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#ECEAE8] text-[#37322F]">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#ECEAE8] text-[#37322F]">
                 <Gauge size={17} />
               </div>
-              <div>
-                <h2 className="text-sm font-semibold text-[#37322F]">Usage balance</h2>
-                <p className="mt-1 text-xs leading-relaxed text-[#605A57]">
-                  Included daily usage:{" "}
-                  <span className="font-semibold text-[#37322F]">
-                    {DAILY_FREE_UNITS_BY_PLAN[planTier] ?? DAILY_FREE_UNITS_BY_PLAN.free} units
-                  </span>
-                </p>
-                <p className="mt-1 text-xs leading-relaxed text-[#605A57]">
-                  Extra usage from codes:{" "}
-                  <span className="font-semibold text-[#37322F]">{creditsBalance} credits</span>
-                </p>
+              <h2 className="text-sm font-semibold text-[#37322F]">Usage Balance</h2>
+            </div>
+            <div className="mt-3">
+              <div className="flex items-center justify-between gap-3 text-xs">
+                <span className="font-medium text-[#605A57]">Used today</span>
+                <span className="font-semibold text-[#37322F]">{usagePercent}%</span>
               </div>
+              <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-[#ECEAE8]">
+                <div
+                  className="h-full rounded-full bg-[#37322F] transition-all duration-300"
+                  style={{ width: progressWidth }}
+                />
+              </div>
+              <p className="mt-2 text-xs leading-relaxed text-[#605A57]">
+                <span className="font-semibold text-[#37322F]">{unitsUsedToday}</span> of{" "}
+                <span className="font-semibold text-[#37322F]">{usageLimit}</span> daily units used on your{" "}
+                <span className="capitalize">{planTier}</span> plan.
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-[#605A57]">
+                Extra usage from codes:{" "}
+                <span className="font-semibold text-[#37322F]">{creditsBalance} credits</span>
+              </p>
             </div>
           </section>
 
@@ -319,38 +352,38 @@ export function PlansPage() {
             onSubmit={handleRedeemUsageCode}
             className="rounded-2xl border border-[#E0DEDB] bg-white p-4"
           >
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-100 text-orange-600">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-100 text-orange-600">
                 <Gift size={17} />
               </div>
-              <div className="min-w-0 flex-1">
-                <h2 className="text-sm font-semibold text-[#37322F]">Redeem usage code</h2>
-                <div className="mt-3 flex gap-2">
-                  <input
-                    value={usageCode}
-                    onChange={(event) => setUsageCode(event.target.value.toUpperCase())}
-                    placeholder="Enter code here"
-                    disabled={isRedeeming}
-                    className="min-w-0 flex-1 rounded-lg border border-[#E0DEDB] bg-[#FAF9F8] px-3 py-2 text-sm uppercase text-[#37322F] outline-none transition-colors placeholder:normal-case placeholder:text-[#A39B95] focus:border-[#37322F] disabled:opacity-60"
-                  />
-                  <button
-                    type="submit"
-                    disabled={!usageCode.trim() || isRedeeming}
-                    className="shrink-0 rounded-lg bg-[#37322F] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#2A2520] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-[#37322F]"
-                  >
-                    {isRedeeming ? "Adding..." : "Redeem"}
-                  </button>
-                </div>
-                {redeemStatus && (
-                  <p
-                    className={`mt-2 text-xs font-medium ${
-                      redeemStatus.type === "success" ? "text-green-700" : "text-red-600"
-                    }`}
-                  >
-                    {redeemStatus.message}
-                  </p>
-                )}
+              <h2 className="text-sm font-semibold text-[#37322F]">Redeem Code</h2>
+            </div>
+            <div className="mt-6">
+              <div className="flex gap-2">
+                <input
+                  value={usageCode}
+                  onChange={(event) => setUsageCode(event.target.value.toUpperCase())}
+                  placeholder="Enter code here"
+                  disabled={isRedeeming}
+                  className="min-w-0 flex-1 rounded-lg border border-[#E0DEDB] bg-[#FAF9F8] px-3 py-2 text-sm uppercase text-[#37322F] outline-none transition-colors placeholder:normal-case placeholder:text-[#A39B95] focus:border-[#37322F] disabled:opacity-60"
+                />
+                <button
+                  type="submit"
+                  disabled={!usageCode.trim() || isRedeeming}
+                  className="shrink-0 rounded-lg bg-[#37322F] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#2A2520] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-[#37322F]"
+                >
+                  {isRedeeming ? "Adding..." : "Redeem"}
+                </button>
               </div>
+              {redeemStatus && (
+                <p
+                  className={`mt-2 text-xs font-medium ${
+                    redeemStatus.type === "success" ? "text-green-700" : "text-red-600"
+                  }`}
+                >
+                  {redeemStatus.message}
+                </p>
+              )}
             </div>
           </form>
         </div>

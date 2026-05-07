@@ -61,6 +61,8 @@ export function RegisterPage() {
                 data.education_level,
                 data.plan_tier,
                 data.credits_balance,
+                data.daily_free_units,
+                data.units_used_today,
             );
 
             navigate("/onboarding");

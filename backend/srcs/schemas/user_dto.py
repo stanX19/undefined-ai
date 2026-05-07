@@ -57,6 +57,8 @@ class TokenResponse(BaseModel):
     education_level: str | None = None
     plan_tier: str = "free"
     credits_balance: int = 0
+    daily_free_units: int = 0
+    units_used_today: int = 0
 
 
 class ProfileUpdateRequest(BaseModel):
@@ -83,5 +85,7 @@ class ProfileResponse(BaseModel):
     education_level: str | None = None
     plan_tier: str = "free"
     credits_balance: int = 0
+    daily_free_units: int = 0
+    units_used_today: int = 0
 
     model_config = {"from_attributes": True}
