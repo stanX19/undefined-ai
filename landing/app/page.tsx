@@ -42,12 +42,17 @@ export default function LandingPage() {
 
   useEffect(() => {
     let cancelled = false
-    fetch("https://lottie.host/29e742a8-effc-4a4e-91a6-e3c0c7d901ac/ERHZpsejbC.json")
-      .then((res) => res.json())
-      .then((data) => {
+    const loadLottie = async () => {
+      try {
+        const res = await fetch("https://lottie.host/29e742a8-effc-4a4e-91a6-e3c0c7d901ac/ERHZpsejbC.json")
+        if (!res.ok) return
+        const data = await res.json()
         if (!cancelled) setSmartSimpleBrilliantLottieData(data)
-      })
-      .catch((err) => console.error("Failed to load Smart Simple Brilliant Lottie", err))
+      } catch (err) {
+        // Silently ignore fetch errors to prevent Next.js dev overlay
+      }
+    }
+    loadLottie()
     return () => {
       cancelled = true
     }

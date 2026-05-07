@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Kanban Method Overview\",\n    \"difficulty\": 4,\n    \"reason\": \"It offers a complementary perspective to Scrum by introducing another popular agile framework focused on flow and visualization, providing a broader understanding of agile approaches.\"\n  },\n  {\n    \"title\": \"Scaling Agile Frameworks (e.g., SAFe, LeSS, Scrum@Scale)\",\n    \"difficulty\": 5,\n    \"reason\": \"This topic explores how to apply agile principles and Scrum practices to larger, multi-team organizational contexts, introducing significant complexity in coordination and governance.\"\n  },\n  {\n    \"title\": \"Empirical Studies on Agile Adoption Success Factors and Challenges\",\n    \"difficulty\": 6,\n    \"reason\": \"This involves conducting or critically analyzing research to understand the drivers, obstacles, and measurable impacts of successful agile implementation across diverse organizational settings.\"\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...F-_QjMhS4A}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Kanban Method Overview",
+      "difficulty": 4,
+      "reason": "It offers a complementary perspective to Scrum by introducing another popular agile framework focused on flow and visualization, providing a broader understanding of agile approaches."
+    },
+    {
+      "title": "Scaling Agile Frameworks (e.g., SAFe, LeSS, Scrum@Scale)",
+      "difficulty": 5,
+      "reason": "This topic explores how to apply agile principles and Scrum practices to larger, multi-team organizational contexts, introducing significant complexity in coordination and governance."
+    },
+    {
+      "title": "Empirical Studies on Agile Adoption Success Factors and Challenges",
+      "difficulty": 6,
+      "reason": "This involves conducting or critically analyzing research to understand the drivers, obstacles, and measurable impacts of successful agile implementation across diverse organizational settings."
+    }
+  ]
+}

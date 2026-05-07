@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, ArrowLeft, Sparkles, Construction, Gift, Gauge } from "lucide-react";
-
+import { Check, ArrowLeft, Gift, Gauge } from "lucide-react";
 import { apiFetch } from "../../constants/api";
 import { useAuthStore } from "../auth/hooks/useAuthStore";
 
@@ -145,42 +144,33 @@ export function PlansPage() {
   };
 
   return (
-    <div className="min-h-dvh w-full bg-[#F7F5F3] font-sans overflow-y-auto">
+    <div className="h-dvh w-full bg-[#F7F5F3] font-sans overflow-hidden flex flex-col relative">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
       `}</style>
 
-      <div className="mx-auto max-w-5xl px-6 py-8">
-        {/* Back nav */}
-        <button
-          onClick={() => navigate("/home", { replace: true })}
-          className="mb-8 flex items-center gap-1.5 text-sm text-[#605A57] hover:text-[#37322F] transition-colors cursor-pointer"
-        >
-          <ArrowLeft size={15} />
-          Back
-        </button>
+      {/* Back nav */}
+      <button
+        onClick={() => navigate("/home", { replace: true })}
+        className="absolute top-5 left-6 md:top-8 md:left-8 z-10 flex items-center gap-1.5 text-sm font-medium text-[#605A57] hover:text-[#37322F] transition-colors cursor-pointer"
+      >
+        <ArrowLeft size={16} />
+        Back
+      </button>
 
+      <div className="mx-auto w-full max-w-5xl px-6 pb-4 pt-10 md:pt-10 flex flex-col h-full min-h-0">
         {/* Header */}
-        <div className="mb-10 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-[#37322F] sm:text-3xl">
-            Choose your plan
+        <div className="mb-4 shrink-0 text-center">
+          <h1 className="text-5xl font-normal tracking-tight text-[#37322F]" style={{ fontFamily: "'Instrument Serif', serif" }}>
+            Choose Your Plan
           </h1>
-          <p className="mt-2 text-sm text-[#605A57]">
+          <p className="mt-1 text-sm text-[#605A57]">
             Start free, upgrade when you're ready.
           </p>
         </div>
 
-        {/* Coming soon banner */}
-        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 flex items-center gap-2">
-          <Construction size={16} className="shrink-0" />
-          <span>
-            <span className="font-semibold">Payments coming soon.</span>{" "}
-            Online payments and subscription management are currently under development. Stay tuned!
-          </span>
-        </div>
-
         {/* Billing toggle */}
-        <div className="mb-8 flex justify-center">
+        <div className="mb-8 shrink-0 flex justify-center">
           <div className="relative flex items-center rounded-full bg-[#ECEAE8] p-0.5">
             <div
               className={`absolute top-0.5 h-[calc(100%-4px)] w-[calc(50%-2px)] rounded-full bg-white shadow-sm transition-all duration-300 ease-in-out ${
@@ -207,7 +197,7 @@ export function PlansPage() {
         </div>
 
         {/* Plan cards */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 min-h-0 shrink">
           {PLANS.map((plan) => {
             const isPro = plan.tier === "pro";
             const isFirst = TIER_ORDER.indexOf(plan.tier) === 0;
@@ -216,33 +206,25 @@ export function PlansPage() {
             return (
               <div
                 key={plan.tier}
-                className={`relative flex flex-col rounded-2xl border p-5 overflow-hidden ${
+                className={`relative flex flex-col rounded-2xl border px-5 pt-5 pb-10 overflow-hidden min-h-0 ${
                   isPro ? "bg-[#37322F] border-[rgba(55,50,47,0.12)]" : "bg-white border-[#E0DEDB]"
                 }`}
               >
-                {/* Popular badge */}
-                {isPro && (
-                  <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-orange-500/20 px-2.5 py-0.5 text-[10px] font-semibold text-orange-300">
-                    <Sparkles size={10} />
-                    Popular
-                  </div>
-                )}
-
                 {/* Header */}
-                <div className="min-h-[80px]">
+                <div className="shrink-0">
                   <h3 className={`text-sm font-semibold ${isPro ? "text-[#FBFAF9]" : "text-[#37322F]"}`}>
                     {plan.name}
                   </h3>
-                  <p className={`mt-1 text-xs leading-relaxed ${isPro ? "text-[#B2AEA9]" : "text-[#847971]"}`}>
+                  <p className={`mt-0.5 text-[11px] leading-tight ${isPro ? "text-[#B2AEA9]" : "text-[#847971]"}`}>
                     {plan.description}
                   </p>
                 </div>
 
                 {/* Price */}
-                <div className="mt-4 mb-2 min-h-[85px]">
-                  <div className="flex flex-col gap-1">
+                <div className="mt-3 mb-2 shrink-0">
+                  <div className="flex flex-col gap-0">
                     <div
-                      className={`relative h-[52px] flex items-center text-5xl font-medium leading-[60px] ${
+                      className={`relative h-[36px] flex items-center text-4xl font-medium leading-[36px] ${
                         isPro ? "text-[#F0EFEE]" : "text-[#37322F]"
                       }`}
                       style={{ fontFamily: "'Instrument Serif', serif" }}
@@ -271,21 +253,21 @@ export function PlansPage() {
                         ${plan.annual_price}
                       </span>
                     </div>
-                    <p className={`text-xs ${isPro ? "text-[#9A9490]" : "text-[#847971]"}`}>
+                    <p className={`text-[11px] ${isPro ? "text-[#9A9490]" : "text-[#847971]"}`}>
                       {getPriceLabel(plan)}
                     </p>
                   </div>
                 </div>
 
                 {/* CTA */}
-                <div className="mb-5">
+                <div className="mb-3 shrink-0 mt-3">
                   {isFirst ? (
-                    <div className={`w-full rounded-lg px-4 py-2 text-center text-[13px] font-medium border border-[#E0DEDB] text-[#B0ACA8]`}>
+                    <div className={`w-full rounded-lg px-4 py-1.5 text-center text-xs font-medium border border-[#E0DEDB] text-[#B0ACA8]`}>
                       Current plan
                     </div>
                   ) : (
                     <div
-                      className={`w-full rounded-lg px-4 py-2 text-center text-[13px] font-medium opacity-60 ${
+                      className={`w-full rounded-lg px-4 py-1.5 text-center text-xs font-medium opacity-60 ${
                         isPro ? "bg-white/80 text-[#37322F]" : "bg-[#37322F]/60 text-white"
                       }`}
                     >
@@ -295,10 +277,10 @@ export function PlansPage() {
                 </div>
 
                 {/* Divider */}
-                <div className={`mb-4 h-px ${isPro ? "bg-white/10" : "bg-[#E0DEDB]"}`} />
+                <div className={`mb-3 h-px shrink-0 ${isPro ? "bg-white/10" : "bg-[#E0DEDB]"}`} />
 
                 {/* Features */}
-                <ul className="flex flex-col gap-2">
+                <ul className="flex flex-col gap-2 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-start gap-2">
                       <Check
@@ -306,7 +288,7 @@ export function PlansPage() {
                         className={`mt-0.5 shrink-0 ${isPro ? "text-orange-400" : "text-[#9CA3AF]"}`}
                         strokeWidth={2}
                       />
-                      <span className={`text-xs leading-relaxed ${isPro ? "text-[#D9D5D2]" : "text-[#605A57]"}`}>
+                      <span className={`text-[11px] leading-tight ${isPro ? "text-[#D9D5D2]" : "text-[#605A57]"}`}>
                         {f}
                       </span>
                     </li>
@@ -317,7 +299,7 @@ export function PlansPage() {
           })}
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="mt-5 shrink-0 grid grid-cols-1 gap-4 lg:grid-cols-2 pb-2">
           <section className="rounded-2xl border border-[#E0DEDB] bg-white p-4">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#ECEAE8] text-[#37322F]">
@@ -358,7 +340,7 @@ export function PlansPage() {
               </div>
               <h2 className="text-sm font-semibold text-[#37322F]">Redeem Code</h2>
             </div>
-            <div className="mt-6">
+            <div className="mt-5">
               <div className="flex gap-2">
                 <input
                   value={usageCode}
