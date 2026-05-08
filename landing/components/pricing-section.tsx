@@ -67,21 +67,9 @@ export default function PricingSection() {
         <div className="p-3 relative bg-[rgba(55,50,47,0.03)] border border-[rgba(55,50,47,0.02)] backdrop-blur-[44px] backdrop-saturate-150 backdrop-brightness-110 flex justify-center items-center rounded-lg z-20 before:absolute before:inset-0 before:bg-white before:opacity-60 before:rounded-lg before:-z-10">
           <div className="p-[2px] bg-[rgba(55,50,47,0.10)] shadow-[0px_1px_0px_white] rounded-[99px] border-[0.5px] border-[rgba(55,50,47,0.08)] flex justify-center items-center gap-[2px] relative">
             <div
-              className={`absolute top-[2px] w-[calc(50%-1px)] h-[calc(100%-4px)] bg-white shadow-[0px_2px_4px_rgba(0,0,0,0.08)] rounded-[99px] transition-all duration-300 ease-in-out ${billingPeriod === "annually" ? "left-[2px]" : "right-[2px]"
+              className={`absolute top-[2px] w-[calc(50%-1px)] h-[calc(100%-4px)] bg-white shadow-[0px_2px_4px_rgba(0,0,0,0.08)] rounded-[99px] transition-all duration-300 ease-in-out ${billingPeriod === "monthly" ? "left-[2px]" : "right-[2px]"
                 }`}
             />
-
-            <button
-              onClick={() => setBillingPeriod("annually")}
-              className="px-4 py-1 rounded-[99px] flex justify-center items-center gap-2 transition-colors duration-300 relative z-10 flex-1"
-            >
-              <div
-                className={`text-[13px] font-medium leading-5 font-sans transition-colors duration-300 ${billingPeriod === "annually" ? "text-[#37322F]" : "text-[#6B7280]"
-                  }`}
-              >
-                Annually
-              </div>
-            </button>
 
             <button
               onClick={() => setBillingPeriod("monthly")}
@@ -92,6 +80,18 @@ export default function PricingSection() {
                   }`}
               >
                 Monthly
+              </div>
+            </button>
+
+            <button
+              onClick={() => setBillingPeriod("annually")}
+              className="px-4 py-1 rounded-[99px] flex justify-center items-center gap-2 transition-colors duration-300 relative z-10 flex-1"
+            >
+              <div
+                className={`text-[13px] font-medium leading-5 font-sans transition-colors duration-300 ${billingPeriod === "annually" ? "text-[#37322F]" : "text-[#6B7280]"
+                  }`}
+              >
+                Annually
               </div>
             </button>
           </div>
@@ -127,8 +127,8 @@ export default function PricingSection() {
               <div className="self-stretch flex flex-col justify-start items-center gap-9">
                 <div className="self-stretch flex flex-col justify-start items-start gap-2">
                   <div className="text-[rgba(55,50,47,0.90)] text-lg font-medium leading-7 font-sans">Starter</div>
-                  <div className="w-full max-w-[242px] text-[rgba(41,37,35,0.70)] text-sm font-normal leading-5 font-sans">
-                    Perfect for individuals and small teams getting started.
+                  <div className="w-full max-w-[242px] min-h-[80px] text-[rgba(41,37,35,0.70)] text-sm font-normal leading-5 font-sans">
+                    Get started for free. Perfect for casual exploration and light study sessions.
                   </div>
                 </div>
 
@@ -160,7 +160,7 @@ export default function PricingSection() {
                       </span>
                     </div>
                     <div className="text-[#847971] text-sm font-medium font-sans pb-2">
-                      per {billingPeriod === "monthly" ? "month" : "year"}, per user.
+                      {billingPeriod === "annually" ? "USD / year" : "USD / month"}
                     </div>
                   </div>
                 </div>
@@ -178,11 +178,11 @@ export default function PricingSection() {
 
               <div className="self-stretch flex flex-col justify-start items-start gap-2">
                 {[
-                  "Up to 3 projects",
-                  "Basic documentation tools",
+                  "25 units per day",
+                  "Basic AI-powered learning",
+                  "Document upload (up to 50MB)",
+                  "Knowledge graph visualization",
                   "Community support",
-                  "Standard templates",
-                  "Basic analytics",
                 ].map((feature, index) => (
                   <div key={index} className="self-stretch flex justify-start items-center gap-[13px]">
                     <div className="w-4 h-4 relative flex items-center justify-center">
@@ -209,9 +209,9 @@ export default function PricingSection() {
               {/* Plan Header */}
               <div className="self-stretch flex flex-col justify-start items-center gap-9">
                 <div className="self-stretch flex flex-col justify-start items-start gap-2">
-                  <div className="text-[#FBFAF9] text-lg font-medium leading-7 font-sans">Professional</div>
-                  <div className="w-full max-w-[242px] text-[#B2AEA9] text-sm font-normal leading-5 font-sans">
-                    Advanced features for growing teams and businesses.
+                  <div className="text-[#FBFAF9] text-lg font-medium leading-7 font-sans">Learner</div>
+                  <div className="w-full max-w-[242px] min-h-[80px] text-[#B2AEA9] text-sm font-normal leading-5 font-sans">
+                    Enhanced learning for serious students, with generous monthly limits to keep up with your study pace.
                   </div>
                 </div>
 
@@ -243,7 +243,7 @@ export default function PricingSection() {
                       </span>
                     </div>
                     <div className="text-[#D2C6BF] text-sm font-medium font-sans pb-2">
-                      per {billingPeriod === "monthly" ? "month" : "year"}, per user.
+                      {billingPeriod === "annually" ? "USD / year" : "USD / month"}
                     </div>
                   </div>
                 </div>
@@ -259,14 +259,14 @@ export default function PricingSection() {
 
               <div className="self-stretch flex flex-col justify-start items-start gap-2">
                 {[
-                  "Unlimited projects",
-                  "Advanced documentation tools",
+                  "50 free units per day + 3,000 monthly credits",
+                  "Priority AI model access",
+                  "Unlimited document uploads",
+                  "Advanced knowledge graph",
                   "Priority support",
+                  "Export to markdown",
+                  "Web search integration",
                   "Custom templates",
-                  "Advanced analytics",
-                  "Team collaboration",
-                  "API access",
-                  "Custom integrations",
                 ].map((feature, index) => (
                   <div key={index} className="self-stretch flex justify-start items-center gap-[13px]">
                     <div className="w-4 h-4 relative flex items-center justify-center">
@@ -291,9 +291,9 @@ export default function PricingSection() {
               {/* Plan Header */}
               <div className="self-stretch flex flex-col justify-start items-center gap-9">
                 <div className="self-stretch flex flex-col justify-start items-start gap-2">
-                  <div className="text-[rgba(55,50,47,0.90)] text-lg font-medium leading-7 font-sans">Enterprise</div>
-                  <div className="w-full max-w-[242px] text-[rgba(41,37,35,0.70)] text-sm font-normal leading-5 font-sans">
-                    Complete solution for large organizations and enterprises.
+                  <div className="text-[rgba(55,50,47,0.90)] text-lg font-medium leading-7 font-sans">Master</div>
+                  <div className="w-full max-w-[242px] min-h-[80px] text-[rgba(41,37,35,0.70)] text-sm font-normal leading-5 font-sans">
+                    Unlimited access for institutions and power users. No practical limits on learning.
                   </div>
                 </div>
 
@@ -325,7 +325,7 @@ export default function PricingSection() {
                       </span>
                     </div>
                     <div className="text-[#847971] text-sm font-medium font-sans pb-2">
-                      per {billingPeriod === "monthly" ? "month" : "year"}, per user.
+                      {billingPeriod === "annually" ? "USD / year" : "USD / month"}
                     </div>
                   </div>
                 </div>
@@ -340,14 +340,14 @@ export default function PricingSection() {
 
               <div className="self-stretch flex flex-col justify-start items-start gap-2">
                 {[
-                  "Everything in Professional",
-                  "Dedicated account manager",
-                  "24/7 phone support",
-                  "Custom onboarding",
-                  "Advanced security features",
-                  "SSO integration",
-                  "Custom contracts",
-                  "White-label options",
+                  "200 free units per day + 15,000 monthly credits",
+                  "Everything in Learner",
+                  "Highest priority AI access",
+                  "Dedicated support channel",
+                  "Early access to new features",
+                  "Advanced analytics",
+                  "Team collaboration (coming soon)",
+                  "API access (coming soon)",
                 ].map((feature, index) => (
                   <div key={index} className="self-stretch flex justify-start items-center gap-[13px]">
                     <div className="w-4 h-4 relative flex items-center justify-center">

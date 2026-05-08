@@ -7,50 +7,50 @@ import { useAuthStore } from "../auth/hooks/useAuthStore";
 const PLANS = [
   {
     tier: "free",
-    name: "Free",
-    description: "Perfect for individuals getting started.",
+    name: "Starter",
+    description: "Get started for free. Perfect for casual exploration and light study sessions.",
     monthly_price: 0,
-    annual_price: 0,
+    annual_price: null,
     features: [
-      "Up to 3 projects",
-      "Basic documentation tools",
+      "25 units per day",
+      "Basic AI-powered learning",
+      "Document upload (up to 50MB)",
+      "Knowledge graph visualization",
       "Community support",
-      "Standard templates",
-      "Basic analytics",
     ],
   },
   {
     tier: "pro",
-    name: "Pro",
-    description: "Advanced features for growing teams and businesses.",
+    name: "Learner",
+    description: "Enhanced learning for serious students, with generous monthly limits to keep up with your study pace.",
     monthly_price: 4,
     annual_price: 40,
     features: [
-      "Unlimited projects",
-      "Advanced documentation tools",
+      "50 free units per day + 3,000 monthly credits",
+      "Priority AI model access",
+      "Unlimited document uploads",
+      "Advanced knowledge graph",
       "Priority support",
+      "Export to markdown",
+      "Web search integration",
       "Custom templates",
-      "Advanced analytics",
-      "Team collaboration",
-      "API access",
-      "Custom integrations",
     ],
   },
   {
     tier: "enterprise",
-    name: "Enterprise",
-    description: "Complete solution for large organizations and enterprises.",
+    name: "Master",
+    description: "Unlimited access for institutions and power users. No practical limits on learning.",
     monthly_price: 11,
     annual_price: 100,
     features: [
-      "Everything in Pro",
-      "Dedicated account manager",
-      "24/7 phone support",
-      "Custom onboarding",
-      "Advanced security features",
-      "SSO integration",
-      "Custom contracts",
-      "White-label options",
+      "200 free units per day + 15,000 monthly credits",
+      "Everything in Learner",
+      "Highest priority AI access",
+      "Dedicated support channel",
+      "Early access to new features",
+      "Advanced analytics",
+      "Team collaboration (coming soon)",
+      "API access (coming soon)",
     ],
   },
 ];
@@ -78,12 +78,11 @@ export function PlansPage() {
   } | null>(null);
   const [isRedeeming, setIsRedeeming] = useState(false);
 
-  const getDisplayPrice = (plan: typeof PLANS[number]) =>
-    billingPeriod === "annually" ? plan.annual_price : plan.monthly_price;
-
-  const getPriceLabel = (plan: typeof PLANS[number]) => {
-    if (plan.monthly_price === 0) return "free forever";
-    return billingPeriod === "annually" ? "per year, per user." : "per month, per user.";
+  const getMonthlyDisplay = (plan: typeof PLANS[number]) => {
+    if (billingPeriod === "annually" && plan.annual_price != null) {
+      return (plan.annual_price / 12).toFixed(2);
+    }
+    return plan.monthly_price.toFixed(0);
   };
 
   useEffect(() => {
@@ -199,88 +198,97 @@ export function PlansPage() {
         {/* Plan cards */}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 min-h-0 shrink">
           {PLANS.map((plan) => {
+            const isPaid = plan.tier !== "free";
             const isPro = plan.tier === "pro";
-            const isFirst = TIER_ORDER.indexOf(plan.tier) === 0;
-            const displayPrice = getDisplayPrice(plan);
+            const isCurrent = TIER_ORDER.indexOf(plan.tier) === 0;
+            const monthlyDisplay = getMonthlyDisplay(plan);
 
             return (
               <div
                 key={plan.tier}
-                className={`relative flex flex-col rounded-2xl border px-5 pt-5 pb-10 overflow-hidden min-h-0 ${
-                  isPro ? "bg-[#37322F] border-[rgba(55,50,47,0.12)]" : "bg-white border-[#E0DEDB]"
+                className={`relative flex min-h-0 flex-col rounded-2xl border-2 p-5 overflow-hidden ${
+                  isPro
+                    ? `bg-[#37322F] ${isCurrent ? "border-white" : "border-[rgba(55,50,47,0.12)]"}`
+                    : `bg-white ${isCurrent ? "border-[#37322F]" : "border-[#E0DEDB]"}`
                 }`}
               >
                 {/* Header */}
-                <div className="shrink-0">
+                <div className="min-h-[80px] shrink-0">
                   <h3 className={`text-sm font-semibold ${isPro ? "text-[#FBFAF9]" : "text-[#37322F]"}`}>
                     {plan.name}
                   </h3>
-                  <p className={`mt-0.5 text-[11px] leading-tight ${isPro ? "text-[#B2AEA9]" : "text-[#847971]"}`}>
+                  <p className={`mt-1 text-xs leading-relaxed ${isPro ? "text-[#B2AEA9]" : "text-[#847971]"}`}>
                     {plan.description}
                   </p>
                 </div>
 
                 {/* Price */}
-                <div className="mt-3 mb-2 shrink-0">
-                  <div className="flex flex-col gap-0">
-                    <div
-                      className={`relative h-[36px] flex items-center text-4xl font-medium leading-[36px] ${
-                        isPro ? "text-[#F0EFEE]" : "text-[#37322F]"
-                      }`}
-                      style={{ fontFamily: "'Instrument Serif', serif" }}
-                    >
-                      <span className="invisible">${displayPrice}</span>
-                      <span
-                        className="absolute inset-0 flex items-center transition-all duration-500"
-                        style={{
-                          opacity: billingPeriod === "monthly" ? 1 : 0,
-                          transform: `scale(${billingPeriod === "monthly" ? 1 : 0.8})`,
-                          filter: `blur(${billingPeriod === "monthly" ? 0 : 4}px)`,
-                        }}
-                        aria-hidden={billingPeriod !== "monthly"}
+                <div className="mt-4 mb-2 min-h-[85px] shrink-0">
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-end gap-2">
+                      <div
+                        className={`relative h-[52px] flex items-center text-5xl font-medium leading-[60px] ${
+                          isPro ? "text-[#F0EFEE]" : "text-[#37322F]"
+                        }`}
+                        style={{ fontFamily: "'Instrument Serif', serif" }}
                       >
-                        ${plan.monthly_price}
-                      </span>
-                      <span
-                        className="absolute inset-0 flex items-center transition-all duration-500"
-                        style={{
-                          opacity: billingPeriod === "annually" ? 1 : 0,
-                          transform: `scale(${billingPeriod === "annually" ? 1 : 0.8})`,
-                          filter: `blur(${billingPeriod === "annually" ? 0 : 4}px)`,
-                        }}
-                        aria-hidden={billingPeriod !== "annually"}
-                      >
-                        ${plan.annual_price}
-                      </span>
+                        <span className="invisible">${monthlyDisplay}</span>
+                        <span
+                          className="absolute inset-0 flex items-center transition-all duration-500"
+                          style={{
+                            opacity: billingPeriod === "monthly" ? 1 : 0,
+                            transform: `scale(${billingPeriod === "monthly" ? 1 : 0.8})`,
+                            filter: `blur(${billingPeriod === "monthly" ? 0 : 4}px)`,
+                          }}
+                          aria-hidden={billingPeriod !== "monthly"}
+                        >
+                          ${plan.monthly_price.toFixed(0)}
+                        </span>
+                        <span
+                          className="absolute inset-0 flex items-center transition-all duration-500"
+                          style={{
+                            opacity: billingPeriod === "annually" ? 1 : 0,
+                            transform: `scale(${billingPeriod === "annually" ? 1 : 0.8})`,
+                            filter: `blur(${billingPeriod === "annually" ? 0 : 4}px)`,
+                          }}
+                          aria-hidden={billingPeriod !== "annually"}
+                        >
+                          ${plan.annual_price != null ? (plan.annual_price / 12).toFixed(2) : plan.monthly_price.toFixed(0)}
+                        </span>
+                      </div>
+                      <div className={`pb-3 text-xs font-medium ${isPro ? "text-[#D2C6BF]" : "text-[#847971]"}`}>
+                        USD / month
+                      </div>
                     </div>
-                    <p className={`text-[11px] ${isPro ? "text-[#9A9490]" : "text-[#847971]"}`}>
-                      {getPriceLabel(plan)}
+                    <p className={`min-h-[14px] text-[11px] ${isPro ? "text-[#9A9490]" : "text-[#847971]"}`}>
+                      {billingPeriod === "annually" && plan.annual_price != null ? `billed annually at $${plan.annual_price}` : ""}
                     </p>
                   </div>
                 </div>
 
                 {/* CTA */}
-                <div className="mb-3 shrink-0 mt-3">
-                  {isFirst ? (
-                    <div className={`w-full rounded-lg px-4 py-1.5 text-center text-xs font-medium border border-[#E0DEDB] text-[#B0ACA8]`}>
-                      Current plan
-                    </div>
-                  ) : (
-                    <div
-                      className={`w-full rounded-lg px-4 py-1.5 text-center text-xs font-medium opacity-60 ${
-                        isPro ? "bg-white/80 text-[#37322F]" : "bg-[#37322F]/60 text-white"
+                <div className="mb-5 mt-3 shrink-0">
+                  {isPaid ? (
+                    <button
+                      disabled
+                      className={`w-full rounded-lg px-4 py-2 text-[13px] font-semibold cursor-not-allowed ${
+                        isPro ? "bg-white/90 text-[#37322F]/60" : "bg-[#37322F]/80 text-white/80"
                       }`}
                     >
                       Coming soon
+                    </button>
+                  ) : (
+                    <div className="w-full rounded-lg bg-[#37322F] px-4 py-2 text-center text-[13px] font-semibold text-white">
+                      Current plan
                     </div>
                   )}
                 </div>
 
                 {/* Divider */}
-                <div className={`mb-3 h-px shrink-0 ${isPro ? "bg-white/10" : "bg-[#E0DEDB]"}`} />
+                <div className={`mb-4 h-px shrink-0 ${isPro ? "bg-white/10" : "bg-[#E0DEDB]"}`} />
 
                 {/* Features */}
-                <ul className="flex flex-col gap-2 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                <ul className="flex flex-1 flex-col gap-2">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-start gap-2">
                       <Check
@@ -288,7 +296,7 @@ export function PlansPage() {
                         className={`mt-0.5 shrink-0 ${isPro ? "text-orange-400" : "text-[#9CA3AF]"}`}
                         strokeWidth={2}
                       />
-                      <span className={`text-[11px] leading-tight ${isPro ? "text-[#D9D5D2]" : "text-[#605A57]"}`}>
+                      <span className={`text-xs leading-relaxed ${isPro ? "text-[#D9D5D2]" : "text-[#605A57]"}`}>
                         {f}
                       </span>
                     </li>
