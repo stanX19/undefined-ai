@@ -1,0 +1,45 @@
+{
+  "text": "```json\n[\n  {\n    \"summary\": \"An operating system (OS) is essential software that manages and coordinates a computer's hardware and applications by allocating resources and performing core functions such as process, memory, and file management, with its central kernel enabling user interaction through graphical or command-line interfaces.\",\n    \"source_indices\": [\n      0,\n      1,\n      2\n    ]\n  },\n  {\n    \"summary\": \"Microsoft Windows is the most widely used OS globally for personal and business use, dominating desktop, tablet, and console markets, while Apple's macOS ranks second; in the mobile market, Google's open-source Android leads, followed by Apple's proprietary iOS, and Linux is the most popular open-source OS, favored for its flexibility and security across desktops, servers, and embedded systems.\",\n    \"source_indices\": [\n      3,\n      4,\n      5\n    ]\n  },\n  {\n    \"summary\": \"The history of operating systems began with early computers requiring customized software, evolving to support multitasking and interactive interfaces, a development significantly boosted by 1950s integrated circuits; key milestones include IBM's 1964 OS/360, the first multiprogramming OS, and the 1960s/70s Unix, which introduced time-sharing, multitasking, and portability, while GPUs later became standard for graphics processing.\",\n    \"source_indices\": [\n      6,\n      7,\n      8\n    ]\n  },\n  {\n    \"summary\": \"Modern computing employs virtualization, enabling multiple virtual machines on a single physical machine managed by a hypervisor, and containerization for lighter, isolated applications; additionally, specialized operating systems include embedded OS for resource-constrained devices, real-time OS for time-sensitive tasks, and distributed, network, or cluster operating systems for coordinating multiple computers and managing shared resources.\",\n    \"source_indices\": [\n      9,\n      10,\n      11\n    ]\n  },\n  {\n    \"summary\": \"The AI operating systems market is projected for significant growth, driven by AI-powered OS that leverage machine learning and automation to predict user behaviors, optimize resource allocation, adapt workloads, and enhance security in systems like Windows and macOS.\",\n    \"source_indices\": [\n      12\n    ]\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...2QpdOtfUUs}",
+  "status": "ok",
+  "json_data": [
+    {
+      "summary": "An operating system (OS) is essential software that manages and coordinates a computer's hardware and applications by allocating resources and performing core functions such as process, memory, and file management, with its central kernel enabling user interaction through graphical or command-line interfaces.",
+      "source_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "summary": "Microsoft Windows is the most widely used OS globally for personal and business use, dominating desktop, tablet, and console markets, while Apple's macOS ranks second; in the mobile market, Google's open-source Android leads, followed by Apple's proprietary iOS, and Linux is the most popular open-source OS, favored for its flexibility and security across desktops, servers, and embedded systems.",
+      "source_indices": [
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "summary": "The history of operating systems began with early computers requiring customized software, evolving to support multitasking and interactive interfaces, a development significantly boosted by 1950s integrated circuits; key milestones include IBM's 1964 OS/360, the first multiprogramming OS, and the 1960s/70s Unix, which introduced time-sharing, multitasking, and portability, while GPUs later became standard for graphics processing.",
+      "source_indices": [
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "summary": "Modern computing employs virtualization, enabling multiple virtual machines on a single physical machine managed by a hypervisor, and containerization for lighter, isolated applications; additionally, specialized operating systems include embedded OS for resource-constrained devices, real-time OS for time-sensitive tasks, and distributed, network, or cluster operating systems for coordinating multiple computers and managing shared resources.",
+      "source_indices": [
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "summary": "The AI operating systems market is projected for significant growth, driven by AI-powered OS that leverage machine learning and automation to predict user behaviors, optimize resource allocation, adapt workloads, and enhance security in systems like Windows and macOS.",
+      "source_indices": [
+        12
+      ]
+    }
+  ]
+}

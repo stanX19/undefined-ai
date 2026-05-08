@@ -5,16 +5,22 @@ MarkGraph state wholesale. Automatically reiterates if the parser finds syntax e
 Called by the ``edit_ui`` chatbot tool.
 """
 from dataclasses import dataclass
+import asyncio
 import traceback
 
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, BaseMessage
 from sqlalchemy import select
 
 from srcs.config import get_settings
+from srcs.logger import logger
 from srcs.models.topic import Topic
 from srcs.models.user import User
-from srcs.services.agents.rotating_llm import rotating_llm, LLMResponse
-from srcs.services.agents.prompts.ui_agent import UI_AGENT_PROMPT, UI_PLANNER_PROMPT
+from srcs.services.agents.rotating_llm import rotating_llm, LLMResponse, RotatingLLM
+from srcs.services.agents.prompts.ui_agent import (
+    UI_AGENT_PROMPT,
+    UI_PLANNER_PROMPT,
+    UI_SCENE_BUILDER_PROMPT,
+)
 from srcs.services.agents.id_mapper import current_mapper
 from srcs.services.usage_service import UsageService
 from srcs.utils.markgraph.markgraph_parser import compile_markgraph, export_to_dict
@@ -66,49 +72,169 @@ class UIAgent:
             return {"error": str(exc)}
 
     async def plan_and_edit(self, topic_id: str, prompt: str) -> dict:
-        """Two-step UI editing: first plan the architecture, then generate MarkGraph.
+        """Two-step UI editing: plan, then build all scenes in parallel.
 
-        This is used for complex full-document rewrites with many facts.
+        Used for complex full-document rewrites with many facts. The planner emits
+        a strict JSON scene blueprint; the backend then fans out one LLM call per
+        scene and stitches the results. Falls back to single-shot generation if
+        the JSON plan is unparseable or stitched output fails MarkGraph validation.
         """
         charge_ctx: UIChargeContext | None = None
         try:
             charge_ctx = await self._charge_generation_units(topic_id)
             current_ui = charge_ctx.current_ui
 
-            planning_messages = [
-                SystemMessage(content=UI_PLANNER_PROMPT),
-                HumanMessage(content=(
-                    f"Topic ID: {current_mapper().shorten(topic_id, prefix='T')}\n\n"
-                    f"=== CURRENT FULL UI STATE ===\n{current_ui}\n=== END UI STATE ===\n\n"
-                    f"Instruction: {prompt}"
-                )),
-            ]
-            planner_response: LLMResponse = await rotating_llm.send_message(planning_messages, temperature=0.2)
-            plan_content = planner_response.text
+            plan_json = await self._plan_scene_blueprint(topic_id, prompt, current_ui)
 
-            augmented_prompt = (
-                f"{prompt}\n\n"
-                f"=== UI ARCHITECT PLAN ===\n"
-                f"{plan_content}\n"
-                f"=== END PLAN ===\n\n"
-                f"CRITICAL: The Scene name and ALL link ids **MUST** follow the provided plan to ensure its ACTUALLY CONNECTED\n"
-                f"Please generate the full MarkGraph document strictly following the logic and structure defined in the plan above."
-            )
+            # Fallback: planner did not return parseable JSON → use existing serial path
+            # so we never regress below current behaviour.
+            if not plan_json or not isinstance(plan_json.get("scenes"), list) or not plan_json["scenes"]:
+                logger.info("[UIAgent] Planner JSON missing/empty — falling back to serial generation")
+                result = await self._edit_with_current_ui(
+                    topic_id=topic_id,
+                    prompt=prompt,
+                    current_ui=current_ui,
+                    header_name=None,
+                )
+                if "error" in result:
+                    await self._refund_generation_units(charge_ctx)
+                return result
 
-            result = await self._edit_with_current_ui(
+            stitched = await self._build_scenes_in_parallel(
                 topic_id=topic_id,
-                prompt=augmented_prompt,
-                current_ui=current_ui,
-                header_name=None,
+                user_prompt=prompt,
+                plan_json=plan_json,
             )
-            if "error" in result:
-                await self._refund_generation_units(charge_ctx)
-            return result
+
+            # Validate stitched output. If it's invalid, fall back to single-shot
+            # generation rather than pushing a broken document.
+            full_result = compile_markgraph(stitched)
+            if full_result.errors:
+                first_err = full_result.errors[0]
+                logger.warning(
+                    "[UIAgent] Parallel stitched output invalid (line %s: %s) — falling back to serial",
+                    first_err.line, first_err.message,
+                )
+                result = await self._edit_with_current_ui(
+                    topic_id=topic_id,
+                    prompt=prompt,
+                    current_ui=current_ui,
+                    header_name=None,
+                )
+                if "error" in result:
+                    await self._refund_generation_units(charge_ctx)
+                return result
+
+            from srcs.database import AsyncSessionLocal
+            from srcs.services.ui_service import UIService
+
+            async with AsyncSessionLocal() as db:
+                await UIService.push_ui_version(db, topic_id, stitched)
+
+            ast_dict = export_to_dict(full_result.scenes)
+            return {
+                "ui_json": {
+                    "version": "0.2",
+                    "scenes": ast_dict,
+                    "id_map": {k: export_to_dict(v) for k, v in full_result.id_map.items()},
+                },
+                "ui_markdown": stitched,
+            }
         except Exception as exc:
             if charge_ctx is not None:
                 await self._refund_generation_units(charge_ctx)
             traceback.print_exc()
             return {"error": f"Planning phase failed: {exc}"}
+
+    async def _plan_scene_blueprint(
+        self, topic_id: str, prompt: str, current_ui: str,
+    ) -> dict | None:
+        """Run the planner and return the parsed JSON blueprint, or None if unusable."""
+        planning_messages = [
+            SystemMessage(content=UI_PLANNER_PROMPT),
+            HumanMessage(content=(
+                f"Topic ID: {current_mapper().shorten(topic_id, prefix='T')}\n\n"
+                f"=== CURRENT FULL UI STATE ===\n{current_ui}\n=== END UI STATE ===\n\n"
+                f"Instruction: {prompt}"
+            )),
+        ]
+        try:
+            planner_response: LLMResponse = await rotating_llm.send_message_get_json(
+                planning_messages, temperature=0.2, retry=2,
+            )
+        except Exception as exc:
+            logger.warning("[UIAgent] Planner JSON parse failed: %s", exc)
+            return None
+
+        plan = planner_response.json_data
+        if not isinstance(plan, dict):
+            return None
+        return plan
+
+    async def _build_scenes_in_parallel(
+        self, topic_id: str, user_prompt: str, plan_json: dict,
+    ) -> str:
+        """Fan out one LLM call per scene and stitch the results in plan order.
+
+        Returns the stitched MarkGraph document. Does NOT validate or persist —
+        the caller is responsible for compile_markgraph + push_ui_version.
+        """
+        scenes = plan_json["scenes"]
+        plan_blob = self._format_plan_for_scene_builder(plan_json)
+        topic_short = current_mapper().shorten(topic_id, prefix="T")
+
+        async def build_one(scene_spec: dict) -> str:
+            return await self._build_one_scene(
+                topic_short=topic_short,
+                user_prompt=user_prompt,
+                plan_blob=plan_blob,
+                scene_spec=scene_spec,
+            )
+
+        # Run all scene builders concurrently. asyncio.gather preserves input order
+        # so the stitched document matches plan_json["scenes"] order.
+        scene_markdowns = await asyncio.gather(*(build_one(s) for s in scenes))
+        # Strip per-scene whitespace and join with a single blank line between scenes.
+        return "\n\n".join(md.strip() for md in scene_markdowns if md and md.strip())
+
+    @staticmethod
+    def _format_plan_for_scene_builder(plan_json: dict) -> str:
+        """Format the full plan as a compact text blob to pass to each scene builder."""
+        import json as _json
+        try:
+            return _json.dumps(plan_json, indent=2, ensure_ascii=False)
+        except Exception:
+            return str(plan_json)
+
+    async def _build_one_scene(
+        self, topic_short: str, user_prompt: str, plan_blob: str, scene_spec: dict,
+    ) -> str:
+        """Generate one MarkGraph scene from a plan entry. Returns raw markdown."""
+        scene_id = scene_spec.get("id", "")
+        scene_name = scene_spec.get("name", scene_id)
+        scene_role = scene_spec.get("role", "detail")
+
+        system_content = UI_SCENE_BUILDER_PROMPT + "\n\n" + MARKGRAPH_SPEC
+        human_content = (
+            f"Topic ID: {topic_short}\n\n"
+            f"Original user instruction: {user_prompt}\n\n"
+            f"=== FULL PLAN (all scenes) ===\n{plan_blob}\n=== END PLAN ===\n\n"
+            f"=== YOUR SCENE TO BUILD ===\n"
+            f"id: {scene_id}\n"
+            f"name: {scene_name}\n"
+            f"role: {scene_role}\n"
+            f"=== END YOUR SCENE ===\n\n"
+            f"Output ONLY the raw MarkGraph for this single scene, starting with "
+            f"`# {scene_name} {{#{scene_id}}}`."
+        )
+
+        messages: list[BaseMessage] = [
+            SystemMessage(content=system_content),
+            HumanMessage(content=human_content),
+        ]
+        response: LLMResponse = await rotating_llm.send_message(messages, temperature=0.3)
+        return RotatingLLM.strip_code_block(response.text)
+
 
     async def _edit_with_current_ui(
         self,

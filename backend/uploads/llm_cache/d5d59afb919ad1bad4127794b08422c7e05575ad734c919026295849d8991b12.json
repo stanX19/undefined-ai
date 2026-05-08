@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Web Application Security\",\n    \"difficulty\": 4,\n    \"reason\": \"This topic builds on basic cybersecurity principles by focusing on vulnerabilities and defenses specific to web applications, a critical attack vector today.\"\n  },\n  {\n    \"title\": \"Security Architecture and Design\",\n    \"difficulty\": 5,\n    \"reason\": \"Moving beyond basic defenses, this topic teaches how to systematically design and build secure systems and infrastructures from the ground up, integrating security throughout the lifecycle.\"\n  },\n  {\n    \"title\": \"Formal Methods in Security\",\n    \"difficulty\": 6,\n    \"reason\": \"This advanced research area explores the use of mathematical logic and rigorous proof techniques to formally verify the correctness and security properties of systems and protocols.\"\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...F-_QjMhS4A}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Web Application Security",
+      "difficulty": 4,
+      "reason": "This topic builds on basic cybersecurity principles by focusing on vulnerabilities and defenses specific to web applications, a critical attack vector today."
+    },
+    {
+      "title": "Security Architecture and Design",
+      "difficulty": 5,
+      "reason": "Moving beyond basic defenses, this topic teaches how to systematically design and build secure systems and infrastructures from the ground up, integrating security throughout the lifecycle."
+    },
+    {
+      "title": "Formal Methods in Security",
+      "difficulty": 6,
+      "reason": "This advanced research area explores the use of mathematical logic and rigorous proof techniques to formally verify the correctness and security properties of systems and protocols."
+    }
+  ]
+}
