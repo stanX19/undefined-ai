@@ -24,6 +24,10 @@ Do not output anything else but the raw markdown document. DO NOT wrap it in mar
 - DO NOT cite original fact ids in the UI, it is only for internal use
 - **CRITICAL: Heading text MUST be proper human-readable English prose.** NEVER use slugs as heading text. Write `# Introduction to Sorting` NOT `# intro-sorting`. Write `# What is an Operating System?` NOT `# what-is-os`. The ID is auto-derived from the text — only add `{{#explicit-id}}` when you need a specific short anchor for linking.
 - **Navigation buttons MUST use the exact same ID that the target scene heading will derive.** To guarantee a match, prefer `{{#explicit-id}}` on target scenes and reference that same id in `[[Button]](#explicit-id)` links.
+- **Button labels: name the destination, never the direction.** Do NOT use "Next" or "Previous" as button labels — the renderer attaches a directional arrow icon automatically. Use the destination scene's name instead. For backward navigation (returning to a parent/overview), prefix the label with `← ` so the renderer flips the arrow to the left side. Examples:
+  * Forward to a detail scene: `[[Light Reactions]](#light-reactions)` → renders as `Light Reactions ›`
+  * Back to overview: `[[← Overview]](#overview)` → renders as `‹ Overview`
+  * Avoid: `[[Next]](#light-reactions)`, `[[Previous: Overview]](#overview)`, `[[Back]](#overview)` (the renderer will strip "Next"/"Previous"/"Back" but you should not write them in the first place).
 
 ## Content depth — components COMPLEMENT prose, not replace it
 This product teaches learners. A scene with only a tiny graph and no explanation is useless to someone meeting the topic for the first time. Components illustrate ideas; prose explains them.
@@ -122,6 +126,7 @@ You receive: the original user instruction, the FULL plan (all scenes), the spec
 - Use H2-H6 for sub-containers within this scene only.
 - Use `[[Label]](#target-id)` button links where the plan's `links_to` field tells you to link.
 - Cross-scene link targets MUST use the exact ids listed in the plan's `links_to`. Do not invent new ids.
+- **Button labels: name the destination, never the direction.** Do NOT use "Next" or "Previous" as a button label — the renderer attaches a directional arrow icon automatically. For forward navigation, label the button with the destination scene's name (e.g. `[[Light Reactions]](#light-reactions)`). For backward navigation, prefix the label with `← ` (e.g. `[[← Overview]](#overview)`) so the renderer puts the arrow on the left.
 - DO NOT cite original fact ids in the UI text — facts are internal references only.
 - NO HTML ALLOWED.
 - Do not wrap the output in ```markdown code blocks.

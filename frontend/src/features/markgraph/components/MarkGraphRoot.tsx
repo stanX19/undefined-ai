@@ -51,6 +51,43 @@ function hasCardAttr(attrs: { name: string }[]): boolean {
   return attrs.some((a) => a.name === "card");
 }
 
+/**
+ * Decide which side the directional chevron should sit on for a nav button,
+ * and strip any literal "Next" / "Previous" / "Back" word from the visible label.
+ *
+ * Recognised inputs:
+ *  - "← Introduction"           → { text: "Introduction", direction: "prev" }
+ *  - "Light Reactions →"        → { text: "Light Reactions", direction: "next" }
+ *  - "Previous: Introduction"   → { text: "Introduction", direction: "prev" }
+ *  - "Back to Overview"         → { text: "Overview", direction: "prev" }
+ *  - "Next — Light Reactions"   → { text: "Light Reactions", direction: "next" }
+ *  - "Continue"                 → { text: "Continue", direction: "next" }   (default)
+ */
+function parseNavLabel(rawLabel: string): { text: string; direction: "prev" | "next" } {
+  const label = rawLabel.trim();
+
+  if (/^[←⟵]\s*/.test(label)) {
+    return { text: label.replace(/^[←⟵]\s*/, "").trim(), direction: "prev" };
+  }
+  if (/\s*[→⟶]$/.test(label)) {
+    return { text: label.replace(/\s*[→⟶]$/, "").trim(), direction: "next" };
+  }
+
+  const prevMatch = label.match(/^(?:previous|prev|back)(?:\s+to)?\s*[:\-—–]?\s*(.*)$/i);
+  if (prevMatch) {
+    const tail = prevMatch[1].trim();
+    return { text: tail.length > 0 ? tail : "Back", direction: "prev" };
+  }
+
+  const nextMatch = label.match(/^(?:next|continue)\s*[:\-—–]?\s*(.*)$/i);
+  if (nextMatch) {
+    const tail = nextMatch[1].trim();
+    return { text: tail.length > 0 ? tail : "Continue", direction: "next" };
+  }
+
+  return { text: label, direction: "next" };
+}
+
 /* ── element renderer ────────────────────────────────────────────────────── */
 
 function ElementRenderer({ element }: { element: MarkGraphElement }) {
@@ -178,14 +215,21 @@ function ElementRenderer({ element }: { element: MarkGraphElement }) {
             if (frag.type === "RedirLink") {
               const targetId = frag.target.replace(/^#/, "");
               if (frag.kind === "button") {
+                const { text, direction } = parseNavLabel(frag.label);
                 return (
                   <button
                     key={i}
                     onClick={() => useMarkGraphStore.getState().navigateScene(targetId)}
                     className="inline-flex items-center gap-1.5 px-4 py-2.5 text-[14px] font-semibold text-[#1a1a1a] bg-gray-100 hover:bg-gray-200 border border-gray-200/80 rounded-xl transition-all duration-200 hover:shadow-sm hover:border-gray-300 active:scale-[0.98] mt-2 mr-3"
+                    aria-label={direction === "prev" ? `Back to ${text}` : `Continue to ${text}`}
                   >
-                    {frag.label}
-                    <ChevronRight size={16} className="text-gray-500 -mr-0.5" />
+                    {direction === "prev" && (
+                      <ChevronLeft size={16} className="text-gray-500 -ml-0.5" />
+                    )}
+                    {text}
+                    {direction === "next" && (
+                      <ChevronRight size={16} className="text-gray-500 -mr-0.5" />
+                    )}
                   </button>
                 );
               } else {
@@ -287,17 +331,24 @@ function ElementRenderer({ element }: { element: MarkGraphElement }) {
     return <GraphBlockView block={element} />;
   }
   if (element.type === "RedirLink") {
+    const { text, direction } = parseNavLabel(element.label);
     return (
-      <button 
+      <button
         id={element.target?.replace(/^#/, '') + '-btn'}
         onClick={() => {
           const targetId = element.target.replace(/^#/, '');
           useMarkGraphStore.getState().navigateScene(targetId);
         }}
         className="inline-flex items-center gap-1.5 px-4 py-2.5 text-[14px] font-semibold text-[#1a1a1a] bg-gray-100 hover:bg-gray-200 border border-gray-200/80 rounded-xl transition-all duration-200 hover:shadow-sm hover:border-gray-300 active:scale-[0.98] mr-3"
+        aria-label={direction === "prev" ? `Back to ${text}` : `Continue to ${text}`}
       >
-        {element.label}
-        <ChevronRight size={16} className="text-gray-500 -mr-0.5" />
+        {direction === "prev" && (
+          <ChevronLeft size={16} className="text-gray-500 -ml-0.5" />
+        )}
+        {text}
+        {direction === "next" && (
+          <ChevronRight size={16} className="text-gray-500 -mr-0.5" />
+        )}
       </button>
     );
   }
