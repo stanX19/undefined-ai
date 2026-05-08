@@ -1,0 +1,69 @@
+{
+  "text": "```json\n[\n  {\n    \"summary\": \"The \\\"Cybersecurity Basics\\\" document, published by NIST as part of its Small Business Cybersecurity Corner which provides various resources, was initially created on February 7, 2019, and subsequently updated on January 5, 2026.\",\n    \"source_indices\": [0, 1, 18, 20, 21]\n  },\n  {\n    \"summary\": \"NIST explicitly states that its identification of commercial entities or linked websites within the document does not imply recommendation or endorsement.\",\n    \"source_indices\": [19]\n  },\n  {\n    \"summary\": \"Cybersecurity is a continuous process where businesses must strive for continuous improvement in risk management, recognizing cyber threats as a business risk, and leveraging strong cybersecurity for a competitive advantage.\",\n    \"source_indices\": [2, 3, 4, 5]\n  },\n  {\n    \"summary\": \"Businesses should implement strong authentication practices by requiring strong, unique passwords, changing default manufacturer passwords, considering password managers, and mandating multi-factor authentication, especially phishing-resistant MFA, on all available accounts.\",\n    \"source_indices\": [6, 7, 10]\n  },\n  {\n    \"summary\": \"It is essential to install and maintain updated antivirus software and ensure all software is regularly updated and patched when new versions become available.\",\n    \"source_indices\": [11, 12]\n  },\n  {\n    \"summary\": \"Regular data backups are crucial, and businesses must establish and test measures to protect these backups effectively.\",\n    \"source_indices\": [8, 9]\n  },\n  {\n    \"summary\": \"Businesses should train employees on basic cybersecurity hygiene and educate them on how to protect themselves from phishing attacks.\",\n    \"source_indices\": [13, 14]\n  },\n  {\n    \"summary\": \"Several external resources are available to aid cybersecurity implementation, including NIST's Cybersecurity Framework Quick Start Guide for small businesses, CISA's Cyber Essentials Toolkit for IT and C-suite leadership, and a Department of Homeland Security guide for CEOs on discussing and implementing cyber risk management.\",\n    \"source_indices\": [15, 16, 17]\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...F-_QjMhS4A}",
+  "status": "ok",
+  "json_data": [
+    {
+      "summary": "The \"Cybersecurity Basics\" document, published by NIST as part of its Small Business Cybersecurity Corner which provides various resources, was initially created on February 7, 2019, and subsequently updated on January 5, 2026.",
+      "source_indices": [
+        0,
+        1,
+        18,
+        20,
+        21
+      ]
+    },
+    {
+      "summary": "NIST explicitly states that its identification of commercial entities or linked websites within the document does not imply recommendation or endorsement.",
+      "source_indices": [
+        19
+      ]
+    },
+    {
+      "summary": "Cybersecurity is a continuous process where businesses must strive for continuous improvement in risk management, recognizing cyber threats as a business risk, and leveraging strong cybersecurity for a competitive advantage.",
+      "source_indices": [
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "summary": "Businesses should implement strong authentication practices by requiring strong, unique passwords, changing default manufacturer passwords, considering password managers, and mandating multi-factor authentication, especially phishing-resistant MFA, on all available accounts.",
+      "source_indices": [
+        6,
+        7,
+        10
+      ]
+    },
+    {
+      "summary": "It is essential to install and maintain updated antivirus software and ensure all software is regularly updated and patched when new versions become available.",
+      "source_indices": [
+        11,
+        12
+      ]
+    },
+    {
+      "summary": "Regular data backups are crucial, and businesses must establish and test measures to protect these backups effectively.",
+      "source_indices": [
+        8,
+        9
+      ]
+    },
+    {
+      "summary": "Businesses should train employees on basic cybersecurity hygiene and educate them on how to protect themselves from phishing attacks.",
+      "source_indices": [
+        13,
+        14
+      ]
+    },
+    {
+      "summary": "Several external resources are available to aid cybersecurity implementation, including NIST's Cybersecurity Framework Quick Start Guide for small businesses, CISA's Cyber Essentials Toolkit for IT and C-suite leadership, and a Department of Homeland Security guide for CEOs on discussing and implementing cyber risk management.",
+      "source_indices": [
+        15,
+        16,
+        17
+      ]
+    }
+  ]
+}

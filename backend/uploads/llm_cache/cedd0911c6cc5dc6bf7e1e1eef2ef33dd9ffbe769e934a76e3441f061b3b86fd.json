@@ -1,0 +1,113 @@
+{
+  "text": "```json\n[\n  {\n    \"summary\": \"An operating system (OS) is essential software that manages and coordinates a computer's hardware and applications by allocating resources like memory, CPU, I/O, and file storage, enabling user interaction across all computer systems.\",\n    \"source_indices\": [0, 1, 3, 21]\n  },\n  {\n    \"summary\": \"The OS performs core functions such as process, memory, file, and device management, security, networking, and resource allocation, with the kernel as its central component, supported by specialized managers for scheduling, memory, I/O, and file systems.\",\n    \"source_indices\": [22, 23, 24, 25, 26, 27]\n  },\n  {\n    \"summary\": \"Users interact with an operating system through a user interface (UI), which can be either a graphical user interface (GUI) or a command-line interface (CLI).\",\n    \"source_indices\": [2]\n  },\n  {\n    \"summary\": \"Microsoft Windows is the most widely used OS globally for personal and business use, dominating the desktop, tablet, and console market with 67% share, while Apple's proprietary, Unix-like macOS ranks second for its desktops, laptops, and workstations.\",\n    \"source_indices\": [4, 5, 34, 35]\n  },\n  {\n    \"summary\": \"Android, an open-source mobile OS by Google, leads the mobile market with approximately 72.04% share, while Apple's proprietary iOS holds the second spot with 27.49% for its mobile devices.\",\n    \"source_indices\": [6, 7, 36, 37]\n  },\n  {\n    \"summary\": \"Linux is the most popular open-source operating system, favored for its flexibility and security, and is widely used in desktops, servers, and embedded systems.\",\n    \"source_indices\": [8, 33]\n  },\n  {\n    \"summary\": \"The history of operating systems began with early computers needing customized software for task management, evolving to support multitasking and interactive interfaces, a development significantly boosted by the 1950s invention of integrated circuits which led to microchips, increasing processing power and reducing computer size.\",\n    \"source_indices\": [9, 10, 11]\n  },\n  {\n    \"summary\": \"In 1964, IBM introduced the OS/360, the first multiprogramming operating system capable of running numerous programs simultaneously, which standardized software across its mainframes, influenced future OS designs, and later evolved into z/OS.\",\n    \"source_indices\": [12, 13, 14]\n  },\n  {\n    \"summary\": \"The development of the time-sharing OS Unix in the 1960s and 1970s introduced key concepts like multitasking, portability, and a hierarchical file system, while GPUs, introduced in the late 1980s and 1990s for graphics processing, are now standard in most computing systems, powering diverse applications.\",\n    \"source_indices\": [15, 16, 17]\n  },\n  {\n    \"summary\": \"Virtualization enables multiple virtual machines (VMs) to run on a single physical machine, managed by a hypervisor, with VMware leading this market, while containerization provides a lighter alternative for isolated applications by not including a full OS copy.\",\n    \"source_indices\": [18, 19, 20]\n  },\n  {\n    \"summary\": \"Embedded operating systems manage hardware in specialized, resource-constrained devices, while real-time operating systems (RTOS) handle time-sensitive tasks with precise timing constraints.\",\n    \"source_indices\": [28, 30]\n  },\n  {\n    \"summary\": \"Distributed operating systems coordinate multiple independent computers as a unified system to share resources, while network operating systems (NOS) manage resources of networked computers, and cluster operating systems manage interconnected groups for load balancing and fault tolerance.\",\n    \"source_indices\": [29, 31, 32]\n  },\n  {\n    \"summary\": \"The AI operating systems market is projected for significant growth, driven by AI-powered OS leveraging machine learning and automation to predict user behaviors, optimize resource allocation, adapt workloads, and enhance security in systems like Windows and macOS.\",\n    \"source_indices\": [38, 39, 40]\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...PdFR2Equ6U}",
+  "status": "ok",
+  "json_data": [
+    {
+      "summary": "An operating system (OS) is essential software that manages and coordinates a computer's hardware and applications by allocating resources like memory, CPU, I/O, and file storage, enabling user interaction across all computer systems.",
+      "source_indices": [
+        0,
+        1,
+        3,
+        21
+      ]
+    },
+    {
+      "summary": "The OS performs core functions such as process, memory, file, and device management, security, networking, and resource allocation, with the kernel as its central component, supported by specialized managers for scheduling, memory, I/O, and file systems.",
+      "source_indices": [
+        22,
+        23,
+        24,
+        25,
+        26,
+        27
+      ]
+    },
+    {
+      "summary": "Users interact with an operating system through a user interface (UI), which can be either a graphical user interface (GUI) or a command-line interface (CLI).",
+      "source_indices": [
+        2
+      ]
+    },
+    {
+      "summary": "Microsoft Windows is the most widely used OS globally for personal and business use, dominating the desktop, tablet, and console market with 67% share, while Apple's proprietary, Unix-like macOS ranks second for its desktops, laptops, and workstations.",
+      "source_indices": [
+        4,
+        5,
+        34,
+        35
+      ]
+    },
+    {
+      "summary": "Android, an open-source mobile OS by Google, leads the mobile market with approximately 72.04% share, while Apple's proprietary iOS holds the second spot with 27.49% for its mobile devices.",
+      "source_indices": [
+        6,
+        7,
+        36,
+        37
+      ]
+    },
+    {
+      "summary": "Linux is the most popular open-source operating system, favored for its flexibility and security, and is widely used in desktops, servers, and embedded systems.",
+      "source_indices": [
+        8,
+        33
+      ]
+    },
+    {
+      "summary": "The history of operating systems began with early computers needing customized software for task management, evolving to support multitasking and interactive interfaces, a development significantly boosted by the 1950s invention of integrated circuits which led to microchips, increasing processing power and reducing computer size.",
+      "source_indices": [
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "summary": "In 1964, IBM introduced the OS/360, the first multiprogramming operating system capable of running numerous programs simultaneously, which standardized software across its mainframes, influenced future OS designs, and later evolved into z/OS.",
+      "source_indices": [
+        12,
+        13,
+        14
+      ]
+    },
+    {
+      "summary": "The development of the time-sharing OS Unix in the 1960s and 1970s introduced key concepts like multitasking, portability, and a hierarchical file system, while GPUs, introduced in the late 1980s and 1990s for graphics processing, are now standard in most computing systems, powering diverse applications.",
+      "source_indices": [
+        15,
+        16,
+        17
+      ]
+    },
+    {
+      "summary": "Virtualization enables multiple virtual machines (VMs) to run on a single physical machine, managed by a hypervisor, with VMware leading this market, while containerization provides a lighter alternative for isolated applications by not including a full OS copy.",
+      "source_indices": [
+        18,
+        19,
+        20
+      ]
+    },
+    {
+      "summary": "Embedded operating systems manage hardware in specialized, resource-constrained devices, while real-time operating systems (RTOS) handle time-sensitive tasks with precise timing constraints.",
+      "source_indices": [
+        28,
+        30
+      ]
+    },
+    {
+      "summary": "Distributed operating systems coordinate multiple independent computers as a unified system to share resources, while network operating systems (NOS) manage resources of networked computers, and cluster operating systems manage interconnected groups for load balancing and fault tolerance.",
+      "source_indices": [
+        29,
+        31,
+        32
+      ]
+    },
+    {
+      "summary": "The AI operating systems market is projected for significant growth, driven by AI-powered OS leveraging machine learning and automation to predict user behaviors, optimize resource allocation, adapt workloads, and enhance security in systems like Windows and macOS.",
+      "source_indices": [
+        38,
+        39,
+        40
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"summary\": \"An operating system (OS) is fundamental software that manages a computer's hardware and applications by allocating resources and performing core functions, having evolved from early customized systems through milestones like OS/360 and Unix to support multitasking and interactive interfaces, and now includes modern approaches like virtualization, containerization, and specialized OS for various computing environments.\",\n    \"source_indices\": [0, 2, 3]\n  },\n  {\n    \"summary\": \"Globally, Microsoft Windows and Apple macOS lead desktop OS, while Google Android dominates mobile, with Linux being a popular open-source choice; looking ahead, the AI operating systems market is projected for significant growth, leveraging machine learning to optimize resource allocation, predict user behavior, and enhance security.\",\n    \"source_indices\": [1, 4]\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...x94X6_VZWM}",
+  "status": "ok",
+  "json_data": [
+    {
+      "summary": "An operating system (OS) is fundamental software that manages a computer's hardware and applications by allocating resources and performing core functions, having evolved from early customized systems through milestones like OS/360 and Unix to support multitasking and interactive interfaces, and now includes modern approaches like virtualization, containerization, and specialized OS for various computing environments.",
+      "source_indices": [
+        0,
+        2,
+        3
+      ]
+    },
+    {
+      "summary": "Globally, Microsoft Windows and Apple macOS lead desktop OS, while Google Android dominates mobile, with Linux being a popular open-source choice; looking ahead, the AI operating systems market is projected for significant growth, leveraging machine learning to optimize resource allocation, predict user behavior, and enhance security.",
+      "source_indices": [
+        1,
+        4
+      ]
+    }
+  ]
+}

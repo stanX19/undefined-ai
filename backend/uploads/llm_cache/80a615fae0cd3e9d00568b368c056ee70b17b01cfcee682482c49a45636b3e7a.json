@@ -1,0 +1,30 @@
+{
+  "text": "```json\n[\n  {\n    \"summary\": \"NIST's 'Cybersecurity Basics' document, updated in 2026 as part of its Small Business Cybersecurity Corner, highlights cybersecurity as a continuous process for risk management and competitive advantage, complemented by external resources from NIST, CISA, and DHS for implementation.\",\n    \"source_indices\": [0, 2, 7]\n  },\n  {\n    \"summary\": \"Businesses must implement strong authentication practices, including unique passwords and multi-factor authentication, ensure all software and antivirus are regularly updated, perform and protect data backups, and train employees on basic cybersecurity hygiene and phishing prevention.\",\n    \"source_indices\": [3, 4, 5, 6]\n  },\n  {\n    \"summary\": \"NIST clarifies that its identification of commercial entities or linked websites within the document does not constitute a recommendation or endorsement.\",\n    \"source_indices\": [1]\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...x94X6_VZWM}",
+  "status": "ok",
+  "json_data": [
+    {
+      "summary": "NIST's 'Cybersecurity Basics' document, updated in 2026 as part of its Small Business Cybersecurity Corner, highlights cybersecurity as a continuous process for risk management and competitive advantage, complemented by external resources from NIST, CISA, and DHS for implementation.",
+      "source_indices": [
+        0,
+        2,
+        7
+      ]
+    },
+    {
+      "summary": "Businesses must implement strong authentication practices, including unique passwords and multi-factor authentication, ensure all software and antivirus are regularly updated, perform and protect data backups, and train employees on basic cybersecurity hygiene and phishing prevention.",
+      "source_indices": [
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "summary": "NIST clarifies that its identification of commercial entities or linked websites within the document does not constitute a recommendation or endorsement.",
+      "source_indices": [
+        1
+      ]
+    }
+  ]
+}

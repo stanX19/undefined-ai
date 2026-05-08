@@ -1,0 +1,22 @@
+{
+  "text": "```json\n[\n  {\n    \"title\": \"Network Security Fundamentals\",\n    \"difficulty\": 4,\n    \"reason\": \"Web applications operate within a network, so understanding underlying network security concepts is crucial for a holistic security approach.\"\n  },\n  {\n    \"title\": \"Threat Modeling Methodologies\",\n    \"difficulty\": 5,\n    \"reason\": \"This topic teaches a systematic approach to proactively identify and mitigate security risks in web applications during the design phase, moving beyond reactive patching.\"\n  },\n  {\n    \"title\": \"Automated Vulnerability Discovery and Exploit Generation\",\n    \"difficulty\": 6,\n    \"reason\": \"This involves cutting-edge research into developing novel techniques, such as advanced fuzzing and symbolic execution, to automatically find new and complex vulnerabilities in web applications.\"\n  }\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...G8WEhvr498}",
+  "status": "ok",
+  "json_data": [
+    {
+      "title": "Network Security Fundamentals",
+      "difficulty": 4,
+      "reason": "Web applications operate within a network, so understanding underlying network security concepts is crucial for a holistic security approach."
+    },
+    {
+      "title": "Threat Modeling Methodologies",
+      "difficulty": 5,
+      "reason": "This topic teaches a systematic approach to proactively identify and mitigate security risks in web applications during the design phase, moving beyond reactive patching."
+    },
+    {
+      "title": "Automated Vulnerability Discovery and Exploit Generation",
+      "difficulty": 6,
+      "reason": "This involves cutting-edge research into developing novel techniques, such as advanced fuzzing and symbolic execution, to automatically find new and complex vulnerabilities in web applications."
+    }
+  ]
+}

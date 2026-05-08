@@ -1,0 +1,29 @@
+{
+  "text": "```json\n[\n  \"The document is titled \\\"Cybersecurity Basics\\\" and is from NIST.\",\n  \"It is part of the NIST Information Technology Laboratory's Small Business Cybersecurity Corner.\",\n  \"Cybersecurity is a continuous process.\",\n  \"Businesses should strive for continuous improvement in cybersecurity risk management.\",\n  \"Cyber threats are a business risk.\",\n  \"Strong cybersecurity provides a competitive advantage.\",\n  \"Employees should be required to enable multi-factor authentication (MFA), particularly phishing-resistant MFA, on all accounts that offer it.\",\n  \"Strong passwords should be required, and using a password manager should be considered.\",\n  \"Data should be regularly backed up.\",\n  \"Measures to protect and test backups should be established.\",\n  \"Default manufacturer passwords should be changed to unique ones.\",\n  \"Updated antivirus software should be installed and maintained.\",\n  \"All software should be updated and patched when new versions are available.\",\n  \"Businesses should learn how to protect themselves from phishing.\",\n  \"Employees should be trained on basic cybersecurity hygiene.\",\n  \"The Cybersecurity Framework Quick Start Guide provides activities for small businesses to get started with the NIST Cybersecurity Framework.\",\n  \"The Cyber Essentials Toolkit from the Cybersecurity and Infrastructure Security Agency (CISA) helps IT and C-suite leadership implement CISA Cyber Essentials.\",\n  \"\\\"Questions Every CEO Should Ask About Cyber Risks\\\" is a Department of Homeland Security guide for CEOs on discussing and implementing cybersecurity risk management.\",\n  \"The Small Business Cybersecurity Corner webpages contain documents and resources from contributors.\",\n  \"NIST's identification of commercial entities or linked websites does not imply recommendation or endorsement.\",\n  \"The document was created on February 7, 2019.\",\n  \"The document was updated on January 5, 2026.\"\n]\n```",
+  "model": "Gemini (gemini-2.5-flash) {api=...PdFR2Equ6U}",
+  "status": "ok",
+  "json_data": [
+    "The document is titled \"Cybersecurity Basics\" and is from NIST.",
+    "It is part of the NIST Information Technology Laboratory's Small Business Cybersecurity Corner.",
+    "Cybersecurity is a continuous process.",
+    "Businesses should strive for continuous improvement in cybersecurity risk management.",
+    "Cyber threats are a business risk.",
+    "Strong cybersecurity provides a competitive advantage.",
+    "Employees should be required to enable multi-factor authentication (MFA), particularly phishing-resistant MFA, on all accounts that offer it.",
+    "Strong passwords should be required, and using a password manager should be considered.",
+    "Data should be regularly backed up.",
+    "Measures to protect and test backups should be established.",
+    "Default manufacturer passwords should be changed to unique ones.",
+    "Updated antivirus software should be installed and maintained.",
+    "All software should be updated and patched when new versions are available.",
+    "Businesses should learn how to protect themselves from phishing.",
+    "Employees should be trained on basic cybersecurity hygiene.",
+    "The Cybersecurity Framework Quick Start Guide provides activities for small businesses to get started with the NIST Cybersecurity Framework.",
+    "The Cyber Essentials Toolkit from the Cybersecurity and Infrastructure Security Agency (CISA) helps IT and C-suite leadership implement CISA Cyber Essentials.",
+    "\"Questions Every CEO Should Ask About Cyber Risks\" is a Department of Homeland Security guide for CEOs on discussing and implementing cybersecurity risk management.",
+    "The Small Business Cybersecurity Corner webpages contain documents and resources from contributors.",
+    "NIST's identification of commercial entities or linked websites does not imply recommendation or endorsement.",
+    "The document was created on February 7, 2019.",
+    "The document was updated on January 5, 2026."
+  ]
+}
