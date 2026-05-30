@@ -84,11 +84,11 @@ export function SharedViewPage() {
             </div>
           )}
         </div>
-        
+
         {/* Footer branding */}
         <footer className="mt-8 mb-12 text-center">
           <p className="text-xs text-[#908A87]">
-            Interative UI generated with <span className="font-semibold text-[#605A57]">MarkGraph</span> &bull; Premium AI Workspaces
+            Interative UI generated with <span className="font-semibold text-[#605A57]">Undefined</span>
           </p>
         </footer>
       </main>

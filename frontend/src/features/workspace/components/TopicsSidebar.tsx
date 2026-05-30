@@ -347,18 +347,17 @@ export function TopicsSidebar() {
                                     >
                                         {username || email || "User"}
                                     </span>
-                                    <span className={`text-[11px] leading-tight ${
-                                        planTier === "enterprise"
-                                            ? "text-[#7C3AED]"
-                                            : planTier === "pro"
-                                              ? "text-[#C4841D]"
-                                              : "text-[#847971]"
-                                    }`}>
+                                    <span className={`text-[11px] leading-tight ${planTier === "enterprise"
+                                        ? "text-[#7C3AED]"
+                                        : planTier === "pro"
+                                            ? "text-[#C4841D]"
+                                            : "text-[#847971]"
+                                        }`}>
                                         {planTier === "enterprise"
                                             ? "Enterprise Plan"
                                             : planTier === "pro"
-                                              ? "Pro Plan"
-                                              : "Free Plan"}
+                                                ? "Pro Plan"
+                                                : "Free Plan"}
                                     </span>
                                 </div>
                             </button>
@@ -393,7 +392,7 @@ export function TopicsSidebar() {
                     }
                 }}
                 title="Delete Topic?"
-                message="This will permanently delete this conversation and all its history. This action cannot be undone."
+                message="This will permanently delete this conversation history and all shared url will be invalid. This action cannot be undone."
                 confirmText="Delete"
                 isDestructive
             />
